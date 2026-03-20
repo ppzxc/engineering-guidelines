@@ -11,16 +11,19 @@
 
 | 모드 | COVERED | PARTIAL | MISSING | 합계 | 커버율 |
 |------|---------|---------|---------|------|--------|
-| Writing | 37 | 11 | 23 | 71 | 59.9% |
-| Review | 43 | 2 | 26 | 71 | 62.0% |
+| Writing | 51 | 2 | 18 | 71 | 73.2% |
+| Review | 58 | 0 | 13 | 71 | 81.7% |
 
 > 커버율 = (COVERED + PARTIAL×0.5) / 합계 × 100
+>
+> **수정 전 (2026-03-20 초기 평가):** Writing 59.9% / Review 62.0%
+> **수정 후 (Critical 반영):** Writing 73.2% / Review 81.7%
 
 ---
 
 ## Critical 문제 (즉시 수정 대상)
 
-> ✅필수 규칙이 Writing 또는 Review 모드에서 MISSING 또는 PARTIAL — 총 17개
+> ✅필수 규칙이 Writing 또는 Review 모드에서 MISSING 또는 PARTIAL — 총 17개 → **모두 해결됨 (Task 5)**
 
 ### Writing Mode Critical 문제
 
@@ -208,6 +211,7 @@ Review Mode 체크리스트 추가 항목:
 
 ## 다음 단계
 
-- [ ] Critical 문제 스킬에 반영 (Task 5)
-- [ ] 스킬 변경 후 동일 테스트 케이스로 회귀 검증
-- [ ] report.md 커버리지 수치 업데이트
+- [x] Critical 문제 스킬에 반영 (Task 5) — 17개 Critical 항목 모두 해결
+- [x] 스킬 변경 후 동일 테스트 케이스로 회귀 검증
+- [x] report.md 커버리지 수치 업데이트
+- [ ] Minor 문제 스킬에 반영 (22개 항목)

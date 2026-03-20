@@ -23,22 +23,22 @@
 | 2.1-2 | ✅필수 | 리소스 컬렉션 이름은 복수형 명사 | COVERED | COVERED | — |
 | 2.1-3 | ❌금지 | URL에 동사 포함 금지 | PARTIAL | COVERED | Minor |
 | 2.1-4 | ❌금지 | URL에 파일 확장자 포함 금지 | MISSING | COVERED | Minor |
-| 2.1-5 | ✅필수 | URL 경로 세그먼트에 ASCII 영소문자/숫자/하이픈만 허용 | PARTIAL | PARTIAL | Critical |
+| 2.1-5 | ✅필수 | URL 경로 세그먼트에 ASCII 영소문자/숫자/하이픈만 허용 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.1-6 | ✅필수 | 쿼리 파라미터 이름은 camelCase | COVERED | COVERED | — |
 | 2.1-7 | ⚠️권장 | URL 2000자 이하 유지 | MISSING | MISSING | Minor |
-| 2.2-1 | ✅필수 | GET 요청은 서버 상태 변경 안 함 | MISSING | COVERED | Critical |
-| 2.2-2 | ✅필수 | PUT 요청은 멱등적으로 동작 | PARTIAL | MISSING | Critical |
+| 2.2-1 | ✅필수 | GET 요청은 서버 상태 변경 안 함 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 2.2-2 | ✅필수 | PUT 요청은 멱등적으로 동작 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.2-3 | ⚠️권장 | 부분 수정에는 PUT 대신 PATCH 사용 | COVERED | MISSING | Minor |
 | 2.2-4 | ❌금지 | GET/HEAD/DELETE 요청에 body 포함 금지 | MISSING | MISSING | Minor |
 | 2.2-5 | ✅필수 | 표준 HTTP 상태 코드를 정확한 의미에 맞게 사용 | COVERED | COVERED | — |
 | 2.2-6 | ✅필수 | 201 Created 응답에 Location 헤더 포함 | COVERED | COVERED | — |
 | 2.2-7 | ❌금지 | 오류 상황에 200 OK 반환 금지 | MISSING | COVERED | Minor |
-| 2.3-1 | ✅필수 | 동일 파라미터 반복으로 배열 값 전달 | MISSING | PARTIAL | Critical |
+| 2.3-1 | ✅필수 | 동일 파라미터 반복으로 배열 값 전달 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.3-2 | ⚠️권장 | 쿼리 파라미터는 선택적으로 설계 | MISSING | MISSING | Minor |
 | 2.3-3 | ⚠️권장 | 쿼리 파라미터에 민감한 정보 포함 금지 | MISSING | MISSING | Minor |
 | 2.3-4 | ❌금지 | 서버 상태 변경에 쿼리 파라미터 사용 금지 | MISSING | MISSING | Minor |
-| 2.4-1 | ✅필수 | 요청 본문 있을 때 Content-Type 헤더 포함 | PARTIAL | MISSING | Critical |
-| 2.4-2 | ✅필수 | 응답 본문 있을 때 Content-Type 헤더 포함 | PARTIAL | MISSING | Critical |
+| 2.4-1 | ✅필수 | 요청 본문 있을 때 Content-Type 헤더 포함 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 2.4-2 | ✅필수 | 응답 본문 있을 때 Content-Type 헤더 포함 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.4-3 | ⚠️권장 | 커스텀 헤더에 X- 접두사 사용 금지 (신규) | MISSING | COVERED | Minor |
 | 2.4-4 | ❌금지 | 표준 HTTP 헤더 의미 재정의 금지 | MISSING | MISSING | Minor |
 
@@ -48,13 +48,13 @@
 
 | # | 규범 수준 | 규칙 요약 | Writing | Review | 심각도 |
 |---|-----------|-----------|---------|--------|--------|
-| 3.1-1 | ✅필수 | 모든 리소스는 고유 id 가짐 | COVERED | MISSING | Critical |
-| 3.1-2 | ✅필수 | 리소스 스키마는 일관된 구조 유지 (id/createdAt/updatedAt) | COVERED | MISSING | Critical |
+| 3.1-1 | ✅필수 | 모든 리소스는 고유 id 가짐 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 3.1-2 | ✅필수 | 리소스 스키마는 일관된 구조 유지 (id/createdAt/updatedAt) | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | MISSING | MISSING | Minor |
 | 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | MISSING | COVERED | Minor |
-| 3.2-1 | ✅필수 | 서버 관리 읽기 전용 필드를 요청 본문에 포함해도 무시 | PARTIAL | MISSING | Critical |
+| 3.2-1 | ✅필수 | 서버 관리 읽기 전용 필드를 요청 본문에 포함해도 무시 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.3-1 | ✅필수 | POST 생성 성공 시 201 Created + 생성된 리소스 반환 | COVERED | COVERED | — |
-| 3.3-2 | ✅필수 | PUT은 리소스 전체 대체, 미포함 필드는 기본값/null | PARTIAL | MISSING | Critical |
+| 3.3-2 | ✅필수 | PUT은 리소스 전체 대체, 미포함 필드는 기본값/null | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.3-3 | ✅필수 | DELETE 성공 시 204 No Content 반환 | COVERED | COVERED | — |
 | 3.4-1 | ✅필수 | 모든 에러 응답은 RFC 7807/9457 구조 따름 | COVERED | COVERED | — |
 | 3.4-2 | ✅필수 | 에러 응답 Content-Type은 application/problem+json | COVERED | COVERED | — |
@@ -68,11 +68,11 @@
 | # | 규범 수준 | 규칙 요약 | Writing | Review | 심각도 |
 |---|-----------|-----------|---------|--------|--------|
 | 4.1-1 | ✅필수 | JSON 필드 이름은 camelCase | COVERED | COVERED | — |
-| 4.1-2 | ✅필수 | 필드 이름은 영소문자로 시작 | PARTIAL | MISSING | Critical |
+| 4.1-2 | ✅필수 | 필드 이름은 영소문자로 시작 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 4.1-3 | ❌금지 | 필드 이름에 약어 남용 금지 | MISSING | MISSING | Minor |
-| 4.2-1 | ✅필수 | Boolean은 JSON true/false 사용 | PARTIAL | MISSING | Critical |
+| 4.2-1 | ✅필수 | Boolean은 JSON true/false 사용 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 4.2-2 | ✅필수 | Boolean 필드 이름에 is/has/can 접두사 | COVERED | COVERED | — |
-| 4.2-3 | ✅필수 | 숫자 값은 JSON number 타입 | MISSING | MISSING | Critical |
+| 4.2-3 | ✅필수 | 숫자 값은 JSON number 타입 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 4.2-4 | ⚠️권장 | 큰 정수(2^53 초과)는 문자열로 반환 | MISSING | MISSING | Minor |
 | 4.3-1 | ✅필수 | 날짜/시간은 RFC 3339 형식 문자열 | COVERED | COVERED | — |
 | 4.3-2 | ✅필수 | 시간대가 있으면 반드시 포함, UTC는 Z | COVERED | COVERED | — |
@@ -93,11 +93,11 @@
 | 5.1-2 | ✅필수 | 액션 엔드포인트에 POST 메서드 사용 | COVERED | COVERED | — |
 | 5.2-1 | ✅필수 | 컬렉션 응답 본문은 top-level JSON array | COVERED | COVERED | — |
 | 5.2-2 | ✅필수 | 다음 페이지 없을 때 Link 헤더에서 rel="next" 제외 | COVERED | COVERED | — |
-| 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | MISSING | COVERED | Critical |
+| 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | MISSING | COVERED | Minor |
 | 5.4-2 | ✅필수 | X-API-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
-| 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | MISSING | MISSING | Critical |
-| 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | MISSING | Critical |
+| 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.6-1 | ✅필수 | 속도 제한 응답에 X-RateLimit-* 헤더 포함 | COVERED | COVERED | — |
 | 5.6-2 | ✅필수 | 429 응답에 Retry-After 헤더 포함 | COVERED | COVERED | — |
 | 5.6-3 | ✅필수 | 429 응답 본문은 RFC 7807 Problem Details 구조 | COVERED | COVERED | — |
@@ -117,7 +117,7 @@
 | 6.2-1 | ✅필수 | 401 응답에 WWW-Authenticate 헤더 포함 | COVERED | COVERED | — |
 | 6.2-2 | ✅필수 | 401(인증 실패) / 403(인가 실패) 정확히 구분 | COVERED | COVERED | — |
 | 6.3-1 | ✅필수 | 중복 실행 위험 있는 POST에 Idempotency-Key 지원 | COVERED | COVERED | — |
-| 6.3-2 | ✅필수 | Idempotency-Key 값은 클라이언트 생성 UUID v4 | PARTIAL | MISSING | Critical |
+| 6.3-2 | ✅필수 | Idempotency-Key 값은 클라이언트 생성 UUID v4 | COVERED | COVERED | ~~Critical~~ Fixed |
 
 ---
 
@@ -127,27 +127,27 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 37 | 52.1% |
-| PARTIAL | 11 | 15.5% |
-| MISSING | 23 | 32.4% |
+| COVERED | 51 | 71.8% |
+| PARTIAL | 2 | 2.8% |
+| MISSING | 18 | 25.4% |
 | **합계** | **71** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 43 | 60.6% |
-| PARTIAL | 2 | 2.8% |
-| MISSING | 26 | 36.6% |
+| COVERED | 58 | 81.7% |
+| PARTIAL | 0 | 0.0% |
+| MISSING | 13 | 18.3% |
 | **합계** | **71** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 80 | 56.3% |
-| PARTIAL | 13 | 9.2% |
-| MISSING | 49 | 34.5% |
+| COVERED | 109 | 76.8% |
+| PARTIAL | 2 | 1.4% |
+| MISSING | 31 | 21.8% |
 | **합계** | **142** | **100%** |
 
 \* 전체는 71개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.

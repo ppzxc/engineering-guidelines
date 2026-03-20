@@ -37,6 +37,19 @@ GET    /users/{userId}/comments
 POST   /articles/{id}:publish
 POST   /orders/{id}:cancel
 POST   /users/{id}:deactivate
+
+# URL path segments: only ASCII lowercase letters, digits, hyphens
+# Correct: /user-profiles, /article-categories
+# Incorrect: /user_profiles, /UserProfiles, /사용자
+
+# Query parameters: use same parameter name repeated for array values (OR condition)
+GET /articles?status=PUBLISHED&status=DRAFT
+
+# Query parameters MUST NOT be used for state-changing operations
+# Bad:  POST /articles?action=publish
+# Good: POST /articles/123:publish
+
+# Sensitive information (tokens, passwords) MUST NOT be placed in query parameters
 ```
 
 ### HTTP Method to Status Code Mapping
@@ -50,6 +63,11 @@ POST   /users/{id}:deactivate
 | PUT | 200 OK | Full replacement success |
 | PATCH | 200 OK | Partial update success |
 | DELETE | 204 No Content | Deletion success (no body) |
+
+✅ Required: GET requests MUST NOT modify server state (safe method)
+✅ Required: PUT requests MUST be idempotent — identical requests must produce the same result
+✅ Required: Include `Content-Type: application/json` header when request body is present
+✅ Required: Include `Content-Type` header in all responses with a body
 
 ### Error Response Format Template
 
@@ -106,6 +124,13 @@ All error responses use RFC 7807/9457 Problem Details structure.
   "created_at": "...",    // snake_case forbidden
   "status": "published"   // enums must be UPPER_SNAKE_CASE
 }
+
+// Type rules
+{
+  "isActive": true,    // Boolean: use native JSON true/false, NOT "true"/"false" or 1/0
+  "count": 42,         // Number: use JSON number type, NOT string "42"
+  "isEnabled": false   // Boolean fields MUST use is/has/can prefix
+}
 ```
 
 ### Collection/Pagination Pattern
@@ -145,6 +170,10 @@ Fields automatically managed by the server on create/update:
   "updatedAt": "RFC 3339, auto-updated by server"
 }
 ```
+
+✅ Required: All resources MUST have a unique identifier (`id`)
+✅ Required: Server-managed read-only fields (`id`, `createdAt`, `updatedAt`) MUST be silently ignored if included in the client's request body
+✅ Required: PUT replaces the entire resource — mutable fields not included in the request body are reset to default or null
 
 ### Date/Time
 
@@ -199,6 +228,7 @@ POST /orders
 Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 ```
 
+- Client MUST generate the key as a UUID v4 (e.g., using UUID.randomUUID() in Java/Kotlin)
 - On re-request with same key → return existing result as-is (no reprocessing)
 - Key validity period: minimum 24 hours
 
@@ -256,17 +286,31 @@ When reviewing API code, identify violations using the checklist below and sugge
 - [ ] No verbs in paths (actions use `:action` pattern)
 - [ ] No file extensions in URLs
 - [ ] No version in URL path (`/v1/`, `/v2/`, etc.)
+- [ ] URL path segments use only ASCII lowercase letters, digits, and hyphens (no underscores, no uppercase, no non-ASCII)
+- [ ] Array values passed by repeating the same parameter name (e.g., ?status=A&status=B), not comma-separated
+- [ ] Query parameters not used for state-changing operations (use POST + action pattern instead)
+- [ ] Sensitive information (tokens, API keys, passwords) not included in query parameters
 
 #### Versioning
 - [ ] API version delivered via `X-API-Version` header, not URL path
 - [ ] `X-API-Version` value uses ISO 8601 date format (`YYYY-MM-DD`)
+- [ ] Breaking changes (field removal/rename, type change, required field addition) are accompanied by a new X-API-Version date
+- [ ] Non-breaking changes (new optional fields, new endpoints, new Enum values) do not require version bump
 
 #### HTTP Methods & Status Codes
 - [ ] POST create → 201 + Location header
 - [ ] GET, PUT, PATCH success → 200
 - [ ] DELETE success → 204 (no body)
 - [ ] GET requests do not modify server state
+- [ ] PUT request is idempotent (same request sent multiple times produces the same result)
+- [ ] GET requests do not include a request body
+- [ ] HEAD requests do not include a request body
+- [ ] DELETE requests do not include a request body
 - [ ] 200 not returned for error conditions
+
+#### Request/Response Headers
+- [ ] `Content-Type: application/json` included in requests with a body
+- [ ] `Content-Type` header included in all responses with a body
 
 #### JSON Response
 - [ ] All fields are camelCase
@@ -276,6 +320,12 @@ When reviewing API code, identify violations using the checklist below and sugge
 - [ ] Offset input is normalized to UTC by server (not an error)
 - [ ] Enum values are UPPER_SNAKE_CASE
 - [ ] Null-valued fields excluded from response
+- [ ] Resource has `id`, `createdAt`, `updatedAt` fields
+- [ ] Server silently ignores `id`, `createdAt`, `updatedAt` if sent in request body (not rejected with error)
+- [ ] PUT request body absence of a mutable field resets it to default/null (not left unchanged)
+- [ ] Boolean values use native JSON true/false (not strings "true"/"false" or numbers 1/0)
+- [ ] Numeric values use JSON number type (not string-wrapped numbers)
+- [ ] Field names start with a lowercase letter (no UpperCamelCase field names)
 
 #### Error Handling
 - [ ] Error responses use RFC 7807/9457 Problem Details structure (`type`, `title`, `status`, `detail`)
@@ -305,12 +355,17 @@ When reviewing API code, identify violations using the checklist below and sugge
 - [ ] 401 response includes `WWW-Authenticate` header
 - [ ] 401 (authentication failure) / 403 (authorization failure) properly distinguished
 - [ ] `Idempotency-Key` supported for duplicate-risk POST operations (payments, orders, etc.)
+- [ ] Idempotency-Key value is a client-generated UUID v4 format
 
 #### Long-Running Tasks
 - [ ] Long-running task returns 201 Created + Location header pointing to domain resource
 - [ ] Domain resource has `status` field (`PENDING`/`IN_PROGRESS`/`COMPLETED`/`FAILED`)
 - [ ] No generic `/operations` endpoint — status tracked on the domain resource itself
 - [ ] `FAILED` status includes RFC 7807 error structure in the resource body
+
+#### Deprecation
+- [ ] Deprecated endpoints include `Deprecation: true`, `Sunset`, and `Link` headers in responses
+- [ ] Deprecation notice provided at least 6 months before sunset date
 
 #### Filtering
 - [ ] Range filters use `After`/`Before` suffix (`createdAfter`, `createdBefore`)
@@ -534,6 +589,20 @@ fun rateLimitExceededResponse(retryAfterSeconds: Long): ResponseEntity<ProblemDe
 ```
 
 ### API Version Header Handling
+
+```
+// Backward-compatible changes (allowed without version bump):
+// - Adding new optional fields
+// - Adding new endpoints
+// - Adding new Enum values
+
+/// Breaking changes (REQUIRE version bump):
+// - Removing or renaming fields
+// - Changing field types
+// - Adding required fields
+// - Removing Enum values
+// - Changing status code semantics
+```
 
 ```kotlin
 // Extract version from request

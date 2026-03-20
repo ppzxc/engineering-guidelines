@@ -18,6 +18,17 @@ Source: https://github.com/ppzxc/restful-api-guidelines
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc`
 - ASCII lowercase letters, numerals, and hyphens only in path segments
 - Repeat parameter names for arrays: `?tag=tech&tag=design`
+- **Max nesting depth: 2 levels** — `/{resource}/{resourceId}/{innerResource}/{innerResourceId}`
+
+**Nesting depth rule:**
+
+Use at most one level of sub-resource nesting. For deeper relationships, use a flat top-level route instead.
+
+| Situation | ✅ Do | ❌ Don't |
+|-----------|-------|---------|
+| Order items under an order | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
+| Reviews on an order item | `/order-items/{orderItemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
+| Delivery zones under address | `/addresses/{addressId}/delivery-zones/{zoneId}` | `/users/{userId}/addresses/{addressId}/delivery-zones/{zoneId}` |
 
 ## HTTP Methods
 

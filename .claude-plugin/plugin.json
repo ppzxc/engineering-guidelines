@@ -1,0 +1,8 @@
+{
+  "name": "restful-api-guidelines",
+  "description": "RESTful API design guidelines skill — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, and headers",
+  "author": {
+    "name": "ppzxc",
+    "url": "https://github.com/ppzxc/restful-api-guidelines"
+  }
+}

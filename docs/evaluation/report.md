@@ -11,13 +11,14 @@
 
 | 모드 | COVERED | PARTIAL | MISSING | 합계 | 커버율 |
 |------|---------|---------|---------|------|--------|
-| Writing | 51 | 2 | 18 | 71 | 73.2% |
-| Review | 58 | 0 | 13 | 71 | 81.7% |
+| Writing | 68 | 0 | 3 | 71 | 95.8% |
+| Review | 68 | 0 | 3 | 71 | 95.8% |
 
 > 커버율 = (COVERED + PARTIAL×0.5) / 합계 × 100
 >
 > **수정 전 (2026-03-20 초기 평가):** Writing 59.9% / Review 62.0%
 > **수정 후 (Critical 반영):** Writing 73.2% / Review 81.7%
+> **수정 후 (Minor 반영):** Writing 95.8% / Review 95.8%
 
 ---
 
@@ -68,32 +69,32 @@
 
 ## Minor 문제 (단계적 수정)
 
-> ⚠️권장/❌금지 규칙 중 하나 이상의 모드에서 MISSING인 항목 — 총 22개
+> ⚠️권장/❌금지 규칙 중 하나 이상의 모드에서 MISSING인 항목 — 총 22개 → **19개 해결됨 (Minor 개선)**, 3개 Tier C 보류
 
 | # | 규범 수준 | 규칙 요약 | Writing | Review | 비고 |
 |---|-----------|-----------|---------|--------|------|
-| 2.1-3 | ❌금지 | URL에 동사 포함 금지 | PARTIAL | COVERED | Writing에 "동사 금지" 규칙 명시 없음, bad case 없음 |
-| 2.1-4 | ❌금지 | URL에 파일 확장자 포함 금지 | MISSING | COVERED | Writing에 확장자 금지 언급 없음 |
-| 2.1-7 | ⚠️권장 | URL 2000자 이하 유지 | MISSING | MISSING | 양쪽 모두 URL 길이 제한 없음 |
-| 2.2-3 | ⚠️권장 | 부분 수정에는 PUT 대신 PATCH 사용 | COVERED | MISSING | Review에 PATCH 권장 체크 없음 |
-| 2.2-4 | ❌금지 | GET/HEAD/DELETE 요청에 body 포함 금지 | MISSING | MISSING | 양쪽 모두 body 금지 규칙 없음 |
-| 2.2-7 | ❌금지 | 오류 상황에 200 OK 반환 금지 | MISSING | COVERED | Writing에 200 OK 에러 반환 금지 없음 |
-| 2.3-2 | ⚠️권장 | 쿼리 파라미터는 선택적으로 설계 | MISSING | MISSING | 양쪽 모두 없음 |
-| 2.3-3 | ⚠️권장 | 쿼리 파라미터에 민감한 정보 포함 금지 | MISSING | MISSING | 양쪽 모두 없음 |
-| 2.3-4 | ❌금지 | 서버 상태 변경에 쿼리 파라미터 사용 금지 | MISSING | MISSING | 양쪽 모두 없음 |
-| 2.4-3 | ⚠️권장 | 커스텀 헤더에 X- 접두사 사용 금지 (신규) | MISSING | COVERED | Writing에 X- 접두사 금지 없음 (Rate Limit에서 X-RateLimit-* 사용 중) |
-| 2.4-4 | ❌금지 | 표준 HTTP 헤더 의미 재정의 금지 | MISSING | MISSING | 양쪽 모두 없음 |
-| 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | MISSING | MISSING | 양쪽 모두 없음 |
-| 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | MISSING | COVERED | Writing에 null 제외 규칙 없음 |
-| 3.4-4 | ❌금지 | 에러 응답에 스택 트레이스/내부 정보 노출 금지 | MISSING | COVERED | Writing에 내부 정보 노출 금지 없음 |
-| 4.1-3 | ❌금지 | 필드 이름에 약어 남용 금지 | MISSING | MISSING | 양쪽 모두 없음 |
-| 4.2-4 | ⚠️권장 | 큰 정수(2^53 초과)는 문자열로 반환 | MISSING | MISSING | 양쪽 모두 없음 |
-| 4.3-5 | ❌금지 | Unix timestamp를 기본 시간 형식으로 사용 금지 | COVERED | MISSING | Review에 Unix timestamp 금지 체크 없음 |
-| 4.4-2 | ⚠️권장 | 클라이언트가 알 수 없는 Enum 값 수신 가능하도록 설계 | MISSING | MISSING | 양쪽 모두 없음 |
-| 4.4-3 | ❌금지 | Enum 값으로 숫자나 불명확한 약어 사용 금지 | PARTIAL | MISSING | Review에 Enum 숫자/약어 금지 체크 없음 |
-| 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | MISSING | COVERED | Writing에 URL 경로 버전 금지 없음 |
-| 5.7-3 | ❌금지 | 범용 /operations 리소스 사용 금지 | MISSING | COVERED | Writing에 /operations 금지 없음 |
-| 6.1-2 | ❌금지 | API Key를 쿼리 파라미터로 전달 금지 | MISSING | COVERED | Writing에 쿼리 파라미터 API Key 금지 없음 |
+| 2.1-3 | ❌금지 | URL에 동사 포함 금지 | COVERED | COVERED | ✅ bad case 및 금지 규칙 추가 |
+| 2.1-4 | ❌금지 | URL에 파일 확장자 포함 금지 | COVERED | COVERED | ✅ 금지 규칙 추가 |
+| 2.1-7 | ⚠️권장 | URL 2000자 이하 유지 | MISSING | MISSING | ⏸️ Tier C 보류 — 런타임 관심사, 코드 리뷰로 검증 어려움 |
+| 2.2-3 | ⚠️권장 | 부분 수정에는 PUT 대신 PATCH 사용 | COVERED | COVERED | ✅ Review 체크리스트 추가 |
+| 2.2-4 | ❌금지 | GET/HEAD/DELETE 요청에 body 포함 금지 | COVERED | COVERED | ✅ Writing 규칙 추가, Review는 기존 포함 확인 |
+| 2.2-7 | ❌금지 | 오류 상황에 200 OK 반환 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 |
+| 2.3-2 | ⚠️권장 | 쿼리 파라미터는 선택적으로 설계 | MISSING | MISSING | ⏸️ Tier C 보류 — 추상적 설계 원칙, 코드 레벨 감지 어려움 |
+| 2.3-3 | ⚠️권장 | 쿼리 파라미터에 민감한 정보 포함 금지 | COVERED | COVERED | ✅ 기존 스킬에 이미 포함됨 (coverage map 오류 수정) |
+| 2.3-4 | ❌금지 | 서버 상태 변경에 쿼리 파라미터 사용 금지 | COVERED | COVERED | ✅ 기존 스킬에 이미 포함됨 (coverage map 오류 수정) |
+| 2.4-3 | ⚠️권장 | 커스텀 헤더에 X- 접두사 사용 금지 (신규) | COVERED | COVERED | ✅ Writing 규칙 추가 (X-RateLimit-* 레거시 예외 주석 포함) |
+| 2.4-4 | ❌금지 | 표준 HTTP 헤더 의미 재정의 금지 | COVERED | COVERED | ✅ Writing/Review 모두 추가 |
+| 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | MISSING | MISSING | ⏸️ Tier C 보류 — 아키텍처 결정 영역, 코드 리뷰로 판단 어려움 |
+| 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 및 bad case 포함 |
+| 3.4-4 | ❌금지 | 에러 응답에 스택 트레이스/내부 정보 노출 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 |
+| 4.1-3 | ❌금지 | 필드 이름에 약어 남용 금지 | COVERED | COVERED | ✅ Writing/Review 모두 추가 |
+| 4.2-4 | ⚠️권장 | 큰 정수(2^53 초과)는 문자열로 반환 | COVERED | COVERED | ✅ Writing/Review 모두 추가 |
+| 4.3-5 | ❌금지 | Unix timestamp를 기본 시간 형식으로 사용 금지 | COVERED | COVERED | ✅ Review 체크리스트 추가 |
+| 4.4-2 | ⚠️권장 | 클라이언트가 알 수 없는 Enum 값 수신 가능하도록 설계 | COVERED | COVERED | ✅ Writing/Review 모두 추가 |
+| 4.4-3 | ❌금지 | Enum 값으로 숫자나 불명확한 약어 사용 금지 | COVERED | COVERED | ✅ bad case 추가 및 Review 체크 추가 |
+| 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 |
+| 5.7-3 | ❌금지 | 범용 /operations 리소스 사용 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 |
+| 6.1-2 | ❌금지 | API Key를 쿼리 파라미터로 전달 금지 | COVERED | COVERED | ✅ Writing 규칙 추가 |
 
 ---
 
@@ -214,4 +215,4 @@ Review Mode 체크리스트 추가 항목:
 - [x] Critical 문제 스킬에 반영 (Task 5) — 17개 Critical 항목 모두 해결
 - [x] 스킬 변경 후 동일 테스트 케이스로 회귀 검증
 - [x] report.md 커버리지 수치 업데이트
-- [ ] Minor 문제 스킬에 반영 (22개 항목)
+- [x] Minor 문제 스킬에 반영 — 19개 해결 (Tier A 14개 + Tier B 5개), 3개 Tier C 보류 (2.1-7, 2.3-2, 3.1-3)

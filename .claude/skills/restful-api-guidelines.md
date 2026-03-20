@@ -42,6 +42,10 @@ POST   /users/{id}:deactivate
 # Correct: /user-profiles, /article-categories
 # Incorrect: /user_profiles, /UserProfiles, /사용자
 
+# Verbs in URL paths are forbidden: /getUsers, /createArticle, /deleteUser — use :action pattern for operations
+# File extensions in URLs are forbidden: /articles.json, /users.xml
+# API version MUST NOT be included in the URL path (/v1/, /v2/) — use X-API-Version header instead
+
 # Query parameters: use same parameter name repeated for array values (OR condition)
 GET /articles?status=PUBLISHED&status=DRAFT
 
@@ -68,6 +72,11 @@ GET /articles?status=PUBLISHED&status=DRAFT
 ✅ Required: PUT requests MUST be idempotent — identical requests must produce the same result
 ✅ Required: Include `Content-Type: application/json` header when request body is present
 ✅ Required: Include `Content-Type` header in all responses with a body
+❌ Prohibited: GET, HEAD, and DELETE requests MUST NOT include a request body
+❌ Prohibited: Never return 200 OK for error conditions — use appropriate 4xx/5xx status codes
+❌ Prohibited: Standard HTTP header semantics MUST NOT be redefined (e.g., do not repurpose Content-Type or Authorization for non-standard meanings)
+❌ Prohibited: Do not use a generic `/operations` endpoint — track long-running task status on the domain resource itself
+⚠️ Recommended: New custom headers MUST NOT use `X-` prefix (deprecated per RFC 6648) — note: `X-RateLimit-*` headers are retained here as a legacy compatibility exception
 
 ### Error Response Format Template
 
@@ -104,6 +113,8 @@ All error responses use RFC 7807/9457 Problem Details structure.
 | 429 | `.../errors/too-many-requests` | Rate limit exceeded |
 | 500 | `.../errors/internal-server-error` | Internal server error |
 
+❌ Prohibited: Never expose stack traces, database errors, or internal implementation details in error responses
+
 ### JSON Field Naming Rules
 
 ```json
@@ -122,7 +133,10 @@ All error responses use RFC 7807/9457 Problem Details structure.
   "user_id": "456",       // snake_case forbidden
   "is_active": true,      // snake_case forbidden
   "created_at": "...",    // snake_case forbidden
-  "status": "published"   // enums must be UPPER_SNAKE_CASE
+  "status": "published",  // enums must be UPPER_SNAKE_CASE
+  "status": 1,            // enum values must be descriptive strings, not numbers or opaque abbreviations
+  "usrId": "456",         // abbreviations in field names forbidden — use userId not usrId
+  "deletedAt": null       // null-valued fields must be omitted from responses entirely
 }
 
 // Type rules
@@ -134,6 +148,10 @@ All error responses use RFC 7807/9457 Problem Details structure.
 ```
 
 ✅ Required: Field names MUST start with a lowercase letter (a-z) — no UpperCamelCase (e.g., `userId` not `UserId`)
+❌ Prohibited: Do not use excessive abbreviations in field names (e.g., `userId` not `usrId`, `createdAt` not `crtdAt`)
+❌ Prohibited: Null-valued fields MUST be omitted from responses — do not include fields with `null` values
+⚠️ Recommended: Integers exceeding 2^53 (`Number.MAX_SAFE_INTEGER`) MUST be returned as strings to prevent JavaScript precision loss
+⚠️ Recommended: Design Enum types to be extensible — clients MUST handle unknown Enum values gracefully (ignore or treat as a default)
 
 ### Collection/Pagination Pattern
 
@@ -213,6 +231,8 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
 # API Key
 Authorization: ApiKey your-api-key-here
 ```
+
+❌ Prohibited: API keys MUST NOT be passed as query parameters (e.g., `?api_key=xxx`) — always use the `Authorization` header
 
 **401 vs 403 distinction:**
 
@@ -309,10 +329,12 @@ When reviewing API code, identify violations using the checklist below and sugge
 - [ ] HEAD requests do not include a request body
 - [ ] DELETE requests do not include a request body
 - [ ] 200 not returned for error conditions
+- [ ] Partial updates use PATCH rather than PUT (PUT only for full resource replacement)
 
 #### Request/Response Headers
 - [ ] `Content-Type: application/json` included in requests with a body
 - [ ] `Content-Type` header included in all responses with a body
+- [ ] Standard HTTP headers (Content-Type, Authorization, etc.) not redefined with non-standard semantics
 
 #### JSON Response
 - [ ] All fields are camelCase
@@ -328,6 +350,11 @@ When reviewing API code, identify violations using the checklist below and sugge
 - [ ] Boolean values use native JSON true/false (not strings "true"/"false" or numbers 1/0)
 - [ ] Numeric values use JSON number type (not string-wrapped numbers)
 - [ ] Field names start with a lowercase letter (no UpperCamelCase field names)
+- [ ] Field names use full descriptive words (no excessive abbreviations: `userId` not `usrId`, `createdAt` not `crtdAt`)
+- [ ] Integers exceeding 2^53 (`Number.MAX_SAFE_INTEGER`) returned as strings
+- [ ] Date/time values use RFC 3339 format, not Unix timestamps (integer milliseconds or seconds)
+- [ ] Enum values use descriptive UPPER_SNAKE_CASE strings (not numeric or opaque abbreviation values)
+- [ ] API designed to allow clients to receive unknown Enum values without breaking (extensible enum)
 
 #### Error Handling
 - [ ] Error responses use RFC 7807/9457 Problem Details structure (`type`, `title`, `status`, `detail`)

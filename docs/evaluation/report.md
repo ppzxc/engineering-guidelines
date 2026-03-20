@@ -39,7 +39,6 @@
 | 4.2-3 | 숫자 값은 JSON number 타입 | MISSING | 숫자 타입 규칙 자체가 스킬에 없음 | "Numeric values MUST use JSON number type, not strings (e.g., `\"age\": 25` not `\"age\": \"25\"`)" 규칙 추가 |
 | 5.3-1 | 동일 파라미터 반복은 OR 조건 | MISSING | Writing 모드에 필터링 시 OR/AND 조건 규칙이 없음 | "Repeated query parameters are treated as OR condition: `?status=ACTIVE&status=DRAFT` means status is ACTIVE OR DRAFT" 규칙 추가 |
 | 5.4-3 | 동일 버전 내 하위 호환성 유지 | MISSING | 하위 호환성 유지 규칙 및 호환/비호환 변경 목록이 없음 | "Within the same API version, all changes MUST be backward-compatible (no field removal, no type change, no required field addition)" 규칙 추가 |
-| 5.5-1 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | (Writing은 코드 예시로 커버됨 — Review에서 누락) | — |
 | 6.3-2 | Idempotency-Key 값은 클라이언트 생성 UUID v4 | PARTIAL | 코드 예시의 키 값이 UUID 형태이나 "UUID v4" 사양이 명시되지 않음 | "Idempotency-Key value MUST be a client-generated UUID v4" 명시 추가 |
 
 ### Review Mode Critical 문제
@@ -66,7 +65,7 @@
 
 ## Minor 문제 (단계적 수정)
 
-> ⚠️권장/❌금지 규칙 중 하나 이상의 모드에서 MISSING인 항목 — 총 21개
+> ⚠️권장/❌금지 규칙 중 하나 이상의 모드에서 MISSING인 항목 — 총 22개
 
 | # | 규범 수준 | 규칙 요약 | Writing | Review | 비고 |
 |---|-----------|-----------|---------|--------|------|
@@ -190,7 +189,7 @@ Review Mode 체크리스트 추가 항목:
 9. **4.2-4** 큰 정수(2^53 초과)는 문자열로 반환
 10. **4.4-2** 클라이언트가 알 수 없는 Enum 값 수신 가능하도록 설계
 
-**우선순위 3: 한쪽만 MISSING (11개)**
+**우선순위 3: 한쪽만 MISSING (12개)**
 
 11. **2.1-3** URL에 동사 포함 금지 — Writing PARTIAL
 12. **2.1-4** URL에 파일 확장자 포함 금지 — Writing MISSING

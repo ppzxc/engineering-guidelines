@@ -316,7 +316,7 @@ When reviewing API code, identify violations using the checklist below and sugge
 #### Versioning
 - [ ] API version delivered via `X-API-Version` header, not URL path
 - [ ] `X-API-Version` value uses ISO 8601 date format (`YYYY-MM-DD`)
-- [ ] Breaking changes (field removal/rename, type change, required field addition) are accompanied by a new X-API-Version date
+- [ ] Breaking changes (field removal/rename, type change, required field addition, enum value removal, status code semantics change) are accompanied by a new X-API-Version date
 - [ ] Non-breaking changes (new optional fields, new endpoints, new Enum values) do not require version bump
 
 #### HTTP Methods & Status Codes

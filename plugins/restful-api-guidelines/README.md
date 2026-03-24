@@ -1,90 +1,92 @@
 # RESTful API Guidelines
 
-RESTful API 설계 가이드라인입니다.
+> [한국어](README.ko.md)
+
+RESTful API design guidelines.
 
 ---
 
-## 규범 수준 표기
+## Compliance Levels
 
-| 기호 | 수준 | 설명 |
-|------|------|------|
-| ✅ **필수** | MUST / DO | 반드시 준수해야 하는 규칙 |
-| ⚠️ **권장** | SHOULD / MAY | 가능하면 준수하는 것이 좋은 규칙 |
-| ❌ **금지** | MUST NOT / DO NOT | 사용하지 말아야 하는 패턴 |
+| Symbol | Level | Description |
+|--------|-------|-------------|
+| ✅ **Required** | MUST / DO | Rules that must be followed |
+| ⚠️ **Recommended** | SHOULD / MAY | Rules that should be followed when possible |
+| ❌ **Prohibited** | MUST NOT / DO NOT | Patterns that must not be used |
 
 ---
 
-## 목차
+## Table of Contents
 
-1. [개요](#1-개요)
-2. [HTTP 기본 규칙](#2-http-기본-규칙)
-   - [URL 설계](#21-url-설계)
-   - [HTTP 요청/응답 패턴](#22-http-요청응답-패턴)
-   - [쿼리 파라미터](#23-쿼리-파라미터)
-   - [HTTP 헤더](#24-http-헤더)
-3. [REST 원칙](#3-rest-원칙)
-   - [리소스 스키마](#31-리소스-스키마)
-   - [필드 변경 가능성](#32-필드-변경-가능성)
-   - [생성/수정/대체 처리](#33-생성수정대체-처리)
-   - [에러 처리](#34-에러-처리)
-4. [JSON 규칙](#4-json-규칙)
-   - [필드 네이밍](#41-필드-네이밍)
-   - [타입 시스템](#42-타입-시스템)
-   - [날짜와 시간](#43-날짜와-시간)
-   - [Enum 처리](#44-enum-처리)
-5. [공통 API 패턴](#5-공통-api-패턴)
-   - [액션 수행](#51-액션-수행)
-   - [컬렉션 및 페이지네이션](#52-컬렉션-및-페이지네이션)
-   - [필터링과 정렬](#53-필터링과-정렬)
-   - [API 버전 관리](#54-api-버전-관리)
+1. [Overview](#1-overview)
+2. [HTTP Fundamentals](#2-http-fundamentals)
+   - [URL Design](#21-url-design)
+   - [HTTP Request/Response Patterns](#22-http-requestresponse-patterns)
+   - [Query Parameters](#23-query-parameters)
+   - [HTTP Headers](#24-http-headers)
+3. [REST Principles](#3-rest-principles)
+   - [Resource Schema](#31-resource-schema)
+   - [Field Mutability](#32-field-mutability)
+   - [Create/Update/Replace Handling](#33-createupdatereplace-handling)
+   - [Error Handling](#34-error-handling)
+4. [JSON Rules](#4-json-rules)
+   - [Field Naming](#41-field-naming)
+   - [Type System](#42-type-system)
+   - [Dates and Times](#43-dates-and-times)
+   - [Enum Handling](#44-enum-handling)
+5. [Common API Patterns](#5-common-api-patterns)
+   - [Actions](#51-actions)
+   - [Collections and Pagination](#52-collections-and-pagination)
+   - [Filtering and Sorting](#53-filtering-and-sorting)
+   - [API Versioning](#54-api-versioning)
    - [Deprecation](#55-deprecation)
-   - [속도 제한](#56-속도-제한)
-   - [장기 실행 작업](#57-장기-실행-작업)
-6. [인증 및 보안](#6-인증-및-보안)
-   - [인증 방식](#61-인증-방식)
-   - [401 vs 403 구분](#62-401-vs-403-구분)
+   - [Rate Limiting](#56-rate-limiting)
+   - [Long-Running Operations](#57-long-running-operations)
+6. [Authentication & Security](#6-authentication--security)
+   - [Authentication Methods](#61-authentication-methods)
+   - [401 vs 403 Distinction](#62-401-vs-403-distinction)
    - [Idempotency-Key](#63-idempotency-key)
 
 ---
 
-## 1. 개요
+## 1. Overview
 
-### 목적
+### Purpose
 
-- 모든 RESTful API의 일관성, 예측 가능성, 유지보수성을 보장합니다.
-- API는 개발자가 소비하는 제품입니다.
-  - 직관적으로 이해 가능해야 합니다.
-  - 오류 발생 시 명확한 메시지를 제공해야 합니다.
-  - 버전이 바뀌어도 하위 호환성을 유지해야 합니다.
-- Roy Fielding의 RESTful 원칙 ([Architectural Styles and the Design of Network-based Software Architectures](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf))을 참고합니다.
-  - HATEOAS는 구현하지 않습니다.
+- Ensure consistency, predictability, and maintainability across all RESTful APIs.
+- APIs are products consumed by developers.
+  - They must be intuitively understandable.
+  - They must provide clear messages when errors occur.
+  - They must maintain backward compatibility across versions.
+- Follows Roy Fielding's RESTful principles ([Architectural Styles and the Design of Network-based Software Architectures](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)).
+  - HATEOAS is not implemented.
 
-### 적용 범위
+### Scope
 
-- 조직 내 신규 개발되는 모든 HTTP/HTTPS API
-- 기존 API 개선 시 가능한 한 적용
+- All new HTTP/HTTPS APIs developed within the organization
+- Applied as much as possible when improving existing APIs
 
 ---
 
-## 2. HTTP 기본 규칙
+## 2. HTTP Fundamentals
 
-### 2.1 URL 설계
+### 2.1 URL Design
 
-#### 기본 구조
+#### Basic Structure
 
 ```
 https://{host}/{service-root}/{resource-collection}/{resource-id}
 ```
 
-예시:
+Example:
 
 ```
 https://api.example.com/users/articles/123
 ```
 
-#### URL 케이싱
+#### URL Casing
 
-✅ **필수**: URL 경로에는 소문자 kebab-case를 사용한다.
+✅ **Required**: Use lowercase kebab-case for URL paths.
 
 ```
 # Good
@@ -97,7 +99,7 @@ GET /UserProfiles
 GET /user_profiles
 ```
 
-✅ **필수**: 리소스 컬렉션 이름은 복수형 명사를 사용한다.
+✅ **Required**: Use plural nouns for resource collection names.
 
 ```
 # Good
@@ -109,7 +111,7 @@ GET /article
 GET /user/123/comment
 ```
 
-❌ **금지**: URL에 동사를 포함하지 않는다. 액션은 HTTP 메서드로 표현한다.
+❌ **Prohibited**: Do not include verbs in URLs. Express actions using HTTP methods.
 
 ```
 # Bad
@@ -123,13 +125,13 @@ GET /articles
 DELETE /comments/123
 ```
 
-❌ **금지**: URL에 파일 확장자(`.json`, `.xml`)를 포함하지 않는다. 콘텐츠 협상은 `Accept` 헤더를 사용한다.
+❌ **Prohibited**: Do not include file extensions (`.json`, `.xml`) in URLs. Use the `Accept` header for content negotiation.
 
-#### 허용 문자
+#### Allowed Characters
 
-✅ **필수**: URL 경로 세그먼트에는 ASCII 영소문자, 숫자, 하이픈(`-`)만 사용한다.
+✅ **Required**: Use only lowercase ASCII letters, digits, and hyphens (`-`) in URL path segments.
 
-✅ **필수**: 쿼리 파라미터 이름은 camelCase를 사용한다.
+✅ **Required**: Use camelCase for query parameter names.
 
 ```
 # Good
@@ -139,65 +141,65 @@ GET /articles?pageSize=20&sortOrder=desc
 GET /articles?page_size=20&sort_order=desc
 ```
 
-#### URL 길이
+#### URL Length
 
-⚠️ **권장**: URL은 2000자 이하로 유지한다. 그 이상이 필요한 경우 쿼리 파라미터를 요청 본문으로 이동하는 것을 고려한다.
+⚠️ **Recommended**: Keep URLs under 2000 characters. If longer URLs are needed, consider moving query parameters to the request body.
 
 ---
 
-### 2.2 HTTP 요청/응답 패턴
+### 2.2 HTTP Request/Response Patterns
 
-#### HTTP 메서드
+#### HTTP Methods
 
-| 메서드 | 의미 | 멱등성 | 안전성 |
-|--------|------|--------|--------|
-| GET | 리소스 조회 | ✅ | ✅ |
-| POST | 리소스 생성 또는 액션 수행 | ❌ | ❌ |
-| PUT | 리소스 완전 대체 | ✅ | ❌ |
-| PATCH | 리소스 부분 수정 | ❌ | ❌ |
-| DELETE | 리소스 삭제 | ✅ | ❌ |
-| HEAD | 헤더만 조회 | ✅ | ✅ |
+| Method | Meaning | Idempotent | Safe |
+|--------|---------|------------|------|
+| GET | Retrieve a resource | ✅ | ✅ |
+| POST | Create a resource or perform an action | ❌ | ❌ |
+| PUT | Fully replace a resource | ✅ | ❌ |
+| PATCH | Partially update a resource | ❌ | ❌ |
+| DELETE | Delete a resource | ✅ | ❌ |
+| HEAD | Retrieve headers only | ✅ | ✅ |
 
-✅ **필수**: GET 요청은 서버 상태를 변경하지 않는다.
+✅ **Required**: GET requests must not modify server state.
 
-✅ **필수**: PUT 요청은 멱등적으로 동작한다 — 같은 요청을 여러 번 보내도 결과가 동일해야 한다.
+✅ **Required**: PUT requests must be idempotent — sending the same request multiple times must produce the same result.
 
-⚠️ **권장**: 부분 수정에는 PUT 대신 PATCH를 사용한다.
+⚠️ **Recommended**: Use PATCH instead of PUT for partial updates.
 
-❌ **금지**: GET, HEAD, DELETE 요청에 요청 본문(body)을 포함하지 않는다.
+❌ **Prohibited**: Do not include a request body in GET, HEAD, or DELETE requests.
 
-#### 상태 코드
+#### Status Codes
 
-✅ **필수**: 아래 표준 HTTP 상태 코드를 정확한 의미에 맞게 사용한다.
+✅ **Required**: Use the standard HTTP status codes below with their precise meanings.
 
-**2xx 성공**
+**2xx Success**
 
-| 코드 | 의미 | 사용 시점 |
-|------|------|-----------|
-| 200 OK | 성공 | GET, PUT, PATCH, POST(액션) 성공 |
-| 201 Created | 생성됨 | POST로 리소스 생성 성공 |
-| 204 No Content | 내용 없음 | DELETE 성공, 응답 본문 없음 |
+| Code | Meaning | When to Use |
+|------|---------|-------------|
+| 200 OK | Success | Successful GET, PUT, PATCH, POST (action) |
+| 201 Created | Created | Successful resource creation via POST |
+| 204 No Content | No Content | Successful DELETE, no response body |
 
-**4xx 클라이언트 오류**
+**4xx Client Errors**
 
-| 코드 | 의미 | 사용 시점 |
-|------|------|-----------|
-| 400 Bad Request | 잘못된 요청 | 요청 형식 오류, 유효성 검사 실패 |
-| 401 Unauthorized | 인증 필요 | 인증 토큰 없음 또는 만료 |
-| 403 Forbidden | 접근 금지 | 인증은 되었지만 권한 없음 |
-| 404 Not Found | 찾을 수 없음 | 리소스 존재하지 않음 |
-| 409 Conflict | 충돌 | 중복 리소스, 낙관적 잠금 실패 |
-| 422 Unprocessable Entity | 처리 불가 | 의미론적 유효성 검사 실패 |
-| 429 Too Many Requests | 요청 과다 | 속도 제한 초과 |
+| Code | Meaning | When to Use |
+|------|---------|-------------|
+| 400 Bad Request | Bad Request | Malformed request, validation failure |
+| 401 Unauthorized | Authentication Required | Missing or expired authentication token |
+| 403 Forbidden | Access Denied | Authenticated but lacks permission |
+| 404 Not Found | Not Found | Resource does not exist |
+| 409 Conflict | Conflict | Duplicate resource, optimistic lock failure |
+| 422 Unprocessable Entity | Unprocessable | Semantic validation failure |
+| 429 Too Many Requests | Too Many Requests | Rate limit exceeded |
 
-**5xx 서버 오류**
+**5xx Server Errors**
 
-| 코드 | 의미 | 사용 시점 |
-|------|------|-----------|
-| 500 Internal Server Error | 서버 오류 | 예기치 못한 서버 오류 |
-| 503 Service Unavailable | 서비스 불가 | 일시적 서버 과부하 또는 유지보수 |
+| Code | Meaning | When to Use |
+|------|---------|-------------|
+| 500 Internal Server Error | Server Error | Unexpected server error |
+| 503 Service Unavailable | Service Unavailable | Temporary server overload or maintenance |
 
-✅ **필수**: 201 Created 응답에는 `Location` 헤더로 생성된 리소스의 URL을 포함한다.
+✅ **Required**: Include the URL of the created resource in the `Location` header for 201 Created responses.
 
 ```
 HTTP/1.1 201 Created
@@ -206,167 +208,167 @@ Content-Type: application/json
 
 {
   "id": "456",
-  "title": "새 글 제목"
+  "title": "New Article Title"
 }
 ```
 
-❌ **금지**: 오류 상황에 200 OK를 반환하지 않는다.
+❌ **Prohibited**: Do not return 200 OK for error situations.
 
 ---
 
-### 2.3 쿼리 파라미터
+### 2.3 Query Parameters
 
-✅ **필수**: 쿼리 파라미터 이름은 camelCase를 사용한다.
+✅ **Required**: Use camelCase for query parameter names.
 
-✅ **필수**: 동일한 파라미터 이름을 반복하여 배열 값을 전달한다.
+✅ **Required**: Pass array values by repeating the same parameter name.
 
 ```
 GET /articles?tag=tech&tag=design
 ```
 
-⚠️ **권장**: 쿼리 파라미터는 선택적(optional)으로 설계한다. 필수 값은 경로(path)에 포함한다.
+⚠️ **Recommended**: Design query parameters as optional. Include required values in the path.
 
-⚠️ **권장**: 쿼리 파라미터에 민감한 정보(비밀번호, 토큰 등)를 포함하지 않는다. 이는 서버 로그에 기록될 수 있다.
+⚠️ **Recommended**: Do not include sensitive information (passwords, tokens, etc.) in query parameters, as they may be recorded in server logs.
 
-❌ **금지**: 서버 상태를 변경하는 작업에 쿼리 파라미터를 사용하지 않는다.
+❌ **Prohibited**: Do not use query parameters for operations that modify server state.
 
 ---
 
-### 2.4 HTTP 헤더
+### 2.4 HTTP Headers
 
-#### 요청 헤더
+#### Request Headers
 
-✅ **필수**: 요청 본문이 있는 경우 `Content-Type` 헤더를 포함한다.
+✅ **Required**: Include the `Content-Type` header when the request has a body.
 
 ```
 Content-Type: application/json
 ```
 
-⚠️ **권장**: 응답 형식 협상을 위해 `Accept` 헤더를 사용한다.
+⚠️ **Recommended**: Use the `Accept` header for response format negotiation.
 
 ```
 Accept: application/json
 ```
 
-#### 응답 헤더
+#### Response Headers
 
-✅ **필수**: 응답 본문이 있는 경우 `Content-Type` 헤더를 포함한다.
+✅ **Required**: Include the `Content-Type` header when the response has a body.
 
-⚠️ **권장**: 캐싱 전략을 명시하기 위해 `Cache-Control` 헤더를 사용한다.
+⚠️ **Recommended**: Use the `Cache-Control` header to specify caching strategy.
 
 ```
 Cache-Control: no-cache
 Cache-Control: max-age=3600
 ```
 
-⚠️ **권장**: 컬렉션 페이지네이션 응답에는 RFC 5988 `Link` 헤더를 사용한다.
+⚠️ **Recommended**: Use the RFC 5988 `Link` header for collection pagination responses.
 
 ```
 Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first"
 ```
 
-⚠️ **권장**: 전체 항목 수를 제공할 때 `X-Total-Count` 헤더를 사용한다.
+⚠️ **Recommended**: Use the `X-Total-Count` header when providing total item count.
 
 ```
 X-Total-Count: 100
 ```
 
-#### 커스텀 헤더
+#### Custom Headers
 
-⚠️ **권장**: 커스텀 헤더 이름은 `X-` 접두사 없이 명확한 이름을 사용한다. RFC 6648(2012)에서 `X-` 접두사는 deprecated됐다.
+⚠️ **Recommended**: Use clear names without the `X-` prefix for custom headers. The `X-` prefix was deprecated in RFC 6648 (2012).
 
 ```
 Request-Id: abc-123
 Correlation-Id: xyz-789
 ```
 
-> **참고**: `X-Request-Id`, `X-Correlation-Id` 등 기존에 사실상 표준처럼 굳어진 헤더는 레거시 호환을 위해 허용된다. 신규 커스텀 헤더에는 `X-` 접두사를 붙이지 않는다.
+> **Note**: Headers like `X-Request-Id` and `X-Correlation-Id` that have become de facto standards are allowed for legacy compatibility. Do not use the `X-` prefix for new custom headers.
 
-❌ **금지**: 표준 HTTP 헤더의 의미를 재정의하지 않는다.
+❌ **Prohibited**: Do not redefine the meaning of standard HTTP headers.
 
 ---
 
-## 3. REST 원칙
+## 3. REST Principles
 
-### 3.1 리소스 스키마
+### 3.1 Resource Schema
 
-리소스는 서비스가 노출하는 핵심 엔티티입니다. 각 리소스는 고유한 URL을 통해 접근 가능해야 합니다.
+Resources are the core entities exposed by a service. Each resource must be accessible via a unique URL.
 
-✅ **필수**: 모든 리소스는 고유 식별자(`id`)를 가진다.
+✅ **Required**: Every resource must have a unique identifier (`id`).
 
-✅ **필수**: 리소스 스키마는 일관된 구조를 유지한다.
+✅ **Required**: Resource schemas must maintain a consistent structure.
 
-**표준 리소스 필드**
+**Standard Resource Fields**
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `id` | string | 리소스 고유 식별자 |
-| `createdAt` | string (RFC 3339) | 생성 시각 |
-| `updatedAt` | string (RFC 3339) | 마지막 수정 시각 |
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique resource identifier |
+| `createdAt` | string (RFC 3339) | Creation timestamp |
+| `updatedAt` | string (RFC 3339) | Last modification timestamp |
 
-예시:
+Example:
 
 ```json
 {
   "id": "123",
-  "title": "RESTful API 설계",
+  "title": "RESTful API Design",
   "content": "...",
   "createdAt": "2024-01-15T09:00:00Z",
   "updatedAt": "2024-01-20T14:30:00Z"
 }
 ```
 
-⚠️ **권장**: 리소스 식별자는 불투명한(opaque) 문자열로 설계한다. 클라이언트가 식별자 구조를 파싱하거나 의존하지 않도록 한다.
+⚠️ **Recommended**: Design resource identifiers as opaque strings. Clients should not parse or depend on the structure of identifiers.
 
-❌ **금지**: 응답에 null 값 필드를 포함하지 않는다. 값이 없는 필드는 응답에서 제외한다.
+❌ **Prohibited**: Do not include null-valued fields in responses. Omit fields with no value from the response.
 
 ```json
 // Bad
 {
   "id": "123",
-  "title": "제목",
+  "title": "Title",
   "deletedAt": null
 }
 
 // Good
 {
   "id": "123",
-  "title": "제목"
+  "title": "Title"
 }
 ```
 
 ---
 
-### 3.2 필드 변경 가능성
+### 3.2 Field Mutability
 
-필드는 생성 후 변경 가능 여부에 따라 분류됩니다.
+Fields are classified by whether they can be changed after creation.
 
-| 분류 | 설명 | 예시 |
-|------|------|------|
-| **생성 시 지정 (Create-only)** | 생성 시에만 설정 가능, 이후 변경 불가 | `id`, `createdAt` |
-| **읽기 전용 (Read-only)** | 서버가 관리, 클라이언트 수정 불가 | `updatedAt` |
-| **변경 가능 (Mutable)** | 클라이언트가 수정 가능 | `title`, `content` |
+| Classification | Description | Examples |
+|----------------|-------------|---------|
+| **Create-only** | Can only be set at creation, cannot be changed afterward | `id`, `createdAt` |
+| **Read-only** | Managed by the server, cannot be modified by clients | `updatedAt` |
+| **Mutable** | Can be modified by clients | `title`, `content` |
 
-✅ **필수**: 서버가 관리하는 읽기 전용 필드(`id`, `createdAt`, `updatedAt`)를 클라이언트가 요청 본문에 포함하더라도 이를 무시한다.
+✅ **Required**: Ignore server-managed read-only fields (`id`, `createdAt`, `updatedAt`) if included by the client in the request body.
 
-⚠️ **권장**: API 문서에서 각 필드의 변경 가능성을 명시한다.
+⚠️ **Recommended**: Document the mutability of each field in the API documentation.
 
 ---
 
-### 3.3 생성/수정/대체 처리
+### 3.3 Create/Update/Replace Handling
 
-#### POST — 리소스 생성
+#### POST — Create Resource
 
-✅ **필수**: 새 리소스 생성 성공 시 201 Created와 생성된 리소스를 반환한다.
+✅ **Required**: Return 201 Created with the created resource upon successful resource creation.
 
 ```
 POST /articles
 Content-Type: application/json
 
 {
-  "title": "새 글 제목",
-  "content": "본문 내용"
+  "title": "New Article Title",
+  "content": "Article body content"
 }
 
 ---
@@ -377,97 +379,97 @@ Content-Type: application/json
 
 {
   "id": "456",
-  "title": "새 글 제목",
-  "content": "본문 내용",
+  "title": "New Article Title",
+  "content": "Article body content",
   "createdAt": "2024-01-20T10:00:00Z",
   "updatedAt": "2024-01-20T10:00:00Z"
 }
 ```
 
-#### PUT — 리소스 완전 대체
+#### PUT — Full Resource Replacement
 
-✅ **필수**: PUT 요청은 리소스 전체를 대체한다. 요청 본문에 포함되지 않은 변경 가능 필드는 기본값 또는 null로 처리한다.
+✅ **Required**: PUT requests fully replace the resource. Mutable fields not included in the request body are treated as default or null values.
 
-✅ **필수**: PUT 요청은 멱등적으로 동작해야 한다.
+✅ **Required**: PUT requests must be idempotent.
 
-#### PATCH — 부분 수정
+#### PATCH — Partial Update
 
-⚠️ **권장**: PATCH 요청은 요청 본문에 포함된 필드만 수정한다.
+⚠️ **Recommended**: PATCH requests modify only the fields included in the request body.
 
 ```
 PATCH /articles/456
 Content-Type: application/json
 
 {
-  "title": "수정된 제목"
+  "title": "Updated Title"
 }
 ```
 
-#### DELETE — 리소스 삭제
+#### DELETE — Delete Resource
 
-✅ **필수**: 삭제 성공 시 204 No Content를 반환한다.
+✅ **Required**: Return 204 No Content upon successful deletion.
 
-⚠️ **권장**: 이미 삭제된 리소스에 대한 재삭제 요청은 404 Not Found 또는 204 No Content를 반환한다. 서비스 특성에 따라 결정한다.
+⚠️ **Recommended**: Return either 404 Not Found or 204 No Content for re-deletion of already-deleted resources. Decide based on service characteristics.
 
 ---
 
-### 3.4 에러 처리
+### 3.4 Error Handling
 
-#### 에러 응답 구조
+#### Error Response Structure
 
-✅ **필수**: 모든 에러 응답은 RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) 표준을 따른다.
+✅ **Required**: All error responses must follow the RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) standard.
 
-✅ **필수**: 에러 응답의 `Content-Type`은 `application/problem+json`을 사용한다.
+✅ **Required**: Use `application/problem+json` as the `Content-Type` for error responses.
 
 ```json
 {
   "type": "https://api.example.com/errors/resource-not-found",
-  "title": "리소스를 찾을 수 없음",
+  "title": "Resource Not Found",
   "status": 404,
-  "detail": "요청한 게시글을 찾을 수 없습니다.",
+  "detail": "The requested article could not be found.",
   "instance": "/articles/999",
   "traceId": "abc-123-xyz"
 }
 ```
 
-| 필드 | 필수 여부 | 설명 |
-|------|-----------|------|
-| `type` | ✅ 필수 | 에러 유형을 식별하는 URI (문서 링크 역할, `about:blank` 허용) |
-| `title` | ✅ 필수 | 에러 유형의 짧은 요약 (사람이 읽을 수 있는 텍스트) |
-| `status` | ✅ 필수 | HTTP 상태 코드 (숫자) |
-| `detail` | ✅ 필수 | 이 요청에 대한 구체적인 에러 설명 (사용자가 이해할 수 있는 언어) |
-| `instance` | ⚠️ 권장 | 문제가 발생한 요청 경로 |
-| `errors` | ⚠️ 권장 | 확장 필드 — 필드 수준 유효성 검사 상세 목록 |
-| `traceId` | ⚠️ 권장 | 확장 필드 — 요청 추적 ID (디버깅용) |
+| Field | Required | Description |
+|-------|----------|-------------|
+| `type` | ✅ Required | URI identifying the error type (serves as documentation link; `about:blank` allowed) |
+| `title` | ✅ Required | Short, human-readable summary of the error type |
+| `status` | ✅ Required | HTTP status code (numeric) |
+| `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
+| `instance` | ⚠️ Recommended | Request path where the problem occurred |
+| `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
+| `traceId` | ⚠️ Recommended | Extension field — request trace ID (for debugging) |
 
-> **참조**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
+> **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
 
-⚠️ **권장**: 유효성 검사 실패 시 모든 오류 필드를 한 번에 반환한다 (하나씩 반환하지 않는다).
+⚠️ **Recommended**: Return all validation errors at once on validation failure (do not return one at a time).
 
 ```json
 {
   "type": "https://api.example.com/errors/validation-failed",
-  "title": "유효성 검사 실패",
+  "title": "Validation Failed",
   "status": 400,
-  "detail": "요청 데이터 유효성 검사에 실패했습니다.",
+  "detail": "Request data failed validation.",
   "instance": "/articles",
   "errors": [
-    { "field": "title", "message": "제목은 필수 입력값입니다." },
-    { "field": "content", "message": "본문은 10자 이상이어야 합니다." }
+    { "field": "title", "message": "Title is required." },
+    { "field": "content", "message": "Content must be at least 10 characters." }
   ],
   "traceId": "abc-123-xyz"
 }
 ```
 
-❌ **금지**: 에러 응답에 스택 트레이스, 내부 시스템 경로, DB 오류 메시지 등 내부 구현 정보를 노출하지 않는다.
+❌ **Prohibited**: Do not expose internal implementation details in error responses, such as stack traces, internal system paths, or database error messages.
 
 ---
 
-## 4. JSON 규칙
+## 4. JSON Rules
 
-### 4.1 필드 네이밍
+### 4.1 Field Naming
 
-✅ **필수**: JSON 필드 이름은 camelCase를 사용한다.
+✅ **Required**: Use camelCase for JSON field names.
 
 ```json
 // Good
@@ -485,9 +487,9 @@ Content-Type: application/json
 }
 ```
 
-✅ **필수**: 필드 이름은 영소문자로 시작한다.
+✅ **Required**: Field names must start with a lowercase letter.
 
-❌ **금지**: 필드 이름에 약어를 남용하지 않는다. 명확한 전체 단어를 우선한다.
+❌ **Prohibited**: Do not overuse abbreviations in field names. Prefer clear, complete words.
 
 ```json
 // Bad
@@ -507,13 +509,13 @@ Content-Type: application/json
 
 ---
 
-### 4.2 타입 시스템
+### 4.2 Type System
 
 #### Boolean
 
-✅ **필수**: Boolean 값에는 JSON `true`/`false`를 사용한다. 문자열 `"true"`/`"false"` 또는 숫자 `1`/`0`을 사용하지 않는다.
+✅ **Required**: Use JSON `true`/`false` for boolean values. Do not use strings `"true"`/`"false"` or numbers `1`/`0`.
 
-✅ **필수**: Boolean 필드 이름은 `is`, `has`, `can` 등의 접두사를 사용한다.
+✅ **Required**: Use prefixes like `is`, `has`, `can` for boolean field names.
 
 ```json
 {
@@ -525,9 +527,9 @@ Content-Type: application/json
 
 #### Number
 
-✅ **필수**: 숫자 값은 JSON number 타입을 사용한다.
+✅ **Required**: Use JSON number type for numeric values.
 
-⚠️ **권장**: JavaScript의 안전한 정수 범위(2^53 - 1)를 초과하는 큰 정수는 문자열로 반환한다.
+⚠️ **Recommended**: Return large integers that exceed JavaScript's safe integer range (2^53 - 1) as strings.
 
 ```json
 {
@@ -539,25 +541,25 @@ Content-Type: application/json
 
 #### String
 
-⚠️ **권장**: 빈 문자열(`""`)과 `null`을 구분하여 사용한다. 의미 있는 "값 없음"에는 필드를 제외하고, 의도적으로 빈 값임을 나타낼 때만 빈 문자열을 사용한다.
+⚠️ **Recommended**: Distinguish between empty string (`""`) and `null`. Omit the field for meaningful "no value" cases; use empty string only when the value is intentionally empty.
 
 ---
 
-### 4.3 날짜와 시간
+### 4.3 Dates and Times
 
-✅ **필수**: 모든 날짜/시간 값은 RFC 3339 형식(ISO 8601 프로파일)의 문자열로 표현한다.
+✅ **Required**: Represent all date/time values as strings in RFC 3339 format (ISO 8601 profile).
 
-✅ **필수**: 시간대(timezone)가 있는 경우 반드시 포함한다. UTC인 경우 `Z`를 사용한다.
+✅ **Required**: Always include the timezone when present. Use `Z` for UTC.
 
-✅ **필수**: 서버 응답의 모든 시간 값은 UTC(`Z`)로 반환한다. 클라이언트가 로컬 시간대로 변환한다.
+✅ **Required**: Return all time values in server responses as UTC (`Z`). Clients handle conversion to local timezone.
 
-⚠️ **권장**: 클라이언트 요청의 시간 값도 UTC(`Z`)로 전송한다. 오프셋이 포함된 경우 서버가 UTC로 정규화하여 저장한다.
+⚠️ **Recommended**: Send time values in client requests as UTC (`Z`). If an offset is included, the server normalizes to UTC before storing.
 
-⚠️ **권장**: 날짜만 필요한 필드(생년월일 등)는 `YYYY-MM-DD` 형식을 사용하며 시간대를 포함하지 않는다.
+⚠️ **Recommended**: Use `YYYY-MM-DD` format without timezone for date-only fields (e.g., date of birth).
 
-❌ **금지**: Unix timestamp(epoch milliseconds/seconds)를 기본 시간 형식으로 사용하지 않는다.
+❌ **Prohibited**: Do not use Unix timestamps (epoch milliseconds/seconds) as the default time format.
 
-#### 서버 응답 예시
+#### Server Response Example
 
 ```json
 {
@@ -567,23 +569,23 @@ Content-Type: application/json
 }
 ```
 
-#### 클라이언트 요청 예시
+#### Client Request Example
 
 ```json
-// ⚠️ 권장: UTC
+// ⚠️ Recommended: UTC
 { "scheduledAt": "2024-01-25T00:30:00Z" }
 
-// 허용: 오프셋 포함 → 서버가 UTC로 정규화 저장
+// Allowed: with offset → server normalizes to UTC before storing
 { "scheduledAt": "2024-01-25T09:30:00+09:00" }
 ```
 
-#### 서버 정규화 규칙
+#### Server Normalization Rules
 
-✅ **필수**: 클라이언트가 오프셋이 포함된 시간을 전송하면, 서버는 이를 UTC로 변환하여 저장한다. 에러를 반환하지 않는다.
+✅ **Required**: When a client sends a time with an offset, the server converts it to UTC before storing. Do not return an error.
 
-✅ **필수**: 서버가 정규화한 후의 응답은 항상 UTC(`Z`)로 반환한다.
+✅ **Required**: Responses after server normalization must always be returned as UTC (`Z`).
 
-⚠️ **권장**: 시간대 정보가 비즈니스적으로 중요한 경우(예: 사용자의 원래 시간대 보존), 별도의 `timeZone` 필드를 사용한다.
+⚠️ **Recommended**: If timezone information is business-critical (e.g., preserving the user's original timezone), use a separate `timeZone` field.
 
 ```json
 {
@@ -594,9 +596,9 @@ Content-Type: application/json
 
 ---
 
-### 4.4 Enum 처리
+### 4.4 Enum Handling
 
-✅ **필수**: Enum 값은 UPPER_SNAKE_CASE 문자열을 사용한다.
+✅ **Required**: Use UPPER_SNAKE_CASE strings for enum values.
 
 ```json
 {
@@ -605,9 +607,9 @@ Content-Type: application/json
 }
 ```
 
-⚠️ **권장**: 클라이언트가 알 수 없는 Enum 값을 수신할 수 있도록 설계한다. 새로운 Enum 값이 추가될 때 기존 클라이언트가 깨지지 않도록 처리한다.
+⚠️ **Recommended**: Design for clients to receive unknown enum values. Handle new enum values being added without breaking existing clients.
 
-❌ **금지**: Enum 값으로 숫자나 불명확한 약어를 사용하지 않는다.
+❌ **Prohibited**: Do not use numbers or unclear abbreviations for enum values.
 
 ```json
 // Bad
@@ -625,13 +627,13 @@ Content-Type: application/json
 
 ---
 
-## 5. 공통 API 패턴
+## 5. Common API Patterns
 
-### 5.1 액션 수행
+### 5.1 Actions
 
-CRUD로 표현하기 어려운 동작(예: 승인, 전송, 잠금)에는 액션 패턴을 사용합니다.
+Use the action pattern for operations that are difficult to express as CRUD (e.g., approve, send, lock).
 
-✅ **필수**: 액션은 리소스 URL 뒤에 `:action` 형태로 표현한다.
+✅ **Required**: Express actions as `:action` appended to the resource URL.
 
 ```
 POST /articles/123:publish
@@ -639,11 +641,11 @@ POST /users/456:deactivate
 POST /orders/789:cancel
 ```
 
-✅ **필수**: 액션 엔드포인트에는 POST 메서드를 사용한다.
+✅ **Required**: Use the POST method for action endpoints.
 
-⚠️ **권장**: 액션 이름은 동사 원형을 사용한다 (publish, cancel, approve).
+⚠️ **Recommended**: Use verb infinitives for action names (publish, cancel, approve).
 
-**요청 예시:**
+**Request Example:**
 
 ```
 POST /articles/123:publish
@@ -665,11 +667,11 @@ Content-Type: application/json
 
 ---
 
-### 5.2 컬렉션 및 페이지네이션
+### 5.2 Collections and Pagination
 
-#### 컬렉션 응답 구조
+#### Collection Response Structure
 
-✅ **필수**: 컬렉션 조회 응답 본문은 리소스 배열(top-level JSON array)을 반환한다.
+✅ **Required**: Return a resource array (top-level JSON array) as the collection response body.
 
 ```
 HTTP/1.1 200 OK
@@ -679,34 +681,34 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
 X-Total-Count: 100
 
 [
-  { "id": "1", "title": "첫 번째 글" },
-  { "id": "2", "title": "두 번째 글" }
+  { "id": "1", "title": "First Article" },
+  { "id": "2", "title": "Second Article" }
 ]
 ```
 
-| 헤더 | 필수 여부 | 설명 |
-|------|-----------|------|
-| `Link` | ⚠️ 권장 | 페이지네이션 네비게이션 (RFC 5988) |
-| `X-Total-Count` | ⚠️ 권장 | 전체 항목 수 |
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Link` | ⚠️ Recommended | Pagination navigation (RFC 5988) |
+| `X-Total-Count` | ⚠️ Recommended | Total item count |
 
-| rel 값 | 설명 |
-|--------|------|
-| `next` | 다음 페이지 |
-| `prev` | 이전 페이지 |
-| `first` | 첫 번째 페이지 |
-| `last` | 마지막 페이지 |
+| rel value | Description |
+|-----------|-------------|
+| `next` | Next page |
+| `prev` | Previous page |
+| `first` | First page |
+| `last` | Last page |
 
-#### 커서 기반 페이지네이션 (권장)
+#### Cursor-Based Pagination (Recommended)
 
-⚠️ **권장**: 대용량 데이터에는 오프셋 기반 대신 커서 기반 페이지네이션을 사용한다.
+⚠️ **Recommended**: Use cursor-based pagination instead of offset-based for large datasets.
 
-**요청:**
+**Request:**
 
 ```
 GET /articles?pageSize=20&pageToken=eyJwYWdlIjoyf...
 ```
 
-**응답:**
+**Response:**
 
 ```
 HTTP/1.1 200 OK
@@ -714,24 +716,24 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first"
 
 [
-  { "id": "1", "title": "첫 번째 글" },
+  { "id": "1", "title": "First Article" },
   ...
 ]
 ```
 
-✅ **필수**: 다음 페이지가 없을 때 `Link` 헤더에서 `rel="next"`를 제외한다.
+✅ **Required**: Exclude `rel="next"` from the `Link` header when there is no next page.
 
-#### 오프셋 기반 페이지네이션
+#### Offset-Based Pagination
 
-소규모 데이터셋에서는 오프셋 기반 페이지네이션도 허용됩니다.
+Offset-based pagination is also acceptable for small datasets.
 
-**요청:**
+**Request:**
 
 ```
 GET /articles?page=2&pageSize=20
 ```
 
-**응답:**
+**Response:**
 
 ```
 HTTP/1.1 200 OK
@@ -742,30 +744,30 @@ Link: <https://api.example.com/articles?pageSize=20&page=1>; rel="first",
 X-Total-Count: 100
 
 [
-  { "id": "21", "title": "스물한 번째 글" },
+  { "id": "21", "title": "Article 21" },
   ...
 ]
 ```
 
-⚠️ **권장**: 기본 페이지 크기(`pageSize`)는 20으로 설정한다.
+⚠️ **Recommended**: Set the default page size (`pageSize`) to 20.
 
-⚠️ **권장**: 최대 페이지 크기는 100으로 제한한다.
+⚠️ **Recommended**: Limit the maximum page size to 100.
 
 ---
 
-### 5.3 필터링과 정렬
+### 5.3 Filtering and Sorting
 
-#### 필터링
+#### Filtering
 
-⚠️ **권장**: 필터는 쿼리 파라미터로 표현한다.
+⚠️ **Recommended**: Express filters as query parameters.
 
-**일치 필터 (equality):**
+**Equality filter:**
 
 ```
 GET /articles?status=PUBLISHED&authorId=123
 ```
 
-**범위 필터 (range):** `After`/`Before` 접미사를 사용한다.
+**Range filter:** Use `After`/`Before` suffixes.
 
 ```
 GET /articles?createdAfter=2024-01-01T00:00:00Z
@@ -773,32 +775,32 @@ GET /articles?createdBefore=2024-02-01T00:00:00Z
 GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
 ```
 
-**다중 값 필터 (IN):** 동일 파라미터를 반복하여 OR 조건으로 표현한다.
+**Multi-value filter (IN):** Repeat the same parameter for OR conditions.
 
 ```
 GET /articles?status=PUBLISHED&status=DRAFT
 GET /articles?authorId=123&authorId=456
 ```
 
-✅ **필수**: 동일 파라미터 반복은 OR 조건으로 처리한다. 서로 다른 파라미터 간 조합은 AND 조건이다.
+✅ **Required**: Treat repeated same parameters as OR conditions. Combinations of different parameters are AND conditions.
 
 ```
 # status=PUBLISHED OR status=DRAFT, AND authorId=123
 GET /articles?status=PUBLISHED&status=DRAFT&authorId=123
 ```
 
-**부분 일치 (contains):** `q` 파라미터를 사용하거나 필드명에 `Contains` 접미사를 붙인다.
+**Partial match (contains):** Use the `q` parameter or append `Contains` to the field name.
 
 ```
-GET /articles?q=REST            # 전체 텍스트 검색
-GET /articles?titleContains=REST  # 특정 필드 부분 일치
+GET /articles?q=REST              # full-text search
+GET /articles?titleContains=REST  # partial match on specific field
 ```
 
-❌ **금지**: 동일 파라미터의 반복을 AND 조건으로 처리하지 않는다.
+❌ **Prohibited**: Do not treat repeated same parameters as AND conditions.
 
-#### 정렬
+#### Sorting
 
-⚠️ **권장**: 정렬은 `orderBy` 파라미터를 사용하며, 필드명과 방향을 조합하여 표현한다.
+⚠️ **Recommended**: Use the `orderBy` parameter for sorting, combining field name and direction.
 
 ```
 GET /articles?orderBy=createdAt:desc
@@ -806,54 +808,54 @@ GET /articles?orderBy=title:asc
 GET /articles?orderBy=createdAt:desc,title:asc
 ```
 
-⚠️ **권장**: 기본 정렬 기준은 API 문서에 명시한다.
+⚠️ **Recommended**: Document the default sort order in the API documentation.
 
 ---
 
-### 5.4 API 버전 관리
+### 5.4 API Versioning
 
-#### 버전 표기
+#### Version Notation
 
-❌ **금지**: API 버전을 URL 경로에 포함하지 않는다.
+❌ **Prohibited**: Do not include the API version in the URL path.
 
-> **이유**: URL은 리소스 식별자다. `/v1/articles`와 `/v2/articles`는 같은 리소스인데 URL이 달라지므로 REST 원칙에 어긋난다. 또한 URL 버전은 클라이언트가 코드를 전면 교체해야 하는 부담을 준다. 헤더 버전은 클라이언트가 버전을 점진적으로 마이그레이션할 수 있고, 버전 미지정 시 서버가 기본 버전을 적용하는 유연성을 제공한다.
+> **Reason**: A URL is a resource identifier. `/v1/articles` and `/v2/articles` represent the same resource but with different URLs, which violates REST principles. URL versioning also forces clients to rewrite their code entirely. Header versioning allows clients to migrate gradually and gives the server flexibility to apply a default version when no version header is specified.
 
-✅ **필수**: `X-API-Version` 헤더에 ISO 8601 (`YYYY-MM-DD`) 형식의 날짜로 버전을 지정한다.
+✅ **Required**: Specify the version in the `X-API-Version` header using ISO 8601 (`YYYY-MM-DD`) date format.
 
 ```
 X-API-Version: 2024-01-20
 ```
 
-⚠️ **권장**: 버전 헤더가 없는 요청에는 최신 안정 버전을 적용하고, 응답에 적용된 버전을 명시한다.
+⚠️ **Recommended**: Apply the latest stable version to requests without a version header, and include the applied version in the response.
 
 ```
 HTTP/1.1 200 OK
 X-API-Version: 2024-01-20
 ```
 
-#### 하위 호환성
+#### Backward Compatibility
 
-✅ **필수**: 동일 버전 내에서 하위 호환성을 유지한다.
+✅ **Required**: Maintain backward compatibility within the same version.
 
-**하위 호환 변경 (허용):**
-- 새 선택적(optional) 필드 추가
-- 새 엔드포인트 추가
-- 새 Enum 값 추가
+**Backward-compatible changes (allowed):**
+- Adding new optional fields
+- Adding new endpoints
+- Adding new enum values
 
-**하위 비호환 변경 (버전 업 필요):**
-- 필드 이름 변경 또는 삭제
-- 필드 타입 변경
-- 필수 필드 추가
-- Enum 값 제거
-- 상태 코드 의미 변경
+**Backward-incompatible changes (requires version bump):**
+- Renaming or removing fields
+- Changing field types
+- Adding required fields
+- Removing enum values
+- Changing status code semantics
 
-⚠️ **권장**: 버전 업 전 최소 6개월 이전 버전을 유지한다.
+⚠️ **Recommended**: Maintain the previous version for at least 6 months before a version bump.
 
 ---
 
 ### 5.5 Deprecation
 
-✅ **필수**: Deprecated된 API에는 응답 헤더로 알림을 제공한다.
+✅ **Required**: Notify clients of deprecated APIs via response headers.
 
 ```
 Deprecation: true
@@ -861,9 +863,9 @@ Sunset: Sat, 01 Jan 2025 00:00:00 GMT
 Link: <https://api.example.com/users/articles>; rel="successor-version"
 ```
 
-⚠️ **권장**: Deprecation 공지는 종료일 최소 6개월 전에 알린다.
+⚠️ **Recommended**: Announce deprecation at least 6 months before the end-of-life date.
 
-⚠️ **권장**: Deprecated API 호출 시 `Deprecation`, `Sunset`, `Link` 헤더로 클라이언트에 공지한다.
+⚠️ **Recommended**: Notify clients with `Deprecation`, `Sunset`, and `Link` headers on deprecated API calls.
 
 ```
 HTTP/1.1 200 OK
@@ -872,41 +874,41 @@ Sunset: Sat, 01 Jan 2025 00:00:00 GMT
 Link: <https://api.example.com/users/articles>; rel="successor-version"
 
 [
-  { "id": "1", "title": "항목 1" },
+  { "id": "1", "title": "Item 1" },
   ...
 ]
 ```
 
 ---
 
-### 5.6 속도 제한
+### 5.6 Rate Limiting
 
-API 서버는 클라이언트별 요청 빈도를 제한하여 서비스 안정성을 보장한다.
+API servers limit request frequency per client to ensure service stability.
 
-#### 응답 헤더
+#### Response Headers
 
-✅ **필수**: 속도 제한이 적용되는 모든 응답에 다음 헤더를 포함한다.
+✅ **Required**: Include the following headers in all responses where rate limiting applies.
 
-**레거시 헤더 (X-RateLimit-\*)**
+**Legacy headers (X-RateLimit-\*)**
 
-| 헤더 | 설명 | 예시 |
-|------|------|------|
-| `X-RateLimit-Limit` | 시간 창(window) 내 허용되는 최대 요청 수 | `100` |
-| `X-RateLimit-Remaining` | 현재 시간 창에서 남은 요청 수 | `99` |
-| `X-RateLimit-Reset` | 시간 창이 초기화되는 시각 (Unix timestamp, 초 단위) | `1742342450` |
+| Header | Description | Example |
+|--------|-------------|---------|
+| `X-RateLimit-Limit` | Maximum requests allowed within the time window | `100` |
+| `X-RateLimit-Remaining` | Remaining requests in the current time window | `99` |
+| `X-RateLimit-Reset` | Time when the window resets (Unix timestamp, seconds) | `1742342450` |
 
-**IETF 표준 헤더 (draft-ietf-httpapi-ratelimit-headers)**
+**IETF standard headers (draft-ietf-httpapi-ratelimit-headers)**
 
-| 헤더 | 설명 | 예시 |
-|------|------|------|
-| `RateLimit` | 현재 속도 제한 상태 (Structured Field) | `limit=100, remaining=99, reset=50` |
-| `RateLimit-Policy` | 적용 중인 속도 제한 정책 | `100;w=3600` |
+| Header | Description | Example |
+|--------|-------------|---------|
+| `RateLimit` | Current rate limit state (Structured Field) | `limit=100, remaining=99, reset=50` |
+| `RateLimit-Policy` | Active rate limit policy | `100;w=3600` |
 
-> **참고**: `RateLimit` 헤더의 `reset` 값은 시간 창 초기화까지 남은 **초(delta-seconds)**이며, `X-RateLimit-Reset`은 **Unix timestamp**이다. 혼동에 주의한다.
+> **Note**: The `reset` value in the `RateLimit` header is **delta-seconds** (seconds until window reset), while `X-RateLimit-Reset` is a **Unix timestamp**. Be careful not to confuse them.
 >
-> **`RateLimit-Policy` 구조**: `100;w=3600` — `100`은 허용 최대 요청 수, `w=3600`은 시간 창 크기(window, 초 단위). 모든 응답에 포함한다.
+> **`RateLimit-Policy` structure**: `100;w=3600` — `100` is the maximum allowed requests, `w=3600` is the window size in seconds. Include in all responses.
 
-**정상 응답 예시:**
+**Normal response example:**
 
 ```
 HTTP/1.1 200 OK
@@ -918,19 +920,19 @@ RateLimit: limit=100, remaining=99, reset=50
 RateLimit-Policy: 100;w=3600
 
 [
-  { "id": "1", "title": "항목 1" }
+  { "id": "1", "title": "Item 1" }
 ]
 ```
 
-#### 429 Too Many Requests 응답
+#### 429 Too Many Requests Response
 
-✅ **필수**: 속도 제한 초과 시 `429 Too Many Requests`를 반환한다.
+✅ **Required**: Return `429 Too Many Requests` when rate limit is exceeded.
 
-✅ **필수**: 429 응답에 `Retry-After` 헤더를 포함한다. 값은 재시도까지 대기해야 하는 초(delta-seconds)를 사용한다.
+✅ **Required**: Include the `Retry-After` header in 429 responses. Use delta-seconds (seconds to wait before retrying).
 
-✅ **필수**: 429 응답 본문은 RFC 7807 Problem Details 구조를 사용한다.
+✅ **Required**: Use RFC 7807 Problem Details structure for 429 response bodies.
 
-**429 응답 예시:**
+**429 response example:**
 
 ```
 HTTP/1.1 429 Too Many Requests
@@ -946,81 +948,81 @@ RateLimit-Policy: 100;w=3600
 ```json
 {
   "type": "https://api.example.com/errors/too-many-requests",
-  "title": "속도 제한 초과",
+  "title": "Rate Limit Exceeded",
   "status": 429,
-  "detail": "허용된 요청 한도를 초과했습니다. 50초 후에 다시 시도해 주세요."
+  "detail": "You have exceeded the allowed request limit. Please try again in 50 seconds."
 }
 ```
 
-#### 클라이언트 재시도 전략
+#### Client Retry Strategy
 
-✅ **필수**: 클라이언트는 429 응답 수신 시 `Retry-After` 헤더 값만큼 대기한 후 재시도한다.
+✅ **Required**: Clients must wait for the duration specified in the `Retry-After` header before retrying after a 429 response.
 
-⚠️ **권장**: `Retry-After` 헤더가 없거나 기타 일시적 오류(503 등) 발생 시, 지수 백오프(exponential backoff) + 지터(jitter) 전략을 사용한다. `attempt`는 1부터 시작하는 재시도 횟수(1 = 첫 번째 재시도).
+⚠️ **Recommended**: When the `Retry-After` header is absent or other transient errors occur (503, etc.), use an exponential backoff + jitter strategy. `attempt` starts at 1 (1 = first retry).
 
 ```
-대기 시간 = min(maxDelay, baseDelay × 2^(attempt - 1)) + random(0, jitterRange)
+wait_time = min(maxDelay, baseDelay × 2^(attempt - 1)) + random(0, jitterRange)
 ```
 
-예시: attempt=1 → `min(60, 1 × 2^0) + random(0,1)` = 1~2초
+Example: attempt=1 → `min(60, 1 × 2^0) + random(0,1)` = 1~2 seconds
 
-| 파라미터 | 권장 값 | 설명 |
-|----------|---------|------|
-| `baseDelay` | 1초 | 첫 번째 재시도 대기 시간 |
-| `maxDelay` | 60초 | 최대 대기 시간 상한 |
-| `jitterRange` | 0 ~ 1초 | 무작위 지연 (thundering herd 방지) |
-| 최대 재시도 횟수 | 3 ~ 5회 | 무한 재시도 방지 |
+| Parameter | Recommended Value | Description |
+|-----------|-------------------|-------------|
+| `baseDelay` | 1 second | Wait time for the first retry |
+| `maxDelay` | 60 seconds | Maximum wait time cap |
+| `jitterRange` | 0 ~ 1 second | Random delay (to prevent thundering herd) |
+| Max retry count | 3 ~ 5 times | Prevent infinite retries |
 
-❌ **금지**: 429 응답 수신 시 즉시 재시도하거나 고정 간격으로 반복 재시도하지 않는다.
+❌ **Prohibited**: Do not retry immediately or at fixed intervals after receiving a 429 response.
 
-❌ **금지**: `Retry-After` 헤더가 있을 때 해당 값을 무시하고 자체 대기 시간을 사용하지 않는다.
+❌ **Prohibited**: Do not ignore the `Retry-After` header and use your own wait time when it is present.
 
 ---
 
-### 5.7 장기 실행 작업
+### 5.7 Long-Running Operations
 
-즉시 완료되지 않는 작업(보고서 생성, 데이터 가져오기 등)은 도메인 리소스를 즉시 생성하고 리소스의 상태 필드로 처리 진행 상황을 추적한다.
+For operations that do not complete immediately (report generation, data import, etc.), create a domain resource immediately and track processing progress via the resource's status field.
 
-✅ **필수**: 장기 실행 작업 요청 시 도메인 리소스를 즉시 생성하고 `201 Created` + `Location` 헤더를 반환한다.
+✅ **Required**: Upon receiving a long-running operation request, create the domain resource immediately and return `201 Created` + `Location` header.
 
-✅ **필수**: 도메인 리소스에 `status` 필드를 포함하여 처리 상태를 표현한다.
+✅ **Required**: Include a `status` field in the domain resource to represent processing state.
 
-⚠️ **권장**: 상태값은 다음을 사용한다.
+⚠️ **Recommended**: Use the following status values:
 
-| 상태 | 설명 |
-|------|------|
-| `PENDING` | 작업 대기 중 |
-| `IN_PROGRESS` | 작업 처리 중 |
-| `COMPLETED` | 작업 완료 |
-| `FAILED` | 작업 실패 |
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Operation is waiting to start |
+| `IN_PROGRESS` | Operation is being processed |
+| `COMPLETED` | Operation has completed |
+| `FAILED` | Operation has failed |
 
-⚠️ **권장**: `FAILED` 상태인 경우 리소스에 RFC 7807 에러 구조를 포함한다.
+⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807 error structure in the resource.
 
-**예시:**
+**Example:**
 
 ```
-# 작업 시작 — 도메인 리소스 즉시 생성
+# Start operation — immediately create domain resource
 POST /reports  →  201 Created
                   Location: /reports/123
                   { "id": "123", "status": "PENDING" }
 
-# 상태 조회 (폴링)
+# Poll status
 GET /reports/123  →  { "id": "123", "status": "IN_PROGRESS" }
 GET /reports/123  →  { "id": "123", "status": "COMPLETED", ... }
 GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 ```
 
-❌ **금지**: 별도의 범용 `/operations` 리소스를 사용하지 않는다. 도메인 리소스 자체에서 상태를 추적한다.
+❌ **Prohibited**: Do not use a separate generic `/operations` resource. Track status within the domain resource itself.
 
 ---
 
-## 6. 인증 및 보안
+## 6. Authentication & Security
 
-### 6.1 인증 방식
+### 6.1 Authentication Methods
 
 #### Bearer Token (JWT)
 
-✅ **필수**: 인증 토큰은 `Authorization` 헤더를 사용한다. 쿼리 파라미터나 요청 본문에 포함하지 않는다.
+✅ **Required**: Use the `Authorization` header for authentication tokens. Do not include in query parameters or request body.
 
 ```
 Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
@@ -1028,13 +1030,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
 
 #### API Key
 
-⚠️ **권장**: API Key 인증은 `Authorization` 헤더를 사용한다.
+⚠️ **Recommended**: Use the `Authorization` header for API Key authentication.
 
 ```
 Authorization: ApiKey your-api-key-here
 ```
 
-❌ **금지**: API Key를 쿼리 파라미터로 전달하지 않는다. URL은 서버 로그에 기록될 수 있다.
+❌ **Prohibited**: Do not pass API Keys as query parameters. URLs may be recorded in server logs.
 
 ```
 # Bad
@@ -1043,14 +1045,14 @@ GET /articles?apiKey=secret-key
 
 ---
 
-### 6.2 401 vs 403 구분
+### 6.2 401 vs 403 Distinction
 
-| 상태 코드 | 의미 | 사용 시점 |
-|-----------|------|-----------|
-| `401 Unauthorized` | 인증 실패 | 토큰 없음, 토큰 만료, 토큰 형식 오류 |
-| `403 Forbidden` | 인가 실패 | 인증은 됐지만 해당 리소스/액션에 대한 권한 없음 |
+| Status Code | Meaning | When to Use |
+|-------------|---------|-------------|
+| `401 Unauthorized` | Authentication failure | Missing token, expired token, malformed token |
+| `403 Forbidden` | Authorization failure | Authenticated but lacks permission for the resource/action |
 
-✅ **필수**: 401 응답에는 `WWW-Authenticate` 헤더를 포함한다.
+✅ **Required**: Include the `WWW-Authenticate` header in 401 responses.
 
 ```
 HTTP/1.1 401 Unauthorized
@@ -1059,13 +1061,13 @@ Content-Type: application/problem+json
 
 {
   "type": "https://api.example.com/errors/unauthorized",
-  "title": "인증이 필요합니다",
+  "title": "Authentication Required",
   "status": 401,
-  "detail": "액세스 토큰이 만료되었습니다."
+  "detail": "The access token has expired."
 }
 ```
 
-⚠️ **권장**: 403 응답에서 리소스의 존재 여부를 노출하지 않는다. 보안상 민감한 리소스는 존재하지 않는 것처럼 404로 응답할 수 있다.
+⚠️ **Recommended**: Do not reveal resource existence in 403 responses. For security-sensitive resources, you may respond with 404 as if the resource does not exist.
 
 ```
 HTTP/1.1 403 Forbidden
@@ -1073,9 +1075,9 @@ Content-Type: application/problem+json
 
 {
   "type": "https://api.example.com/errors/forbidden",
-  "title": "접근이 거부되었습니다",
+  "title": "Access Denied",
   "status": 403,
-  "detail": "이 리소스에 접근할 권한이 없습니다."
+  "detail": "You do not have permission to access this resource."
 }
 ```
 
@@ -1083,9 +1085,9 @@ Content-Type: application/problem+json
 
 ### 6.3 Idempotency-Key
 
-POST는 멱등하지 않아 네트워크 오류 후 재시도하면 리소스가 중복 생성될 수 있다. 결제, 주문, 이메일 발송 등 중복 실행이 위험한 API에는 `Idempotency-Key` 헤더를 사용한다.
+POST is not idempotent, so retrying after a network error can result in duplicate resource creation. Use the `Idempotency-Key` header for APIs where duplicate execution is dangerous, such as payments, orders, and email sending.
 
-✅ **필수**: 중복 실행 위험이 있는 POST 엔드포인트는 `Idempotency-Key` 헤더를 지원한다.
+✅ **Required**: Support the `Idempotency-Key` header for POST endpoints where duplicate execution is risky.
 
 ```
 POST /orders
@@ -1098,22 +1100,22 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 }
 ```
 
-**서버 동작:**
-- 처음 요청: 정상 처리 후 결과 저장
-- 같은 키로 재요청: 새로 처리하지 않고 저장된 결과 그대로 반환
-- 키가 다른 동일 요청: 별도 요청으로 처리
+**Server Behavior:**
+- First request: Process normally and store the result
+- Re-request with same key: Return the stored result without reprocessing
+- Same request with different key: Treat as a separate request
 
-✅ **필수**: `Idempotency-Key` 값은 클라이언트가 생성한 UUID v4를 사용한다.
+✅ **Required**: Use client-generated UUID v4 for `Idempotency-Key` values.
 
-⚠️ **권장**: 동일 키로 재요청 시 원래 응답과 동일한 상태 코드 및 본문을 반환한다.
+⚠️ **Recommended**: Return the same status code and body as the original response for re-requests with the same key.
 
-⚠️ **권장**: `Idempotency-Key`의 유효 기간은 최소 24시간으로 설정한다.
+⚠️ **Recommended**: Set the validity period of `Idempotency-Key` to at least 24 hours.
 
-❌ **금지**: `Idempotency-Key` 없이 결제·주문 등 금전적 영향을 주는 POST 엔드포인트를 설계하지 않는다.
+❌ **Prohibited**: Do not design POST endpoints with financial impact (payments, orders, etc.) without `Idempotency-Key` support.
 
 ---
 
-## 참고 자료
+## References
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)

@@ -744,7 +744,7 @@ Link: <https://api.example.com/articles?pageSize=20&page=1>; rel="first",
 X-Total-Count: 100
 
 [
-  { "id": "21", "title": "Twenty-First Article" },
+  { "id": "21", "title": "Article 21" },
   ...
 ]
 ```

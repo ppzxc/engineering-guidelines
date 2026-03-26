@@ -17,7 +17,7 @@ Otherwise detect from current branch:
 
 ```bash
 git branch --show-current
-gh pr view --head <FEATURE_BRANCH> --json number,title,state
+gh pr view <FEATURE_BRANCH> --json number,title,state
 ```
 
 If no PR is found, ask the user for the PR number directly.

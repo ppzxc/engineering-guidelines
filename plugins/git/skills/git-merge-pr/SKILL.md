@@ -25,7 +25,7 @@ Otherwise detect from current branch:
 
 ```bash
 git branch --show-current
-gh pr view --head <FEATURE_BRANCH> --json number,title,state
+gh pr view <FEATURE_BRANCH> --json number,title,state
 ```
 
 ### 2. Check PR Status

@@ -36,7 +36,7 @@ Parse arguments before executing any step:
 ```bash
 git status
 git branch --show-current
-gh pr view --head <FEATURE_BRANCH> --json number,state 2>/dev/null
+gh pr view <FEATURE_BRANCH> --json number,state 2>/dev/null
 ```
 
 Assess current state and determine which steps are needed.

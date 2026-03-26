@@ -39,7 +39,7 @@ Assess current state and determine which steps are needed.
 
 ### Step 1. Commit (if uncommitted changes exist)
 
-If uncommitted changes exist, execute the **commit** skill.
+If uncommitted changes exist, execute the **git:commit** skill.
 
 Skip this step if there are no changes.
 
@@ -55,7 +55,7 @@ Skip this step if there are no changes.
 
 ### Step 2. Create PR (if no open PR exists)
 
-If no open PR exists for the branch, execute the **pull-request** skill.
+If no open PR exists for the branch, execute the **git:pull-request** skill.
 
 Skip this step if a PR already exists.
 
@@ -71,7 +71,7 @@ Skip this step if a PR already exists.
 
 ### Step 3. PR Review
 
-Execute the **review** skill.
+Execute the **git:review** skill.
 
 - **Normal mode:** confirm before proceeding
   ```
@@ -110,7 +110,7 @@ EOF
 
 ### Step 4. Merge PR
 
-Execute the **merge** skill.
+Execute the **git:merge** skill.
 
 **Always requires confirmation regardless of auto mode** (merge is hard to reverse).
 

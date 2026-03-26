@@ -31,9 +31,7 @@ gh pr checks <PR_NUMBER>
 
 ### 3. Detect Languages
 
-```bash
-gh pr diff <PR_NUMBER> --name-only
-```
+Use the `files` field already retrieved in Step 2 (no additional API call needed).
 
 Inspect the changed file extensions and map to languages:
 

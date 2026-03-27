@@ -123,8 +123,16 @@ Analyze arguments:
 
 #### 2. Compose Title and Body
 
-- Generate title in format: `<type>: <description>` (under 70 chars)
-- Fill in the type-specific template based on user input or natural language analysis
+- Generate title in Conventional Commits format: `<type>(<scope>): <한글 설명>` (under 70 chars)
+  - `type` mapping from `--type` argument:
+    - bug → `fix`
+    - feature → `feat`
+    - chore → `chore`
+    - docs → `docs`
+    - review → `review`
+  - `scope`: optional — infer from context (e.g., affected module, directory name). Omit parentheses if no scope.
+  - PR에서 파생된 이슈: append ` (#PR번호)` to the end — e.g., `review(api): PR 리뷰 항목 정리 (#42)`
+- Fill in the unified body template (see Issue Template — Unified Structure section) based on user input or natural language analysis
 - If explicit `--title` provided, use it as-is
 
 #### 3. User Confirmation (mandatory)
@@ -185,12 +193,12 @@ Receive from git:clean context:
 
 #### 2. Compose Issue
 
-Title: `review: PR #<NUMBER> review items`
+Title: `review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)` (under 70 chars)
 
 Body using review template:
 ```bash
 gh issue create \
-  --title "review: PR #<NUMBER> review items" \
+  --title "review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)" \
   --body "$(cat <<'EOF'
 ## Source
 PR #<NUMBER>: <PR_TITLE>

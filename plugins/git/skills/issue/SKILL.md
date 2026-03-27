@@ -44,7 +44,7 @@ Create a GitHub Issue using a unified template after user confirmation.
 | feature | `enhancement` | `feat` |
 | chore | `chore` | `chore` |
 | docs | `documentation` | `docs` |
-| review | `review` | `review` |
+| review *(internal)* | `review` | `review` |
 
 ### Review Mode 적용 예시
 
@@ -170,12 +170,12 @@ Receive from git:clean context:
 
 #### 2. Compose Issue
 
-Title: `review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)` (under 70 chars; scope omitted in automated review mode)
+Title: `review: PR #<NUMBER> 리뷰 항목 정리` (under 70 chars; scope omitted in automated review mode)
 
 Body using unified template:
 ```bash
 gh issue create \
-  --title "review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)" \
+  --title "review: PR #<NUMBER> 리뷰 항목 정리" \
   --label "review" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -214,7 +214,7 @@ EOF
 ```
 /git:issue
 /git:issue 로그인 페이지에서 500 에러 발생
-/git:issue --type bug --title "Login 500 error"
+/git:issue --type bug --title "로그인 500 에러 발생"
 /git:issue --type feature --title "다크 모드 지원 추가" --label priority:high
 이슈 만들어줘
 버그 리포트 생성

@@ -93,7 +93,7 @@ Pass the following context to git:issue:
 
 ```
 git:issue --no-confirm
-[review data: PR #<NUMBER>, items list]
+[review data: PR #<NUMBER> "<TITLE>" <URL>, items list]
 ```
 
 - If no review items exist, skip this step entirely

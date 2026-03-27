@@ -129,7 +129,7 @@ Analyze arguments:
     - feature → `feat`
     - chore → `chore`
     - docs → `docs`
-    - review → `review`
+    - review → `review` (Review Mode only — not user-selectable in Generic Mode)
   - `scope`: optional — infer from context (e.g., affected module, directory name). Omit parentheses if no scope.
   - PR에서 파생된 이슈: append ` (#PR번호)` to the end — e.g., `review(api): PR 리뷰 항목 정리 (#42)`
 - Fill in the unified body template (see Issue Template — Unified Structure section) based on user input or natural language analysis
@@ -193,7 +193,7 @@ Receive from git:clean context:
 
 #### 2. Compose Issue
 
-Title: `review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)` (under 70 chars)
+Title: `review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)` (under 70 chars; scope omitted in automated review mode)
 
 Body using review template:
 ```bash

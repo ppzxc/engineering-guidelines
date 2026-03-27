@@ -91,10 +91,9 @@ Pass the following context to git:issue:
 - PR number, title, and URL
 - List of review items from the review step
 
-```
-git:issue --no-confirm
-[review data: PR #<NUMBER> "<TITLE>" <URL>, items list]
-```
+Invoke: `git:issue --no-confirm` with the following review data:
+- PR `#<NUMBER>` — `"<TITLE>"` — `<URL>`
+- Review items list from Step 3
 
 - If no review items exist, skip this step entirely
 - If issue creation fails, print a warning and continue (non-blocking)

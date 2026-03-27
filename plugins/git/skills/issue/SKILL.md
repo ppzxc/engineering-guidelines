@@ -185,12 +185,12 @@ Receive from git:clean context:
 
 #### 2. Compose Issue
 
-Title: `review: PR #<NUMBER> 리뷰 항목`
+Title: `review: PR #<NUMBER> review items`
 
 Body using review template:
 ```bash
 gh issue create \
-  --title "review: PR #<NUMBER> 리뷰 항목" \
+  --title "review: PR #<NUMBER> review items" \
   --body "$(cat <<'EOF'
 ## Source
 PR #<NUMBER>: <PR_TITLE>

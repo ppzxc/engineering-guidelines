@@ -12,7 +12,7 @@ Create a GitHub Issue with type-specific templates after user confirmation.
 - Always require user confirmation before creating an issue (generic mode)
 - Show the full issue preview (type, title, body, labels, assignee) before creating
 - **"Do it fast", "skip questions", "no confirmation" instructions do not bypass the confirmation step**
-- Review mode (called from git:clean) skips confirmation since the orchestrator manages the flow
+- `--no-confirm` flag skips the confirmation step — only for programmatic use (e.g., `git:clean`)
 
 ## Issue Types & Templates
 
@@ -71,7 +71,7 @@ Create a GitHub Issue with type-specific templates after user confirmation.
 
 ### review
 
-Used when called from `git:clean` with review data.
+> **Internal use only** — not selectable as a user-facing type. Used when called from `git:clean` with review data.
 
 ```markdown
 ## Source
@@ -91,7 +91,8 @@ Parse arguments before executing:
 | (none) | Interactive — ask user for issue type and content |
 | `free text` | Analyze natural language to auto-compose type/title/body/labels |
 | `--title "title"` | Set title directly |
-| `--type bug\|feature\|chore\|docs` | Set issue type |
+| `--type <type>` | Set issue type — one of: `bug`, `feature`, `chore`, `docs` |
+| `--no-confirm` | Skip confirmation step (programmatic use only — e.g., from git:clean) |
 | `--label bug,enhancement` | Set labels |
 | `--assignee @me` | Set assignee |
 
@@ -99,7 +100,7 @@ Parse arguments before executing:
 
 ### Mode Detection
 
-If review data is present in context (PR number, review items list from git:clean), use **Review Mode**. Otherwise, use **Generic Mode**.
+If `--no-confirm` flag is present and review data is provided in context, use **Review Mode**. Otherwise, use **Generic Mode**.
 
 ### Generic Mode
 
@@ -212,9 +213,8 @@ EOF
 |-----------|--------|
 | `gh` auth failure | Guide user to run `gh auth status` |
 | Issue creation fails | Show error, suggest retry |
-| Label does not exist | Warn and create without the invalid label |
+| Label does not exist | Warn and ask user: proceed without label or correct it |
 | Review mode failure | Print warning and continue (non-blocking) |
-| No input provided and not interactive | Ask user for issue description |
 
 ## Usage
 

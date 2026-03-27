@@ -107,7 +107,8 @@ If `--no-confirm` flag is present and review data is provided in context, use **
 #### 1. Parse Input
 
 Analyze arguments:
-- If explicit `--type` provided, use it
+- If `--type review` is provided without `--no-confirm`, reject with: `review type is for internal use only — use /git:issue without --type to create a regular issue`
+- If explicit `--type` provided (bug, feature, chore, docs), use it
 - If natural language provided, infer type from content (e.g., "500 에러 발생" → bug)
 - If no arguments, ask user to select type:
   ```

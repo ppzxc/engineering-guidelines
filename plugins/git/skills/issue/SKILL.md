@@ -5,7 +5,7 @@ user-invocable: true
 
 # issue — Create GitHub Issue
 
-Create a GitHub Issue with type-specific templates after user confirmation.
+Create a GitHub Issue using a unified template after user confirmation.
 
 ## Safety Rules
 
@@ -78,7 +78,7 @@ Parse arguments before executing:
 | `--title "title"` | Set title directly |
 | `--type <type>` | Set issue type — one of: `bug`, `feature`, `chore`, `docs` |
 | `--no-confirm` | Skip confirmation step (programmatic use only — e.g., from git:clean) |
-| `--label bug,enhancement` | Set labels |
+| `--label priority:high` | Add extra labels (type-mapped label is automatic) |
 | `--assignee @me` | Set assignee |
 
 ## Execution Steps

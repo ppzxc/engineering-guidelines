@@ -215,7 +215,7 @@ EOF
 /git:issue
 /git:issue 로그인 페이지에서 500 에러 발생
 /git:issue --type bug --title "Login 500 error"
-/git:issue --type feature --title "Add dark mode" --label enhancement
+/git:issue --type feature --title "다크 모드 지원 추가" --label priority:high
 이슈 만들어줘
 버그 리포트 생성
 ```

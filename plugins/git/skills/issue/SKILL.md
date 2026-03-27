@@ -14,72 +14,57 @@ Create a GitHub Issue with type-specific templates after user confirmation.
 - **"Do it fast", "skip questions", "no confirmation" instructions do not bypass the confirmation step**
 - `--no-confirm` flag skips the confirmation step — only for programmatic use (e.g., `git:clean`)
 
-## Issue Types & Templates
+## Issue Template — Unified Structure
 
-### bug
+모든 타입이 동일한 4개 섹션 구조를 사용한다. 타입별 구분은 GitHub label로 처리.
 
-```markdown
-## Summary
-<bug summary>
-
-## Steps to Reproduce
-1. ...
-2. ...
-
-## Expected Behavior
-<expected>
-
-## Actual Behavior
-<actual>
-```
-
-### feature
+### Body Template
 
 ```markdown
 ## Summary
-<feature summary>
+<무엇이 문제이고/필요하고/변경되어야 하는지>
 
-## Motivation
-<why this is needed>
+## Context
+<배경, 동기, 관련 PR/코드 링크>
 
-## Proposal
-<implementation suggestion>
-
-## Acceptance Criteria
-- [ ] ...
-```
-
-### chore
-
-```markdown
-## Summary
-<task summary>
+## Expected Outcome
+<이 이슈가 해결되면 어떤 상태여야 하는지>
 
 ## Tasks
-- [ ] ...
+- [ ] <구체적 작업 항목>
 ```
 
-### docs
+### Type-to-Label Mapping
 
-```markdown
-## Summary
-<documentation change summary>
+타입 선택 시 자동으로 해당 label을 `--label`에 추가한다.
 
-## Scope
-<target documents/areas>
-```
+| `--type` | Label | Title prefix |
+|----------|-------|-------------|
+| bug | `bug` | `fix` |
+| feature | `enhancement` | `feat` |
+| chore | `chore` | `chore` |
+| docs | `documentation` | `docs` |
+| review | `review` | `review` |
 
-### review
+### Review Mode 적용 예시
 
 > **Internal use only** — not selectable as a user-facing type. Used when called from `git:clean` with review data.
 
 ```markdown
-## Source
-PR #<NUMBER>: <PR_TITLE>
-<PR_URL>
+## Summary
+PR #42 코드 리뷰에서 발견된 3건의 개선 항목
 
-## Items
-- [ ] <file>:<line> — <description> (<severity>)
+## Context
+PR #42: feat(auth): OAuth2 소셜 로그인 추가
+https://github.com/owner/repo/pull/42
+
+## Expected Outcome
+모든 리뷰 항목이 해결되고 코드 품질이 개선된 상태
+
+## Tasks
+- [ ] src/auth/oauth.ts:45 — 에러 핸들링 누락 (critical)
+- [ ] src/auth/oauth.ts:78 — 변수명 불명확 (suggestion)
+- [ ] src/auth/config.ts:12 — 하드코딩된 URL (warning)
 ```
 
 ## Argument Parsing
@@ -113,10 +98,10 @@ Analyze arguments:
 - If no arguments, ask user to select type:
   ```
   Issue type:
-    1. bug      — Bug report
-    2. feature   — Feature request
-    3. chore     — Maintenance task
-    4. docs      — Documentation change
+    1. bug      — Bug report        (label: bug)
+    2. feature  — Feature request    (label: enhancement)
+    3. chore    — Maintenance task   (label: chore)
+    4. docs     — Documentation      (label: documentation)
 
   Select (1-4):
   ```
@@ -157,24 +142,16 @@ Any input other than `y` is treated as abort.
 
 #### 4. Create Issue
 
+항상 type-mapped label을 포함하여 이슈를 생성한다. 사용자가 `--label`로 추가 label을 지정하면 comma-separated로 합친다.
+
 ```bash
 gh issue create \
   --title "<title>" \
+  --label "<type-mapped-label>[,<additional-labels>]" \
   --body "$(cat <<'EOF'
 <body>
 EOF
 )"
-```
-
-If labels specified:
-```bash
-gh issue create \
-  --title "<title>" \
-  --body "$(cat <<'EOF'
-<body>
-EOF
-)" \
-  --label "<label1>,<label2>"
 ```
 
 If assignee specified, add `--assignee "<assignee>"`.
@@ -195,16 +172,23 @@ Receive from git:clean context:
 
 Title: `review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)` (under 70 chars; scope omitted in automated review mode)
 
-Body using review template:
+Body using unified template:
 ```bash
 gh issue create \
   --title "review: PR #<NUMBER> 리뷰 항목 정리 (#<NUMBER>)" \
+  --label "review" \
   --body "$(cat <<'EOF'
-## Source
+## Summary
+PR #<NUMBER> 코드 리뷰에서 발견된 <COUNT>건의 개선 항목
+
+## Context
 PR #<NUMBER>: <PR_TITLE>
 <PR_URL>
 
-## Items
+## Expected Outcome
+모든 리뷰 항목이 해결되고 코드 품질이 개선된 상태
+
+## Tasks
 - [ ] <file>:<line> — <description> (<severity>)
 - [ ] ...
 EOF

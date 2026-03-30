@@ -786,8 +786,6 @@ GET /articles?viewCountMin=1000
 
 ⚠️ **Recommended**: Use `After`/`Before` suffixes for date/time ranges and `Min`/`Max` suffixes for numeric ranges.
 
-```
-
 **Multi-value filter (IN):** Repeat the same parameter for OR conditions.
 
 ```

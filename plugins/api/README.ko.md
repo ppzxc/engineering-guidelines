@@ -129,20 +129,6 @@ DELETE /comments/123
 
 ❌ **금지**: URL에 파일 확장자(`.json`, `.xml`)를 포함하지 않는다. 콘텐츠 협상은 `Accept` 헤더를 사용한다.
 
-#### 허용 문자
-
-✅ **필수**: URL 경로 세그먼트에는 ASCII 영소문자, 숫자, 하이픈(`-`)만 사용한다.
-
-✅ **필수**: 쿼리 파라미터 이름은 camelCase를 사용한다.
-
-```
-# Good
-GET /articles?pageSize=20&sortOrder=desc
-
-# Bad
-GET /articles?page_size=20&sort_order=desc
-```
-
 #### URL 중첩 깊이
 
 ✅ **필수**: URL 중첩은 최대 2단계(리소스/ID/서브리소스/ID)까지 허용한다.
@@ -161,6 +147,20 @@ GET /articles?page_size=20&sort_order=desc
 |------|-------|---------|
 | 주문 내 항목 | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
 | 주문 항목의 리뷰 | `/order-items/{itemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
+
+#### 허용 문자
+
+✅ **필수**: URL 경로 세그먼트에는 ASCII 영소문자, 숫자, 하이픈(`-`)만 사용한다.
+
+✅ **필수**: 쿼리 파라미터 이름은 camelCase를 사용한다.
+
+```
+# Good
+GET /articles?pageSize=20&sortOrder=desc
+
+# Bad
+GET /articles?page_size=20&sort_order=desc
+```
 
 ---
 

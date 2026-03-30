@@ -155,6 +155,19 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Contains: `?q=keyword` (full-text) or `?titleContains=keyword` (field)
 - Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
 
+## Pagination
+
+- Collections return **top-level JSON array** `[]` — never wrapped in an envelope object
+- **Empty collections**: return `200 OK` + `[]` — never `404`; include `Total-Count: 0`
+- Use `Link` header (RFC 8288) with `rel="next"`, `prev`, `first`, `last` for navigation
+- `Total-Count` header for total item count
+- **Cursor-based** (recommended): `pageSize` + `pageToken` — `pageToken` is an opaque value, clients MUST NOT parse or construct it
+- **Offset-based**: `page` + `pageSize` — acceptable for small datasets
+- **Keyset**: `after`/`before` opaque cursor + `orderBy` — O(1) regardless of page depth; cannot jump to arbitrary pages
+- Default `pageSize`: 20, max: 100
+- `pageSize < 1` → `400 Bad Request`; `pageSize > max` → cap to max (no error)
+- Exclude `rel="next"` when there is no next page
+
 ## Rate Limiting
 
 - Response headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`

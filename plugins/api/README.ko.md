@@ -1130,3 +1130,5 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 - [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
 - [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+- [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
+- [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)

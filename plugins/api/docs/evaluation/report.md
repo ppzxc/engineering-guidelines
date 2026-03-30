@@ -3,7 +3,7 @@
 **평가 날짜:** 2026-03-20
 **평가 대상:** `skills/restful-guidelines/SKILL.md`
 **기준 문서:** `README.md`
-**테스트 케이스:** `docs/evaluation/test-cases.md` (총 54개)
+**테스트 케이스:** `docs/evaluation/test-cases.md` (총 59개)
 
 ---
 
@@ -11,8 +11,8 @@
 
 | 모드 | COVERED | PARTIAL | MISSING | 합계 | 커버율 |
 |------|---------|---------|---------|------|--------|
-| Writing | 68 | 0 | 3 | 71 | 95.8% |
-| Review | 68 | 0 | 3 | 71 | 95.8% |
+| Writing | 73 | 0 | 3 | 76 | 96.1% |
+| Review | 73 | 0 | 3 | 76 | 96.1% |
 
 > 커버율 = (COVERED + PARTIAL×0.5) / 합계 × 100
 >
@@ -216,3 +216,4 @@ Review Mode 체크리스트 추가 항목:
 - [x] 스킬 변경 후 동일 테스트 케이스로 회귀 검증
 - [x] report.md 커버리지 수치 업데이트
 - [x] Minor 문제 스킬에 반영 — 19개 해결 (Tier A 14개 + Tier B 5개), 3개 Tier C 보류 (2.1-7, 2.3-2, 3.1-3)
+- [x] Pagination & Filtering 심화 — 5개 신규 규칙 추가 (5.2-3~5.2-6, 5.3-0), 5개 테스트 케이스 추가 (TC-5-19~23)

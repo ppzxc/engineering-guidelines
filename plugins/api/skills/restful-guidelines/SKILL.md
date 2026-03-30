@@ -144,3 +144,27 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Avoid storing sensitive data in query strings (they get logged)
 - `Cache-Control` header specifies caching strategy
 - Custom header names MUST NOT use `X-` prefix (RFC 6648/BCP 178) — applies to all new APIs; `X-Forwarded-For` and other headers already standardized with `X-` are grandfathered exceptions
+
+## Filtering & Sorting
+
+- Equality: `?status=PUBLISHED&authorId=123`
+- Date range: `After`/`Before` suffix — `?createdAfter=2024-01-01T00:00:00Z`
+- Numeric range: `Min`/`Max` suffix — `?priceMin=100&priceMax=500`
+- Multi-value (IN): repeat param = OR — `?status=a&status=b`
+- Cross-param = AND: `?status=PUBLISHED&authorId=123`
+- Contains: `?q=keyword` (full-text) or `?titleContains=keyword` (field)
+- Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
+
+## Rate Limiting
+
+- Response headers (always): `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` (Unix ts)
+- IETF headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
+- 429 Too Many Requests: include `Retry-After` (delta-seconds) + RFC 9457 Problem Details body
+- Client retry: honor `Retry-After`; otherwise exponential backoff + jitter
+
+## Long-Running Operations
+
+- Return `201 Created` + `Location` header with domain resource immediately
+- Include `status` field: `PENDING` → `PROCESSING` → `COMPLETED` | `FAILED`
+- Client polls `GET {Location}` to check progress
+- On failure: include error details in response body

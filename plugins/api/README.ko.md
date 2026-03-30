@@ -143,6 +143,27 @@ GET /articles?pageSize=20&sortOrder=desc
 GET /articles?page_size=20&sort_order=desc
 ```
 
+#### URL 중첩 깊이
+
+✅ **필수**: URL 중첩은 최대 2단계(리소스/ID/서브리소스/ID)까지 허용한다.
+
+| 깊이 | 패턴 | 예시 | 허용 |
+|------|------|------|------|
+| 0 | `/{resource}` | `/articles` | ✅ |
+| 1 | `/{resource}/{id}` | `/articles/123` | ✅ |
+| 2 | `/{resource}/{id}/{sub}` | `/articles/123/comments` | ✅ |
+| 2 | `/{resource}/{id}/{sub}/{subId}` | `/articles/123/comments/456` | ✅ |
+| 3+ | `/{a}/{id}/{b}/{id}/{c}` | — | ❌ |
+
+❌ **금지**: 3단계 이상 중첩하지 않는다. 깊은 관계는 최상위 리소스로 승격한다.
+
+| 상황 | ✅ Do | ❌ Don't |
+|------|-------|---------|
+| 주문 내 항목 | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
+| 주문 항목의 리뷰 | `/order-items/{itemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
+
+---
+
 #### URL 길이
 
 ⚠️ **권장**: URL은 2000자 이하로 유지한다. 그 이상이 필요한 경우 쿼리 파라미터를 요청 본문으로 이동하는 것을 고려한다.
@@ -776,6 +797,16 @@ GET /articles?createdAfter=2024-01-01T00:00:00Z
 GET /articles?createdBefore=2024-02-01T00:00:00Z
 GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
 ```
+
+**숫자 범위 필터 (range):** `Min`/`Max` 접미사를 사용한다.
+
+```
+GET /products?priceMin=100
+GET /products?priceMax=500
+GET /products?priceMin=100&priceMax=500
+```
+
+⚠️ **권장**: 날짜/시간 범위는 `After`/`Before`, 숫자 범위는 `Min`/`Max` 접미사를 사용한다.
 
 **다중 값 필터 (IN):** 동일 파라미터를 반복하여 OR 조건으로 표현한다.
 

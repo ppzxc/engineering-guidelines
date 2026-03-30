@@ -932,7 +932,7 @@ RateLimit-Policy: 100;w=3600
 
 ✅ **Required**: Include the `Retry-After` header in 429 responses. Use delta-seconds (seconds to wait before retrying).
 
-✅ **Required**: Use RFC 7807 Problem Details structure for 429 response bodies.
+✅ **Required**: Use RFC 7807/9457 Problem Details structure for 429 response bodies.
 
 **429 response example:**
 
@@ -998,7 +998,7 @@ For operations that do not complete immediately (report generation, data import,
 | `COMPLETED` | Operation has completed |
 | `FAILED` | Operation has failed |
 
-⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807 error structure in the resource.
+⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807/9457 error structure in the resource.
 
 **Example:**
 

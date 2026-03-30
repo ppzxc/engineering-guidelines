@@ -932,7 +932,7 @@ RateLimit-Policy: 100;w=3600
 
 ✅ **필수**: 429 응답에 `Retry-After` 헤더를 포함한다. 값은 재시도까지 대기해야 하는 초(delta-seconds)를 사용한다.
 
-✅ **필수**: 429 응답 본문은 RFC 7807 Problem Details 구조를 사용한다.
+✅ **필수**: 429 응답 본문은 RFC 7807/9457 Problem Details 구조를 사용한다.
 
 **429 응답 예시:**
 
@@ -998,7 +998,7 @@ RateLimit-Policy: 100;w=3600
 | `COMPLETED` | 작업 완료 |
 | `FAILED` | 작업 실패 |
 
-⚠️ **권장**: `FAILED` 상태인 경우 리소스에 RFC 7807 에러 구조를 포함한다.
+⚠️ **권장**: `FAILED` 상태인 경우 리소스에 RFC 7807/9457 에러 구조를 포함한다.
 
 **예시:**
 

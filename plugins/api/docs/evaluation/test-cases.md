@@ -1383,7 +1383,7 @@ class ArticleController {
         val result = articleService.getArticles(pageSize, pageToken)
         val headers = HttpHeaders()
         buildLinkHeader(result, pageSize).let { headers.set("Link", it) }
-        result.totalCount?.let { headers.set("X-Total-Count", it.toString()) }
+        result.totalCount?.let { headers.set("Total-Count", it.toString()) }
         return ResponseEntity.ok().headers(headers).body(result.items)
     }
 }
@@ -1391,7 +1391,7 @@ class ArticleController {
 // 응답:
 // HTTP/1.1 200 OK
 // Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next"
-// X-Total-Count: 100
+// Total-Count: 100
 //
 // [
 //   { "id": "1", "title": "첫 번째 글" },
@@ -1472,9 +1472,9 @@ GET /articles?orderBy=createdAt:desc
 
 ---
 
-### TC-5-06: X-Total-Count 헤더
+### TC-5-06: Total-Count 헤더
 
-- 규칙: "⚠️ **권장**: 전체 항목 수를 제공할 때 `X-Total-Count` 헤더를 사용한다."
+- 규칙: "⚠️ **권장**: 전체 항목 수를 제공할 때 `Total-Count` 헤더를 사용한다."
 - 규범 수준: ⚠️권장
 - 대상 모드: Both
 - 스킬 커버: Writing: COVERED / Review: COVERED
@@ -1502,19 +1502,19 @@ fun getArticles(
     val result = articleService.getArticles(pageSize, pageToken)
     val headers = HttpHeaders()
     buildLinkHeader(result, pageSize).let { headers.set("Link", it) }
-    result.totalCount?.let { headers.set("X-Total-Count", it.toString()) }
+    result.totalCount?.let { headers.set("Total-Count", it.toString()) }
     return ResponseEntity.ok().headers(headers).body(result.items)
 }
 
 // 응답:
 // HTTP/1.1 200 OK
-// X-Total-Count: 100
+// Total-Count: 100
 // Link: <...>; rel="next"
 //
 // [ { "id": "1", ... }, { "id": "2", ... } ]
 ```
 
-- 검증 포인트: Writing 모드의 Collection/Pagination Pattern에 `X-Total-Count: 100` 헤더 예시 및 코드에서 `headers.set("X-Total-Count", ...)`, Review 체크리스트의 "X-Total-Count header used when providing total item count" 항목
+- 검증 포인트: Writing 모드의 Collection/Pagination Pattern에 `Total-Count: 100` 헤더 예시 및 코드에서 `headers.set("Total-Count", ...)`, Review 체크리스트의 "Total-Count header used when providing total item count" 항목
 
 ---
 
@@ -1650,24 +1650,24 @@ class ArticleController {
 
     @GetMapping
     fun getArticles(
-        @RequestHeader("X-API-Version", required = false) apiVersion: String?
+        @RequestHeader("Api-Version", required = false) apiVersion: String?
     ): ResponseEntity<List<Article>> {
         val version = apiVersion ?: "2024-01-20"
         val articles = articleService.getArticles(version)
         return ResponseEntity.ok()
-            .header("X-API-Version", version)
+            .header("Api-Version", version)
             .body(articles)
     }
 }
 ```
 
-- 검증 포인트: Writing 모드에 URL 경로 버전 금지 규칙 명시 없음(MISSING), Review 체크리스트의 "No version in URL path (`/v1/`, `/v2/`, etc.)" 및 "API version delivered via `X-API-Version` header, not URL path" 항목
+- 검증 포인트: Writing 모드에 URL 경로 버전 금지 규칙 명시 없음(MISSING), Review 체크리스트의 "No version in URL path (`/v1/`, `/v2/`, etc.)" 및 "API version delivered via `Api-Version` header, not URL path" 항목
 
 ---
 
-### TC-5-11: X-API-Version 헤더 ISO 8601 날짜 형식
+### TC-5-11: Api-Version 헤더 ISO 8601 날짜 형식
 
-- 규칙: "✅ **필수**: `X-API-Version` 헤더에 ISO 8601 (`YYYY-MM-DD`) 형식의 날짜로 버전을 지정한다."
+- 규칙: "✅ **필수**: `Api-Version` 헤더에 ISO 8601 (`YYYY-MM-DD`) 형식의 날짜로 버전을 지정한다."
 - 규범 수준: ✅필수
 - 대상 모드: Both
 - 스킬 커버: Writing: COVERED / Review: COVERED
@@ -1675,36 +1675,36 @@ class ArticleController {
 ❌ Bad:
 ```
 # 숫자 버전 — 금지
-X-API-Version: 1
-X-API-Version: 2.0
-X-API-Version: v3
+Api-Version: 1
+Api-Version: 2.0
+Api-Version: v3
 
 # 비표준 날짜 형식 — 금지
-X-API-Version: 20240120
-X-API-Version: Jan 20, 2024
-X-API-Version: 2024/01/20
+Api-Version: 20240120
+Api-Version: Jan 20, 2024
+Api-Version: 2024/01/20
 ```
 
 ✅ Good:
 ```
-X-API-Version: 2024-01-20
-X-API-Version: 2025-06-15
+Api-Version: 2024-01-20
+Api-Version: 2025-06-15
 ```
 
 ```kotlin
 @GetMapping("/articles")
 fun getArticles(
-    @RequestHeader("X-API-Version", required = false) apiVersion: String?
+    @RequestHeader("Api-Version", required = false) apiVersion: String?
 ): ResponseEntity<List<Article>> {
     val version = apiVersion ?: "2024-01-20"  // ISO 8601 날짜 형식
     val articles = articleService.getArticles(version)
     return ResponseEntity.ok()
-        .header("X-API-Version", version)
+        .header("Api-Version", version)
         .body(articles)
 }
 ```
 
-- 검증 포인트: Writing 모드의 API Version Header Handling 코드에서 `"2024-01-20"` 형식 사용, Review 체크리스트의 "X-API-Version value uses ISO 8601 date format (YYYY-MM-DD)" 항목
+- 검증 포인트: Writing 모드의 API Version Header Handling 코드에서 `"2024-01-20"` 형식 사용, Review 체크리스트의 "Api-Version value uses ISO 8601 date format (YYYY-MM-DD)" 항목
 
 ---
 

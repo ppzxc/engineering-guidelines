@@ -2,7 +2,7 @@
 
 **평가 날짜:** 2026-03-20
 **README:** README.md
-**스킬:** .claude/skills/restful-api-guidelines.md
+**스킬:** skills/restful-guidelines/SKILL.md
 
 ---
 

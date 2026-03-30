@@ -1,7 +1,7 @@
 # RESTful API Guidelines Skill 성능 평가 보고서
 
 **평가 날짜:** 2026-03-20
-**평가 대상:** `.claude/skills/restful-api-guidelines.md`
+**평가 대상:** `skills/restful-guidelines/SKILL.md`
 **기준 문서:** `README.md`
 **테스트 케이스:** `docs/evaluation/test-cases.md` (총 54개)
 

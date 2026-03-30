@@ -1,13 +1,13 @@
 # RESTful API Guidelines Skill 성능 평가 설계
 
 **날짜:** 2026-03-19
-**목적:** Claude Code skill(restful-api-guidelines.md)이 README 가이드라인을 얼마나 잘 커버하는지 평가하고, 개선 우선순위를 도출한다.
+**목적:** Claude Code skill(SKILL.md)이 README 가이드라인을 얼마나 잘 커버하는지 평가하고, 개선 우선순위를 도출한다.
 
 ---
 
 ## 배경
 
-`/home/ppzxc/projects/restful-api-guidelines/.claude/skills/restful-api-guidelines.md` 스킬은 Claude Code가 API 코드를 작성하거나 리뷰할 때 자동으로 활성화된다. 이 스킬에는 두 가지 모드가 있다:
+`skills/restful-guidelines/SKILL.md` 스킬은 Claude Code가 API 코드를 작성하거나 리뷰할 때 자동으로 활성화된다. 이 스킬에는 두 가지 모드가 있다:
 
 - **Code Writing Mode** — API 코드를 생성할 때 따라야 할 규칙 및 코드 예시
 - **Code Review Mode** — 기존 코드를 리뷰할 때 사용하는 체크리스트 및 위반 보고 형식

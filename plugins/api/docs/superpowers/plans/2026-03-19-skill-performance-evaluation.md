@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** RESTful API Guidelines 스킬(restful-api-guidelines.md)의 README 규칙 커버리지를 정량화하고 테스트 케이스로 검증하여 개선 보고서를 작성한다.
+**Goal:** RESTful API Guidelines 스킬(SKILL.md)의 README 규칙 커버리지를 정량화하고 테스트 케이스로 검증하여 개선 보고서를 작성한다.
 
 **Architecture:** README의 모든 규칙을 추출 → 스킬과 매핑하여 커버리지 맵 작성 → 섹션별 bad/good 코드 테스트 케이스 작성 → 커버리지 수치 기반 보고서 작성 → Critical 문제 즉시 스킬에 반영.
 
@@ -17,15 +17,15 @@
 | `docs/evaluation/coverage-map.md` | README 규칙 ↔ 스킬 커버 상태 매핑 테이블 |
 | `docs/evaluation/test-cases.md` | 섹션별 bad/good 코드 테스트 케이스 (~54개) |
 | `docs/evaluation/report.md` | 커버리지 수치, Critical/Minor 목록, 개선 권고사항 |
-| `.claude/skills/restful-api-guidelines.md` | 평가 후 Critical 문제 수정 반영 |
+| `skills/restful-guidelines/SKILL.md` | 평가 후 Critical 문제 수정 반영 |
 
 ---
 
 ## 참고 파일
 
-- README: `/home/ppzxc/projects/restful-api-guidelines/README.md`
-- 스킬: `/home/ppzxc/projects/restful-api-guidelines/.claude/skills/restful-api-guidelines.md`
-- 스펙: `/home/ppzxc/projects/restful-api-guidelines/docs/superpowers/specs/2026-03-19-skill-performance-evaluation-design.md`
+- README: `README.md`
+- 스킬: `skills/restful-guidelines/SKILL.md`
+- 스펙: `docs/superpowers/specs/2026-03-19-skill-performance-evaluation-design.md`
 
 ---
 
@@ -47,7 +47,7 @@
 
 **Files:**
 - Read: `README.md` (규칙 추출)
-- Read: `.claude/skills/restful-api-guidelines.md` (커버 여부 확인)
+- Read: `skills/restful-guidelines/SKILL.md` (커버 여부 확인)
 - Create: `docs/evaluation/coverage-map.md`
 
 README의 모든 ✅필수/⚠️권장/❌금지 규칙을 목록화하고 스킬의 Writing/Review 모드 각각에서 COVERED/PARTIAL/MISSING 상태를 기록한다.
@@ -64,7 +64,7 @@ README 2.1~2.4(URL, HTTP 메서드, 상태코드, 쿼리파라미터, 헤더)의
 
 **평가 날짜:** 2026-03-19
 **README:** README.md
-**스킬:** .claude/skills/restful-api-guidelines.md
+**스킬:** skills/restful-guidelines/SKILL.md
 
 ---
 
@@ -231,7 +231,7 @@ git commit -m "docs: add skill coverage map for restful-api-guidelines"
 
 **Files:**
 - Read: `README.md` (규칙 원문)
-- Read: `.claude/skills/restful-api-guidelines.md` (검증 포인트 확인)
+- Read: `skills/restful-guidelines/SKILL.md` (검증 포인트 확인)
 - Read: `docs/evaluation/coverage-map.md` (PARTIAL/MISSING 항목 우선 작성)
 - Create: `docs/evaluation/test-cases.md`
 
@@ -775,7 +775,7 @@ git commit -m "docs: add test cases for sections 2-4 (HTTP rules, REST, JSON)"
 
 **Files:**
 - Read: `README.md`
-- Read: `.claude/skills/restful-api-guidelines.md`
+- Read: `skills/restful-guidelines/SKILL.md`
 - Modify: `docs/evaluation/test-cases.md`
 
 - [ ] **Step 1: 섹션 5 케이스 작성**
@@ -1168,7 +1168,7 @@ coverage-map.md의 모든 규칙을 모드별로 집계한다:
 # Skill 성능 평가 보고서
 
 **평가 날짜:** 2026-03-19
-**평가 대상:** `.claude/skills/restful-api-guidelines.md`
+**평가 대상:** `skills/restful-guidelines/SKILL.md`
 **기준 문서:** `README.md`
 
 ---
@@ -1234,8 +1234,8 @@ git commit -m "docs: add skill performance evaluation report"
 
 **Files:**
 - Read: `docs/evaluation/report.md` (Critical 목록)
-- Read: `.claude/skills/restful-api-guidelines.md`
-- Modify: `.claude/skills/restful-api-guidelines.md`
+- Read: `skills/restful-guidelines/SKILL.md`
+- Modify: `skills/restful-guidelines/SKILL.md`
 
 report.md의 Critical 문제 목록을 하나씩 스킬 파일에 반영한다. 각 수정 후 해당 테스트 케이스를 다시 확인하여 해결됐는지 검증한다.
 
@@ -1260,7 +1260,7 @@ report.md의 Critical 목록을 순서대로 처리한다:
 - [ ] **Step 4: 커밋**
 
 ```bash
-git add .claude/skills/restful-api-guidelines.md docs/evaluation/coverage-map.md docs/evaluation/report.md
+git add skills/restful-guidelines/SKILL.md docs/evaluation/coverage-map.md docs/evaluation/report.md
 git commit -m "fix: apply critical skill improvements from performance evaluation"
 ```
 

@@ -899,7 +899,7 @@ API servers limit request frequency per client to ensure service stability.
 | `X-RateLimit-Remaining` | Remaining requests in the current time window | `99` |
 | `X-RateLimit-Reset` | Time when the window resets (Unix timestamp, seconds) | `1742342450` |
 
-**IETF standard headers (draft-ietf-httpapi-ratelimit-headers)**
+**IETF standard headers ([draft-ietf-httpapi-ratelimit-headers-10](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/), Internet-Draft, Standards Track)**
 
 | Header | Description | Example |
 |--------|-------------|---------|
@@ -932,7 +932,7 @@ RateLimit-Policy: 100;w=3600
 
 ✅ **Required**: Include the `Retry-After` header in 429 responses. Use delta-seconds (seconds to wait before retrying).
 
-✅ **Required**: Use RFC 7807 Problem Details structure for 429 response bodies.
+✅ **Required**: Use RFC 7807/9457 Problem Details structure for 429 response bodies.
 
 **429 response example:**
 
@@ -998,7 +998,7 @@ For operations that do not complete immediately (report generation, data import,
 | `COMPLETED` | Operation has completed |
 | `FAILED` | Operation has failed |
 
-⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807 error structure in the resource.
+⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807/9457 error structure in the resource.
 
 **Example:**
 
@@ -1123,10 +1123,12 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
 - [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
-- [HTTP/1.1 (RFC 7231)](https://datatracker.ietf.org/doc/html/rfc7231)
+- [RFC 9110: HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
 - [JSON:API Specification](https://jsonapi.org/)
 - [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)
 - [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
 - [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
-- [IETF draft-ietf-httpapi-ratelimit-headers - RateLimit Header Fields](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+- [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
+- [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)

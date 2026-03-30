@@ -1,7 +1,7 @@
 # Test Cases — RESTful API Guidelines Skill Evaluation
 
 **작성일:** 2026-03-20
-**대상 스킬:** `.claude/skills/restful-api-guidelines.md`
+**대상 스킬:** `skills/restful-guidelines/SKILL.md`
 **참조:** `docs/evaluation/coverage-map.md`
 
 ---

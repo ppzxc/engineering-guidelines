@@ -157,8 +157,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 
 ## Rate Limiting
 
-- Response headers (always): `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` (Unix ts)
-- IETF headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
+- Response headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
 - 429 Too Many Requests: include `Retry-After` (delta-seconds) + RFC 9457 Problem Details body
 - Client retry: honor `Retry-After`; otherwise exponential backoff + jitter
 

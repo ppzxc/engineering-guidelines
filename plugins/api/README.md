@@ -899,7 +899,7 @@ API servers limit request frequency per client to ensure service stability.
 | `X-RateLimit-Remaining` | Remaining requests in the current time window | `99` |
 | `X-RateLimit-Reset` | Time when the window resets (Unix timestamp, seconds) | `1742342450` |
 
-**IETF standard headers (draft-ietf-httpapi-ratelimit-headers)**
+**IETF standard headers ([draft-ietf-httpapi-ratelimit-headers-10](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/), Internet-Draft, Standards Track)**
 
 | Header | Description | Example |
 |--------|-------------|---------|
@@ -1129,4 +1129,4 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 - [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
 - [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
-- [IETF draft-ietf-httpapi-ratelimit-headers - RateLimit Header Fields](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)

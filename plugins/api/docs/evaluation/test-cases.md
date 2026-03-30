@@ -2408,3 +2408,203 @@ val response = httpClient.post("/orders") {
 ```
 
 - 검증 포인트: Writing 모드의 Idempotency-Key 코드 예시에 UUID 형태 값(`a8098c1a-f86e-11da-bd1a-00112444be1e`) 있으나 "UUID v4" 명시 없음(PARTIAL), Review 체크리스트에 UUID v4 검증 항목 없음(MISSING)
+
+---
+
+## 섹션 5: 공통 API 패턴 (신규)
+
+### TC-5-03: 빈 컬렉션에 200 OK + 빈 배열 반환
+
+- 규칙: "✅ **필수**: 컬렉션에 항목이 없을 때 `200 OK` + 빈 배열 `[]` 반환. `404 Not Found` 사용 금지"
+- 규범 수준: ✅필수
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+@RestController
+@RequestMapping("/articles")
+class ArticleController(private val articleService: ArticleService) {
+
+    @GetMapping
+    fun getArticles(@RequestParam status: String?): ResponseEntity<List<Article>> {
+        val articles = articleService.findByStatus(status)
+        if (articles.isEmpty()) {
+            // 빈 컬렉션에 404 반환 — 금지
+            return ResponseEntity.notFound().build()
+        }
+        return ResponseEntity.ok(articles)
+    }
+}
+```
+
+✅ Good:
+```kotlin
+@RestController
+@RequestMapping("/articles")
+class ArticleController(private val articleService: ArticleService) {
+
+    @GetMapping
+    fun getArticles(@RequestParam status: String?): ResponseEntity<List<Article>> {
+        val articles = articleService.findByStatus(status)
+        // 빈 컬렉션이어도 200 OK + 빈 배열 반환
+        return ResponseEntity.ok()
+            .header("Total-Count", articles.size.toString())
+            .body(articles)
+    }
+}
+```
+
+- 검증 포인트: Writing 모드의 "Empty collections: return 200 OK + []" 규칙, Review 체크리스트의 "빈 컬렉션에 404 사용하지 않음" 항목
+
+---
+
+### TC-5-04: pageSize 범위 검증
+
+- 규칙: "✅ **필수**: `pageSize`가 1 미만이면 `400 Bad Request` 반환"
+- 규범 수준: ✅필수
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+@GetMapping("/articles")
+fun getArticles(
+    @RequestParam(defaultValue = "20") pageSize: Int
+): ResponseEntity<List<Article>> {
+    // pageSize 검증 없이 그대로 사용 — 음수/0 허용
+    val articles = articleService.findAll(pageSize)
+    return ResponseEntity.ok(articles)
+}
+```
+
+✅ Good:
+```kotlin
+@GetMapping("/articles")
+fun getArticles(
+    @RequestParam(defaultValue = "20") pageSize: Int
+): ResponseEntity<List<Article>> {
+    if (pageSize < 1) {
+        return ResponseEntity.badRequest().build()
+    }
+    val effectivePageSize = pageSize.coerceAtMost(100)
+    val articles = articleService.findAll(effectivePageSize)
+    return ResponseEntity.ok()
+        .header("Total-Count", articleService.count().toString())
+        .body(articles)
+}
+```
+
+- 검증 포인트: Writing 모드의 "pageSize < 1 → 400 Bad Request" 규칙, pageSize > max → cap 동작
+
+---
+
+### TC-5-05: pageToken 불투명성
+
+- 규칙: "✅ **필수**: `pageToken`은 불투명한 값이다. 클라이언트는 파싱/조합/내부 형식 가정 금지"
+- 규범 수준: ✅필수
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+// 클라이언트 코드: pageToken 직접 조합 — 금지
+val lastId = articles.last().id
+val lastCreatedAt = articles.last().createdAt
+val nextPageToken = Base64.encode("$lastCreatedAt|$lastId")  // 내부 형식 가정
+val response = api.get("/articles?pageSize=20&pageToken=$nextPageToken")
+```
+
+✅ Good:
+```kotlin
+// 클라이언트 코드: 서버가 제공한 Link 헤더 사용
+val linkHeader = response.headers["Link"]
+val nextUrl = parseLinkRelNext(linkHeader)
+if (nextUrl != null) {
+    // 서버 제공 URL 그대로 사용 — pageToken 내부 형식 가정 없음
+    val nextResponse = api.get(nextUrl)
+}
+```
+
+- 검증 포인트: Writing 모드의 "pageToken is an opaque value" 규칙, Review 체크리스트의 "클라이언트가 pageToken을 직접 조합하지 않음" 항목
+
+---
+
+### TC-5-06: Keyset Pagination 패턴
+
+- 규칙: "⚠️ **권장**: 대규모 데이터셋에서 일관된 성능이 중요한 경우 키셋 페이지네이션 사용"
+- 규범 수준: ⚠️권장
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+// 대규모 데이터셋에서 오프셋 기반 페이지네이션 — 성능 문제
+@GetMapping("/events")
+fun getEvents(
+    @RequestParam(defaultValue = "1") page: Int,
+    @RequestParam(defaultValue = "20") pageSize: Int
+): ResponseEntity<List<Event>> {
+    // 100만 건 테이블에서 page=50000 → 매우 느린 OFFSET 쿼리
+    val pageable = PageRequest.of(page - 1, pageSize)
+    val events = eventRepository.findAll(pageable)
+    return ResponseEntity.ok(events.content)
+}
+```
+
+✅ Good:
+```kotlin
+// 대규모 데이터셋에서 키셋 기반 페이지네이션 — O(1) 성능
+@GetMapping("/events")
+fun getEvents(
+    @RequestParam(defaultValue = "20") pageSize: Int,
+    @RequestParam(required = false) after: String?
+): ResponseEntity<List<Event>> {
+    val cursor = after?.let { decodeCursor(it) }
+    val events = eventRepository.findAfterCursor(cursor, pageSize)
+    val nextCursor = if (events.size == pageSize) encodeCursor(events.last()) else null
+
+    val response = ResponseEntity.ok()
+    if (nextCursor != null) {
+        response.header("Link", "<...?pageSize=$pageSize&after=$nextCursor>; rel=\"next\"")
+    }
+    return response.body(events)
+}
+```
+
+- 검증 포인트: Writing 모드의 "Keyset: after/before opaque cursor + orderBy" 규칙, Review 체크리스트의 "대규모 데이터에 keyset 사용 여부" 항목
+
+---
+
+### TC-5-07: Min/Max 숫자 범위 필터
+
+- 규칙: "⚠️ **권장**: 숫자 범위 필터에 `Min`/`Max` 접미사 사용"
+- 규범 수준: ⚠️권장
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+// 숫자 범위 필터에 일관성 없는 파라미터 이름 사용
+@GetMapping("/products")
+fun getProducts(
+    @RequestParam(required = false) price_from: Int?,   // snake_case + 비표준 접미사
+    @RequestParam(required = false) price_to: Int?      // snake_case + 비표준 접미사
+): ResponseEntity<List<Product>> {
+    return ResponseEntity.ok(productService.findByPriceRange(price_from, price_to))
+}
+```
+
+✅ Good:
+```kotlin
+// 숫자 범위 필터에 Min/Max 접미사 + camelCase 사용
+@GetMapping("/products")
+fun getProducts(
+    @RequestParam(required = false) priceMin: Int?,
+    @RequestParam(required = false) priceMax: Int?
+): ResponseEntity<List<Product>> {
+    return ResponseEntity.ok(productService.findByPriceRange(priceMin, priceMax))
+}
+```
+
+- 검증 포인트: Writing 모드의 "Numeric range: Min/Max suffix" 규칙, Review 체크리스트의 "숫자 범위 필터에 Min/Max 접미사 사용" 항목

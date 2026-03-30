@@ -777,6 +777,17 @@ GET /articles?createdBefore=2024-02-01T00:00:00Z
 GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
 ```
 
+**Numeric range filter:** Use `Min`/`Max` suffixes.
+
+```
+GET /products?priceMin=100&priceMax=500
+GET /articles?viewCountMin=1000
+```
+
+⚠️ **Recommended**: Use `After`/`Before` suffixes for date/time ranges and `Min`/`Max` suffixes for numeric ranges.
+
+```
+
 **Multi-value filter (IN):** Repeat the same parameter for OR conditions.
 
 ```

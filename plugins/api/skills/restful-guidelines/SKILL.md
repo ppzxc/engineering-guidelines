@@ -7,6 +7,8 @@ user-invocable: true
 
 Source: https://github.com/ppzxc/restful-api-guidelines
 
+Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
+
 ---
 
 ## URL Design
@@ -67,6 +69,7 @@ GET, HEAD, DELETE must not include request bodies.
 - **camelCase** field names: `userId`, `createdAt`, `isActive`
 - Never snake_case or abbreviations
 - Omit null/missing fields entirely (do not send `"field": null`)
+- Date/time values as RFC 3339 strings; server responses in UTC (`Z`)
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
 - Servers must ignore read-only fields in request bodies
 
@@ -93,7 +96,7 @@ GET, HEAD, DELETE must not include request bodies.
 - `Accept: application/json` for content negotiation
 - `Location` header on 201 Created
 - `Total-Count` for collection size
-- RFC 5988 `Link` header for pagination
+- RFC 8288 `Link` header for pagination
 - **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility
 
 ## CRUD Behavior

@@ -8,6 +8,8 @@ RESTful API design guidelines.
 
 ## Compliance Levels
 
+The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document are to be interpreted as described in [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) and [RFC 8174](https://datatracker.ietf.org/doc/html/rfc8174).
+
 | Symbol | Level | Description |
 |--------|-------|-------------|
 | ✅ **Required** | MUST / DO | Rules that must be followed |
@@ -261,17 +263,17 @@ Cache-Control: no-cache
 Cache-Control: max-age=3600
 ```
 
-⚠️ **Recommended**: Use the RFC 5988 `Link` header for collection pagination responses.
+⚠️ **Recommended**: Use the RFC 8288 `Link` header for collection pagination responses.
 
 ```
 Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first"
 ```
 
-⚠️ **Recommended**: Use the `X-Total-Count` header when providing total item count.
+⚠️ **Recommended**: Use the `Total-Count` header when providing total item count.
 
 ```
-X-Total-Count: 100
+Total-Count: 100
 ```
 
 #### Custom Headers
@@ -678,7 +680,7 @@ HTTP/1.1 200 OK
 Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first",
       <https://api.example.com/articles?pageSize=20&pageToken=xyz>; rel="last"
-X-Total-Count: 100
+Total-Count: 100
 
 [
   { "id": "1", "title": "First Article" },
@@ -688,8 +690,8 @@ X-Total-Count: 100
 
 | Header | Required | Description |
 |--------|----------|-------------|
-| `Link` | ⚠️ Recommended | Pagination navigation (RFC 5988) |
-| `X-Total-Count` | ⚠️ Recommended | Total item count |
+| `Link` | ⚠️ Recommended | Pagination navigation (RFC 8288) |
+| `Total-Count` | ⚠️ Recommended | Total item count |
 
 | rel value | Description |
 |-----------|-------------|
@@ -741,7 +743,7 @@ Link: <https://api.example.com/articles?pageSize=20&page=1>; rel="first",
       <https://api.example.com/articles?pageSize=20&page=1>; rel="prev",
       <https://api.example.com/articles?pageSize=20&page=3>; rel="next",
       <https://api.example.com/articles?pageSize=20&page=5>; rel="last"
-X-Total-Count: 100
+Total-Count: 100
 
 [
   { "id": "21", "title": "Article 21" },
@@ -820,17 +822,17 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 > **Reason**: A URL is a resource identifier. `/v1/articles` and `/v2/articles` represent the same resource but with different URLs, which violates REST principles. URL versioning also forces clients to rewrite their code entirely. Header versioning allows clients to migrate gradually and gives the server flexibility to apply a default version when no version header is specified.
 
-✅ **Required**: Specify the version in the `X-API-Version` header using ISO 8601 (`YYYY-MM-DD`) date format.
+✅ **Required**: Specify the version in the `Api-Version` header using ISO 8601 (`YYYY-MM-DD`) date format.
 
 ```
-X-API-Version: 2024-01-20
+Api-Version: 2024-01-20
 ```
 
 ⚠️ **Recommended**: Apply the latest stable version to requests without a version header, and include the applied version in the response.
 
 ```
 HTTP/1.1 200 OK
-X-API-Version: 2024-01-20
+Api-Version: 2024-01-20
 ```
 
 #### Backward Compatibility
@@ -1118,6 +1120,8 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 ## References
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+- [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
+- [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
 - [HTTP/1.1 (RFC 7231)](https://datatracker.ietf.org/doc/html/rfc7231)
 - [JSON:API Specification](https://jsonapi.org/)

@@ -8,6 +8,8 @@ RESTful API 설계 가이드라인입니다.
 
 ## 규범 수준 표기
 
+이 문서에서 사용하는 "MUST", "MUST NOT", "SHOULD", "MAY", "DO NOT" 키워드는 [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) 및 [RFC 8174](https://datatracker.ietf.org/doc/html/rfc8174)에 따라 해석한다.
+
 | 기호 | 수준 | 설명 |
 |------|------|------|
 | ✅ **필수** | MUST / DO | 반드시 준수해야 하는 규칙 |
@@ -261,17 +263,17 @@ Cache-Control: no-cache
 Cache-Control: max-age=3600
 ```
 
-⚠️ **권장**: 컬렉션 페이지네이션 응답에는 RFC 5988 `Link` 헤더를 사용한다.
+⚠️ **권장**: 컬렉션 페이지네이션 응답에는 RFC 8288 `Link` 헤더를 사용한다.
 
 ```
 Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first"
 ```
 
-⚠️ **권장**: 전체 항목 수를 제공할 때 `X-Total-Count` 헤더를 사용한다.
+⚠️ **권장**: 전체 항목 수를 제공할 때 `Total-Count` 헤더를 사용한다.
 
 ```
-X-Total-Count: 100
+Total-Count: 100
 ```
 
 #### 커스텀 헤더
@@ -678,7 +680,7 @@ HTTP/1.1 200 OK
 Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
       <https://api.example.com/articles?pageSize=20>; rel="first",
       <https://api.example.com/articles?pageSize=20&pageToken=xyz>; rel="last"
-X-Total-Count: 100
+Total-Count: 100
 
 [
   { "id": "1", "title": "첫 번째 글" },
@@ -688,8 +690,8 @@ X-Total-Count: 100
 
 | 헤더 | 필수 여부 | 설명 |
 |------|-----------|------|
-| `Link` | ⚠️ 권장 | 페이지네이션 네비게이션 (RFC 5988) |
-| `X-Total-Count` | ⚠️ 권장 | 전체 항목 수 |
+| `Link` | ⚠️ 권장 | 페이지네이션 네비게이션 (RFC 8288) |
+| `Total-Count` | ⚠️ 권장 | 전체 항목 수 |
 
 | rel 값 | 설명 |
 |--------|------|
@@ -741,7 +743,7 @@ Link: <https://api.example.com/articles?pageSize=20&page=1>; rel="first",
       <https://api.example.com/articles?pageSize=20&page=1>; rel="prev",
       <https://api.example.com/articles?pageSize=20&page=3>; rel="next",
       <https://api.example.com/articles?pageSize=20&page=5>; rel="last"
-X-Total-Count: 100
+Total-Count: 100
 
 [
   { "id": "21", "title": "스물한 번째 글" },
@@ -820,17 +822,17 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 > **이유**: URL은 리소스 식별자다. `/v1/articles`와 `/v2/articles`는 같은 리소스인데 URL이 달라지므로 REST 원칙에 어긋난다. 또한 URL 버전은 클라이언트가 코드를 전면 교체해야 하는 부담을 준다. 헤더 버전은 클라이언트가 버전을 점진적으로 마이그레이션할 수 있고, 버전 미지정 시 서버가 기본 버전을 적용하는 유연성을 제공한다.
 
-✅ **필수**: `X-API-Version` 헤더에 ISO 8601 (`YYYY-MM-DD`) 형식의 날짜로 버전을 지정한다.
+✅ **필수**: `Api-Version` 헤더에 ISO 8601 (`YYYY-MM-DD`) 형식의 날짜로 버전을 지정한다.
 
 ```
-X-API-Version: 2024-01-20
+Api-Version: 2024-01-20
 ```
 
 ⚠️ **권장**: 버전 헤더가 없는 요청에는 최신 안정 버전을 적용하고, 응답에 적용된 버전을 명시한다.
 
 ```
 HTTP/1.1 200 OK
-X-API-Version: 2024-01-20
+Api-Version: 2024-01-20
 ```
 
 #### 하위 호환성
@@ -1118,6 +1120,8 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 ## 참고 자료
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+- [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
+- [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
 - [HTTP/1.1 (RFC 7231)](https://datatracker.ietf.org/doc/html/rfc7231)
 - [JSON:API Specification](https://jsonapi.org/)

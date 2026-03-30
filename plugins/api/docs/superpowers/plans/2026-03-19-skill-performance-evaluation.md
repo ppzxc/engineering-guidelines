@@ -172,7 +172,7 @@ README 5.1~5.7, 6.1~6.3 규칙을 추출하고 coverage-map.md에 추가한다.
 | 5.2-2 | ✅필수 | 다음 페이지 없을 때 Link 헤더에서 rel="next" 제외 | ? | ? | ? |
 | 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | ? | ? | ? |
 | 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | ? | ? | ? |
-| 5.4-2 | ✅필수 | X-API-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | ? | ? | ? |
+| 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | ? | ? | ? |
 | 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | ? | ? | ? |
 | 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | ? | ? | ? |
 | 5.6-1 | ✅필수 | 속도 제한 응답에 X-RateLimit-* 헤더 포함 | ? | ? | ? |
@@ -827,7 +827,7 @@ POST /articles/123:publish
 ✅ Good:
 ```
 HTTP/1.1 200 OK
-X-Total-Count: 100
+Total-Count: 100
 
 [
   { "id": "1", "title": "첫 번째 글" }
@@ -875,7 +875,7 @@ GET /v2/users/123
 ✅ Good:
 ```
 GET /articles
-X-API-Version: 2024-01-20
+Api-Version: 2024-01-20
 ```
 
 - 검증 포인트: Review 체크리스트 "No version in URL path (/v1/, /v2/, etc.)"
@@ -900,8 +900,8 @@ X-API-Version: 2024-01-20
 
 ✅ Good:
 ```json
-// 비호환 변경 시 새 버전 일자로 X-API-Version 업데이트
-// X-API-Version: 2024-06-01
+// 비호환 변경 시 새 버전 일자로 Api-Version 업데이트
+// Api-Version: 2024-06-01
 { "id": "1", "name": "제목" }
 ```
 

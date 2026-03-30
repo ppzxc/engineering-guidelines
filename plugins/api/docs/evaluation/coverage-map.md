@@ -95,7 +95,7 @@
 | 5.2-2 | ✅필수 | 다음 페이지 없을 때 Link 헤더에서 rel="next" 제외 | COVERED | COVERED | — |
 | 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
-| 5.4-2 | ✅필수 | X-API-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
+| 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
 | 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.6-1 | ✅필수 | 속도 제한 응답에 X-RateLimit-* 헤더 포함 | COVERED | COVERED | — |
@@ -247,7 +247,7 @@
 | 5.2-2 | COVERED | `nextPageToken` null 시 Link에 next 미포함하는 buildLinkHeader 코드 있음 |
 | 5.3-1 | MISSING | OR 조건 규칙이 Writing 모드에 없음 |
 | 5.4-1 | COVERED | "URL 경로에 버전 금지" 규칙 추가 (Minor 개선) |
-| 5.4-2 | COVERED | X-API-Version 헤더 코드 예시 있음 (ISO 8601 날짜 형식 "2024-01-20") |
+| 5.4-2 | COVERED | Api-Version 헤더 코드 예시 있음 (ISO 8601 날짜 형식 "2024-01-20") |
 | 5.4-3 | MISSING | 하위 호환성 유지 규칙 없음 |
 | 5.5-1 | COVERED | Deprecation/Sunset/Link 헤더 설정 코드 예시 있음. 커버리지 출처: Writing Mode 본문이 아닌 Code Examples 부록의 Kotlin 코드 예시에서 확인됨. |
 | 5.6-1 | COVERED | addRateLimitHeaders 함수에 X-RateLimit-* 헤더 설정 코드 있음 |
@@ -322,8 +322,8 @@
 | 5.2-1 | COVERED | "Collection response body is a top-level array" 체크리스트 항목 |
 | 5.2-2 | COVERED | "rel=next excluded from Link header when no next page" 체크리스트 항목 |
 | 5.3-1 | COVERED | "Repeated same parameter treated as OR condition" 체크리스트 항목 |
-| 5.4-1 | COVERED | "No version in URL path" + "API version delivered via X-API-Version header, not URL path" 체크리스트 항목 |
-| 5.4-2 | COVERED | "X-API-Version value uses ISO 8601 date format" 체크리스트 항목 |
+| 5.4-1 | COVERED | "No version in URL path" + "API version delivered via Api-Version header, not URL path" 체크리스트 항목 |
+| 5.4-2 | COVERED | "Api-Version value uses ISO 8601 date format" 체크리스트 항목 |
 | 5.4-3 | MISSING | 하위 호환성 유지 체크 없음 |
 | 5.5-1 | MISSING | Deprecation 헤더 체크 항목 없음 |
 | 5.6-1 | COVERED | Rate Limiting 체크리스트에 X-RateLimit-* 헤더 항목 있음 |

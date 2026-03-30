@@ -2411,9 +2411,9 @@ val response = httpClient.post("/orders") {
 
 ---
 
-## 섹션 5: 공통 API 패턴 (신규)
+## 섹션 5: 공통 API 패턴 (신규 — 페이지네이션 심화)
 
-### TC-5-03: 빈 컬렉션에 200 OK + 빈 배열 반환
+### TC-5-19: 빈 컬렉션에 200 OK + 빈 배열 반환
 
 - 규칙: "✅ **필수**: 컬렉션에 항목이 없을 때 `200 OK` + 빈 배열 `[]` 반환. `404 Not Found` 사용 금지"
 - 규범 수준: ✅필수
@@ -2459,7 +2459,7 @@ class ArticleController(private val articleService: ArticleService) {
 
 ---
 
-### TC-5-04: pageSize 범위 검증
+### TC-5-20: pageSize 범위 검증
 
 - 규칙: "✅ **필수**: `pageSize`가 1 미만이면 `400 Bad Request` 반환"
 - 규범 수준: ✅필수
@@ -2499,7 +2499,7 @@ fun getArticles(
 
 ---
 
-### TC-5-05: pageToken 불투명성
+### TC-5-21: pageToken 불투명성
 
 - 규칙: "✅ **필수**: `pageToken`은 불투명한 값이다. 클라이언트는 파싱/조합/내부 형식 가정 금지"
 - 규범 수준: ✅필수
@@ -2530,7 +2530,7 @@ if (nextUrl != null) {
 
 ---
 
-### TC-5-06: Keyset Pagination 패턴
+### TC-5-22: Keyset Pagination 패턴
 
 - 규칙: "⚠️ **권장**: 대규모 데이터셋에서 일관된 성능이 중요한 경우 키셋 페이지네이션 사용"
 - 규범 수준: ⚠️권장
@@ -2576,7 +2576,7 @@ fun getEvents(
 
 ---
 
-### TC-5-07: Min/Max 숫자 범위 필터
+### TC-5-23: Min/Max 숫자 범위 필터
 
 - 규칙: "⚠️ **권장**: 숫자 범위 필터에 `Min`/`Max` 접미사 사용"
 - 규범 수준: ⚠️권장

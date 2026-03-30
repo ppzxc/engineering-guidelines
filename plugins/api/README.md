@@ -44,6 +44,9 @@ The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document
    - [Deprecation](#55-deprecation)
    - [Rate Limiting](#56-rate-limiting)
    - [Long-Running Operations](#57-long-running-operations)
+   - [Partial Response](#58-partial-response)
+   - [Expand/Embed](#59-expandembed)
+   - [Bulk Operations](#510-bulk-operations)
 6. [Authentication & Security](#6-authentication--security)
    - [Authentication Methods](#61-authentication-methods)
    - [401 vs 403 Distinction](#62-401-vs-403-distinction)
@@ -1091,6 +1094,24 @@ GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 ```
 
 ❌ **Prohibited**: Do not use a separate generic `/operations` resource. Track status within the domain resource itself.
+
+---
+
+### 5.8 Partial Response
+
+> 🚧 Coming soon
+
+---
+
+### 5.9 Expand/Embed
+
+> 🚧 Coming soon
+
+---
+
+### 5.10 Bulk Operations
+
+> 🚧 Coming soon
 
 ---
 

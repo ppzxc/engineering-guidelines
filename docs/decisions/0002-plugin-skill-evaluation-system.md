@@ -1,4 +1,4 @@
-# 플러그인 스킬 성능 평가 시스템 구조
+# Adopt Independent Evaluation System per Plugin Skill
 
 ## Status
 

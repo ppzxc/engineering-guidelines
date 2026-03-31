@@ -44,6 +44,9 @@ The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document
    - [Deprecation](#55-deprecation)
    - [Rate Limiting](#56-rate-limiting)
    - [Long-Running Operations](#57-long-running-operations)
+   - [Partial Response](#58-partial-response)
+   - [Expand/Embed](#59-expandembed)
+   - [Bulk Operations](#510-bulk-operations)
 6. [Authentication & Security](#6-authentication--security)
    - [Authentication Methods](#61-authentication-methods)
    - [401 vs 403 Distinction](#62-401-vs-403-distinction)
@@ -700,6 +703,22 @@ Total-Count: 100
 | `first` | First page |
 | `last` | Last page |
 
+#### Empty Collection Response
+
+✅ **Required**: Return `200 OK` with an empty array `[]` when a collection has no items. Do not return `404 Not Found` for empty collections.
+
+⚠️ **Recommended**: Include the `Total-Count: 0` header for empty collections.
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Total-Count: 0
+
+[]
+```
+
+> **Note**: A collection endpoint always exists as a resource even when empty ([RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)). `404 Not Found` indicates the endpoint itself does not exist, not that the collection is empty.
+
 #### Cursor-Based Pagination (Recommended)
 
 ⚠️ **Recommended**: Use cursor-based pagination instead of offset-based for large datasets.
@@ -724,6 +743,12 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
 ```
 
 ✅ **Required**: Exclude `rel="next"` from the `Link` header when there is no next page.
+
+✅ **Required**: `pageToken` is an opaque value. Clients MUST NOT parse, construct, or make assumptions about its internal format.
+
+✅ **Required**: Servers MAY change the encoding of `pageToken` at any time without notice.
+
+> **Note**: This follows the same principle as resource identifiers — opaque strings that clients must not depend on structurally.
 
 #### Offset-Based Pagination
 
@@ -755,6 +780,51 @@ Total-Count: 100
 
 ⚠️ **Recommended**: Limit the maximum page size to 100.
 
+✅ **Required**: Return `400 Bad Request` when `pageSize` is less than 1.
+
+⚠️ **Recommended**: When `pageSize` exceeds the maximum allowed value, cap it to the maximum rather than returning an error. Include the applied `pageSize` in the response.
+
+```
+# Request: pageSize=500 (max is 100)
+# Server applies pageSize=100
+
+HTTP/1.1 200 OK
+Link: <https://api.example.com/articles?pageSize=100&pageToken=abc>; rel="next"
+
+[ ... 100 items ... ]
+```
+
+#### Keyset Pagination
+
+⚠️ **Recommended**: Use keyset pagination for large datasets where consistent performance is critical.
+
+Keyset pagination uses the last item's sort key as a cursor, achieving O(1) lookup regardless of page depth.
+
+**Request:**
+
+```
+GET /articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...
+```
+
+**Response:**
+
+```
+HTTP/1.1 200 OK
+Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...>; rel="next"
+
+[
+  { "id": "455", "createdAt": "2024-01-20T09:55:00Z" },
+  ...
+  { "id": "440", "createdAt": "2024-01-15T08:00:00Z" }
+]
+```
+
+✅ **Required**: The keyset cursor (`after`/`before`) MUST be an opaque token — clients must not construct it manually.
+
+⚠️ **Recommended**: Encode compound sort keys into the opaque cursor.
+
+> **Trade-off**: Keyset pagination cannot jump to arbitrary pages. Use offset pagination when random page access is required.
+
 ---
 
 ### 5.3 Filtering and Sorting
@@ -776,6 +846,15 @@ GET /articles?createdAfter=2024-01-01T00:00:00Z
 GET /articles?createdBefore=2024-02-01T00:00:00Z
 GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
 ```
+
+**Numeric range filter:** Use `Min`/`Max` suffixes.
+
+```
+GET /products?priceMin=100&priceMax=500
+GET /articles?viewCountMin=1000
+```
+
+⚠️ **Recommended**: Use `After`/`Before` suffixes for date/time ranges and `Min`/`Max` suffixes for numeric ranges.
 
 **Multi-value filter (IN):** Repeat the same parameter for OR conditions.
 
@@ -1015,6 +1094,24 @@ GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 ```
 
 ❌ **Prohibited**: Do not use a separate generic `/operations` resource. Track status within the domain resource itself.
+
+---
+
+### 5.8 Partial Response
+
+> 🚧 Coming soon
+
+---
+
+### 5.9 Expand/Embed
+
+> 🚧 Coming soon
+
+---
+
+### 5.10 Bulk Operations
+
+> 🚧 Coming soon
 
 ---
 

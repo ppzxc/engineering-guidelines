@@ -93,6 +93,11 @@
 | 5.1-2 | ✅필수 | 액션 엔드포인트에 POST 메서드 사용 | COVERED | COVERED | — |
 | 5.2-1 | ✅필수 | 컬렉션 응답 본문은 top-level JSON array | COVERED | COVERED | — |
 | 5.2-2 | ✅필수 | 다음 페이지 없을 때 Link 헤더에서 rel="next" 제외 | COVERED | COVERED | — |
+| 5.2-3 | ✅필수 | 빈 컬렉션에 200 OK + 빈 배열 반환, 404 금지 | COVERED | COVERED | New |
+| 5.2-4 | ✅필수 | pageSize < 1이면 400 Bad Request | COVERED | COVERED | New |
+| 5.2-5 | ✅필수 | pageToken은 불투명 값, 클라이언트 파싱/조합 금지 | COVERED | COVERED | New |
+| 5.2-6 | ⚠️권장 | 대규모 데이터셋에 Keyset Pagination 사용 | COVERED | COVERED | New |
+| 5.3-0 | ⚠️권장 | 숫자 범위 필터에 Min/Max 접미사 사용 | COVERED | COVERED | New |
 | 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
@@ -127,30 +132,30 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 68 | 95.8% |
+| COVERED | 73 | 96.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 4.2% |
-| **합계** | **71** | **100%** |
+| MISSING | 3 | 3.9% |
+| **합계** | **76** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 68 | 95.8% |
+| COVERED | 73 | 96.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 4.2% |
-| **합계** | **71** | **100%** |
+| MISSING | 3 | 3.9% |
+| **합계** | **76** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 136 | 95.8% |
+| COVERED | 146 | 96.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 6 | 4.2% |
-| **합계** | **142** | **100%** |
+| MISSING | 6 | 3.9% |
+| **합계** | **152** | **100%** |
 
-\* 전체는 71개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 76개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 

@@ -44,6 +44,9 @@ RESTful API 설계 가이드라인입니다.
    - [Deprecation](#55-deprecation)
    - [속도 제한](#56-속도-제한)
    - [장기 실행 작업](#57-장기-실행-작업)
+   - [Partial Response](#58-partial-response)
+   - [Expand/Embed](#59-expandembed)
+   - [Bulk Operations](#510-bulk-operations)
 6. [인증 및 보안](#6-인증-및-보안)
    - [인증 방식](#61-인증-방식)
    - [401 vs 403 구분](#62-401-vs-403-구분)
@@ -721,6 +724,22 @@ Total-Count: 100
 | `first` | 첫 번째 페이지 |
 | `last` | 마지막 페이지 |
 
+#### 빈 컬렉션 응답
+
+✅ **필수**: 컬렉션에 항목이 없을 때 `200 OK` + 빈 배열 `[]`을 반환한다. 빈 컬렉션에 `404 Not Found`를 사용하지 않는다.
+
+⚠️ **권장**: 빈 컬렉션에도 `Total-Count: 0` 헤더를 포함한다.
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Total-Count: 0
+
+[]
+```
+
+> **참고**: 컬렉션 엔드포인트는 비어 있어도 리소스 자체는 존재한다 ([RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)). `404 Not Found`는 엔드포인트 자체가 존재하지 않는다는 의미이지, 컬렉션이 비어 있다는 의미가 아니다.
+
 #### 커서 기반 페이지네이션 (권장)
 
 ⚠️ **권장**: 대용량 데이터에는 오프셋 기반 대신 커서 기반 페이지네이션을 사용한다.
@@ -745,6 +764,12 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
 ```
 
 ✅ **필수**: 다음 페이지가 없을 때 `Link` 헤더에서 `rel="next"`를 제외한다.
+
+✅ **필수**: `pageToken`은 불투명한 값이다. 클라이언트는 `pageToken`을 파싱하거나, 직접 조합하거나, 내부 형식에 대해 가정해서는 안 된다.
+
+✅ **필수**: 서버는 `pageToken`의 인코딩을 사전 고지 없이 변경할 수 있다.
+
+> **참고**: 이는 리소스 식별자의 불투명성 원칙과 동일하다 — 클라이언트가 구조적으로 의존해서는 안 되는 불투명한 문자열.
 
 #### 오프셋 기반 페이지네이션
 
@@ -775,6 +800,51 @@ Total-Count: 100
 ⚠️ **권장**: 기본 페이지 크기(`pageSize`)는 20으로 설정한다.
 
 ⚠️ **권장**: 최대 페이지 크기는 100으로 제한한다.
+
+✅ **필수**: `pageSize`가 1 미만이면 `400 Bad Request`를 반환한다.
+
+⚠️ **권장**: `pageSize`가 최대 허용값을 초과하면 에러 대신 최대값으로 자른다. 적용된 `pageSize`를 응답에 포함한다.
+
+```
+# 요청: pageSize=500 (최대값 100)
+# 서버가 pageSize=100으로 적용
+
+HTTP/1.1 200 OK
+Link: <https://api.example.com/articles?pageSize=100&pageToken=abc>; rel="next"
+
+[ ... 100개 항목 ... ]
+```
+
+#### 키셋 페이지네이션
+
+⚠️ **권장**: 대규모 데이터셋에서 일관된 성능이 중요한 경우 키셋 페이지네이션을 사용한다.
+
+키셋 페이지네이션은 마지막 항목의 정렬 키를 커서로 사용하여, 페이지 깊이와 무관하게 O(1) 조회 성능을 달성한다.
+
+**요청:**
+
+```
+GET /articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...
+```
+
+**응답:**
+
+```
+HTTP/1.1 200 OK
+Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...>; rel="next"
+
+[
+  { "id": "455", "createdAt": "2024-01-20T09:55:00Z" },
+  ...
+  { "id": "440", "createdAt": "2024-01-15T08:00:00Z" }
+]
+```
+
+✅ **필수**: 키셋 커서(`after`/`before`)는 불투명한 토큰이어야 한다 — 클라이언트가 직접 조합하면 안 된다.
+
+⚠️ **권장**: 복합 정렬 키는 불투명한 커서에 인코딩한다.
+
+> **트레이드오프**: 키셋 페이지네이션은 임의 페이지로 점프할 수 없다. 임의 페이지 접근이 필요하면 오프셋 페이지네이션을 사용한다.
 
 ---
 
@@ -1046,6 +1116,24 @@ GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 ```
 
 ❌ **금지**: 별도의 범용 `/operations` 리소스를 사용하지 않는다. 도메인 리소스 자체에서 상태를 추적한다.
+
+---
+
+### 5.8 Partial Response
+
+> 🚧 Coming soon
+
+---
+
+### 5.9 Expand/Embed
+
+> 🚧 Coming soon
+
+---
+
+### 5.10 Bulk Operations
+
+> 🚧 Coming soon
 
 ---
 

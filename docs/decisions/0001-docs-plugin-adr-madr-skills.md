@@ -1,4 +1,4 @@
-# docs 플러그인에 ADR/MADR 스킬 추가
+# Adopt ADR and MADR Skills for docs Plugin
 
 ## Status
 

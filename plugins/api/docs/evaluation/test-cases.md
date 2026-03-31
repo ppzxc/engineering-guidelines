@@ -2564,11 +2564,11 @@ fun getEvents(
     val events = eventRepository.findAfterCursor(cursor, pageSize)
     val nextCursor = if (events.size == pageSize) encodeCursor(events.last()) else null
 
-    val response = ResponseEntity.ok()
+    var builder = ResponseEntity.ok()
     if (nextCursor != null) {
-        response.header("Link", "<...?pageSize=$pageSize&after=$nextCursor>; rel=\"next\"")
+        builder = builder.header("Link", "<...?pageSize=$pageSize&after=$nextCursor>; rel=\"next\"")
     }
-    return response.body(events)
+    return builder.body(events)
 }
 ```
 

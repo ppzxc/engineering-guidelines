@@ -49,11 +49,13 @@ GitHub (`/pulls/{number}/merge`).
 
 **Action response status codes:**
 
-| Scenario | Status Code | Example |
-|----------|-------------|---------|
-| Sync action — resource updated | `200 OK` + updated resource | `POST /orders/{id}/cancel` → 200 |
-| Sync action — no response body | `204 No Content` | `POST /caches/{id}/purge` → 204 |
-| Async action — accepted for processing | `202 Accepted` + operation status | `POST /reports/{id}/regenerate` → 202 |
+| Scenario | Status Code | Response Body |
+|----------|-------------|---------------|
+| Sync action — resource updated | `200 OK` | Updated resource |
+| Sync action — no response body | `204 No Content` | None |
+| Async action — fire-and-forget | `202 Accepted` | None or minimal acknowledgement |
+
+For async actions that create a pollable job resource, use `201 Created` + `Location` header instead (see [Long-Running Operations](#long-running-operations)).
 
 ## HTTP Methods
 
@@ -72,7 +74,7 @@ GET, HEAD, DELETE must not include request bodies.
 **2xx Success:**
 - `200 OK` — standard success
 - `201 Created` — creation success; include `Location` header with new resource URL
-- `202 Accepted` — request accepted, processing not complete (async actions)
+- `202 Accepted` — request accepted, processing not complete; used for async or deferred operations
 - `204 No Content` — success with no body (DELETE, etc.)
 
 **4xx Client Error:**

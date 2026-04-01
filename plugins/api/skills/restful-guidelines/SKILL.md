@@ -15,7 +15,7 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 - **kebab-case** for path segments: `/user-profiles`, `/product-categories/123`
 - **Plural nouns** for collections: `/articles` not `/article`
-- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST /{resource}/{id}/{action}` or `POST /{resource}/{action}` for collection-level operations
+- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with a verb sub-path (resource-level: `/{resource}/{id}/{action}`, collection-level: `/{resource}/{action}`)
 - **No file extensions** (`.json`, `.xml`)
 - **No trailing slash** — `/articles` not `/articles/`
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc`
@@ -38,15 +38,16 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 Some operations carry side-effects that go beyond simple field updates (e.g., refunds,
 notifications, state-machine transitions). Disguising them as PATCH masks intent and
 couples unrelated concerns. Use `POST` with a verb sub-path to make the operation explicit.
+This applies equally to collection-level operations where no specific resource identifier exists (`POST /{resource}/{action}`).
 
 | Action | ✅ Do | ❌ Don't | Why |
 |--------|-------|---------|-----|
 | Cancel an order | `POST /orders/{id}/cancel` | `PATCH /orders/{id}` with `{"status":"cancelled"}` | Cancellation triggers refund + notification — not a simple field update |
 | Approve a review | `POST /reviews/{id}/approve` | `PUT /reviews/{id}/approval` | Approval may trigger publishing, scoring, or downstream workflows |
-| Generate a report | `POST /reports/generate` | `GET /reports?generate=true` | Generation is a side-effect (async job), not a retrieval — use POST to make intent explicit |
+| Generate a report | `POST /reports/generate` | `GET /reports?generate=true` | Generation is a compute side-effect that may mutate state — not a safe retrieval |
 
 Adopted pattern: Stripe (`/charges/{id}/capture`), Shopify (`/orders/{id}/cancel`),
-GitHub (`/pulls/{number}/merge`).
+GitHub (`/pulls/{number}/merge`); collection-level: GitHub (`/repos/{owner}/{repo}/dispatches`).
 
 **Action response status codes:**
 

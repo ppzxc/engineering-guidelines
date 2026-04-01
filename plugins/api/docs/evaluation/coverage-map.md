@@ -21,11 +21,14 @@
 |---|-----------|-----------|---------|--------|--------|
 | 2.1-1 | ✅필수 | URL 경로에 소문자 kebab-case 사용 | COVERED | COVERED | — |
 | 2.1-2 | ✅필수 | 리소스 컬렉션 이름은 복수형 명사 | COVERED | COVERED | — |
-| 2.1-3 | ❌금지 | URL에 동사 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 2.1-3 | ❌금지 | 리소스 경로에 동사 포함 금지 (비-CRUD action 예외) | COVERED | COVERED | ~~Minor~~ Fixed |
 | 2.1-4 | ❌금지 | URL에 파일 확장자 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 2.1-5 | ✅필수 | URL 경로 세그먼트에 ASCII 영소문자/숫자/하이픈만 허용 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.1-6 | ✅필수 | 쿼리 파라미터 이름은 camelCase | COVERED | COVERED | — |
 | 2.1-7 | ⚠️권장 | URL 2000자 이하 유지 | MISSING | MISSING | Minor |
+| 2.1-8 | ❌금지 | URL에 trailing slash 포함 금지 | COVERED | COVERED | — |
+| 2.1-9 | ✅필수 | 리소스 경로에 동사 금지, 비-CRUD action은 POST + verb sub-path | COVERED | COVERED | — |
+| 2.1-10 | ✅필수 | 하위 리소스 중첩은 1단계까지만 허용 | COVERED | COVERED | — |
 | 2.2-1 | ✅필수 | GET 요청은 서버 상태 변경 안 함 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.2-2 | ✅필수 | PUT 요청은 멱등적으로 동작 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 2.2-3 | ⚠️권장 | 부분 수정에는 PUT 대신 PATCH 사용 | COVERED | COVERED | ~~Minor~~ Fixed |

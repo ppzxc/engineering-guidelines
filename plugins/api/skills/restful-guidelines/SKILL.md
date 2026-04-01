@@ -20,11 +20,11 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc`
 - ASCII lowercase letters, numerals, and hyphens only in path segments
 - Repeat parameter names for arrays: `?tag=tech&tag=design`
-- **Max nesting depth: 2 levels** — `/{resource}/{resourceId}/{innerResource}/{innerResourceId}`
+- **Single sub-resource nesting** — `/{parent}/{parentId}/{child}/{childId}` e.g., `/users/42/profiles/7`
 
 **Nesting depth rule:**
 
-Use at most one level of sub-resource nesting. For deeper relationships, use a flat top-level route instead.
+Nest at most one sub-resource under a parent. For deeper relationships, promote to a flat top-level route.
 
 | Situation | ✅ Do | ❌ Don't |
 |-----------|-------|---------|

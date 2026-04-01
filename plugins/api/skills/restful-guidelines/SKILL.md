@@ -17,6 +17,7 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 - **Plural nouns** for collections: `/articles` not `/article`
 - **No verbs** in URLs — HTTP methods convey the action
 - **No file extensions** (`.json`, `.xml`)
+- **No trailing slash** — `/articles` not `/articles/`
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc`
 - ASCII lowercase letters, numerals, and hyphens only in path segments
 - Repeat parameter names for arrays: `?tag=tech&tag=design`

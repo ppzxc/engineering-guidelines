@@ -8,14 +8,14 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "plugins": [
     {
       "name": "api",
       "source": "./plugins/api",
       "description": "RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, headers, and non-CRUD action endpoints",
-      "version": "0.0.4"
+      "version": "0.0.5"
     },
     {
       "name": "docs",

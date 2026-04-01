@@ -118,7 +118,7 @@ class ArticleController {
 - 규칙: "❌ **금지**: URL에 동사를 포함하지 않는다. 액션은 HTTP 메서드로 표현한다."
 - 규범 수준: ❌금지
 - 대상 모드: Both
-- 스킬 커버: Writing: PARTIAL / Review: COVERED
+- 스킬 커버: Writing: COVERED / Review: COVERED
 
 ❌ Bad:
 ```kotlin
@@ -179,7 +179,7 @@ class CommentController {
 }
 ```
 
-- 검증 포인트: Writing 모드에 `:action` 패턴 예시는 있으나 "동사 금지" 규칙 자체 명시 없음(PARTIAL), Review 체크리스트의 "No verbs in paths (actions use :action pattern)" 항목
+- 검증 포인트: Writing 모드에 "No verbs in resource paths" 규칙 명시 및 Non-CRUD action은 `POST /{resource}/{id}/{action}` 패턴 안내(COVERED), Review 체크리스트의 "No verbs in resource paths" 항목
 
 ---
 

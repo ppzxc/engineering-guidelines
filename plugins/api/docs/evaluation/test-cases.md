@@ -118,7 +118,7 @@ class ArticleController {
 - 규칙: "❌ **금지**: URL에 동사를 포함하지 않는다. 액션은 HTTP 메서드로 표현한다."
 - 규범 수준: ❌금지
 - 대상 모드: Both
-- 스킬 커버: Writing: PARTIAL / Review: COVERED
+- 스킬 커버: Writing: COVERED / Review: COVERED
 
 ❌ Bad:
 ```kotlin
@@ -179,7 +179,7 @@ class CommentController {
 }
 ```
 
-- 검증 포인트: Writing 모드에 `:action` 패턴 예시는 있으나 "동사 금지" 규칙 자체 명시 없음(PARTIAL), Review 체크리스트의 "No verbs in paths (actions use :action pattern)" 항목
+- 검증 포인트: Writing 모드에 "No verbs in resource paths" 규칙 명시 및 Non-CRUD action은 `POST /{resource}/{id}/{action}` 패턴 안내(COVERED), Review 체크리스트의 "No verbs in resource paths" 항목
 
 ---
 
@@ -526,6 +526,91 @@ fun createArticle(@RequestBody request: CreateArticleRequest): ResponseEntity<Ar
 ```
 
 - 검증 포인트: Spring Boot는 `@RestController` + `produces` 설정으로 자동 처리되나, HTTP 규칙상 응답 본문이 있는 모든 응답에 Content-Type 헤더가 있어야 함. Writing 모드는 에러 응답 `application/problem+json`만 언급하고 일반 요청/응답 Content-Type 규칙 없음(PARTIAL), Review 모드에 요청/응답 Content-Type 체크 항목 없음(MISSING)
+
+---
+
+### TC-2-12: Trailing Slash 금지
+
+- 규칙: "❌ **금지**: URL에 trailing slash를 포함하지 않는다."
+- 규범 수준: ❌금지
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+@RestController
+@RequestMapping("/articles/")
+class ArticleController {
+
+    @GetMapping("/")
+    fun listArticles(): ResponseEntity<List<Article>> {
+        // trailing slash 사용 — 금지
+        return ResponseEntity.ok(articleService.findAll())
+    }
+}
+```
+
+✅ Good:
+```kotlin
+@RestController
+@RequestMapping("/articles")
+class ArticleController {
+
+    @GetMapping
+    fun listArticles(): ResponseEntity<List<Article>> {
+        return ResponseEntity.ok(articleService.findAll())
+    }
+}
+```
+
+- 검증 포인트: URL 매핑에 trailing slash가 없어야 함
+
+---
+
+### TC-2-13: Non-CRUD Action Endpoint
+
+- 규칙: "✅ **필수**: 비-CRUD 작업은 `POST /{resource}/{id}/{action}` 형태를 사용한다."
+- 규범 수준: ✅필수
+- 대상 모드: Both
+- 스킬 커버: Writing: COVERED / Review: COVERED
+
+❌ Bad:
+```kotlin
+@RestController
+@RequestMapping("/orders")
+class OrderController {
+
+    @PatchMapping("/{id}")
+    fun cancelOrder(
+        @PathVariable id: String,
+        @RequestBody body: Map<String, String>
+    ): ResponseEntity<Order> {
+        // PATCH로 상태 변경을 위장 — side-effect(환불, 알림)가 숨겨짐
+        if (body["status"] == "cancelled") {
+            val order = orderService.cancel(id)
+            return ResponseEntity.ok(order)
+        }
+        throw IllegalArgumentException("Invalid status")
+    }
+}
+```
+
+✅ Good:
+```kotlin
+@RestController
+@RequestMapping("/orders")
+class OrderController {
+
+    @PostMapping("/{id}/cancel")
+    fun cancelOrder(@PathVariable id: String): ResponseEntity<Order> {
+        // POST + verb sub-path로 action 의도 명시
+        val order = orderService.cancel(id)
+        return ResponseEntity.ok(order)
+    }
+}
+```
+
+- 검증 포인트: side-effect가 있는 비-CRUD 작업이 `POST /{resource}/{id}/{action}` 형태로 구현되어 있는지 확인
 
 ---
 

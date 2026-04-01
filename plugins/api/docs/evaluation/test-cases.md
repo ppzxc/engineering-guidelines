@@ -529,7 +529,7 @@ fun createArticle(@RequestBody request: CreateArticleRequest): ResponseEntity<Ar
 
 ---
 
-### TC-2-08: Trailing Slash 금지
+### TC-2-12: Trailing Slash 금지
 
 - 규칙: "❌ **금지**: URL에 trailing slash를 포함하지 않는다."
 - 규범 수준: ❌금지
@@ -567,7 +567,7 @@ class ArticleController {
 
 ---
 
-### TC-2-09: Non-CRUD Action Endpoint
+### TC-2-13: Non-CRUD Action Endpoint
 
 - 규칙: "✅ **필수**: 비-CRUD 작업은 `POST /{resource}/{id}/{action}` 형태를 사용한다."
 - 규범 수준: ✅필수

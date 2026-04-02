@@ -2,9 +2,7 @@
 
 ## Status
 
-accepted
-
-Supersedes [ADR 0004](0004-adopt-non-crud-action-endpoint-pattern.md)
+accepted — Supersedes [ADR 0004](0004-adopt-non-crud-action-endpoint-pattern.md)
 
 ## Context and Problem Statement
 
@@ -23,7 +21,7 @@ Google AIP(API Improvement Proposals)의 핵심 원칙을 부분적으로 도입
 * Google AIP 생태계(gRPC-gateway, Google Cloud API)와의 정렬
 * 표준 메서드 우선 원칙 확립 — GET, POST, PATCH, DELETE를 우선 사용
 * PUT의 역할 제한 — 새 필드 추가 시 데이터 손실 위험 방지
-* RFC 3986 표준 준수 — path segment 내 콜론은 명시적으로 허용되는 문자
+* RFC 3986 §3.3 부분 준수 — 절대 경로의 path segment 내 콜론은 허용되는 문자 (단, 상대 경로의 첫 번째 segment에는 사용 불가)
 
 ## Considered Options
 
@@ -39,6 +37,7 @@ Chosen option: "Option B", because 리소스/액션 분리와 PATCH 기본화의
 ### Consequences
 
 * Good: 커스텀 액션이 리소스 경로와 시각적으로 분리됨 — `/orders/{id}:cancel`
+* Good: `api:restful-guidelines` 스킬의 URL Design, HTTP Methods, Non-CRUD Actions, CRUD Behavior 섹션이 이 결정을 직접 구현함
 * Good: AIP 생태계(gRPC-gateway, Google Cloud)와 정렬
 * Good: PATCH 기본화로 새 필드 추가 시 데이터 손실 위험 원천 차단
 * Good: 파일/바이너리 업로드에 PUT 예외 허용으로 실용성 유지

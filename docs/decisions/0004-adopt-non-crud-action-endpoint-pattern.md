@@ -2,7 +2,7 @@
 
 ## Status
 
-accepted
+superseded by [ADR 0005](0005-adopt-aip-resource-oriented-design-and-colon-custom-methods.md)
 
 ## Context and Problem Statement
 

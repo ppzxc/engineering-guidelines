@@ -71,9 +71,9 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 | Method | Purpose | Idempotent | Safe |
 |--------|---------|-----------|------|
 | GET | Retrieve | Yes | Yes |
-| POST | Create / execute | No | No |
-| PUT | Full replacement | Yes | No |
-| PATCH | Partial update | No | No |
+| POST | Create / execute custom method | No | No |
+| PUT | Full content replacement (file/binary upload) | Yes | No |
+| PATCH | Partial update (default update method) | No | No |
 | DELETE | Remove | Yes | No |
 
 GET, HEAD, DELETE must not include request bodies.

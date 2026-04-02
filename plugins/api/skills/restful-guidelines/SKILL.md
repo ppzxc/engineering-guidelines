@@ -42,17 +42,20 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 
 Some operations carry side-effects that go beyond simple field updates (e.g., refunds,
 notifications, state-machine transitions). Disguising them as PATCH masks intent and
-couples unrelated concerns. Use `POST` with a verb sub-path to make the operation explicit.
-This applies equally to collection-level operations where no specific resource identifier exists (`POST /{resource}/{action}`).
+couples unrelated concerns. Use `POST` with colon syntax to make the operation explicit
+and clearly separate it from the resource path.
+This applies equally to collection-level operations where no specific resource identifier exists (`POST /{resource}:{action}`).
 
 | Action | ✅ Do | ❌ Don't | Why |
 |--------|-------|---------|-----|
-| Cancel an order | `POST /orders/{id}/cancel` | `PATCH /orders/{id}` with `{"status":"cancelled"}` | Cancellation triggers refund + notification — not a simple field update |
-| Approve a review | `POST /reviews/{id}/approve` | `PUT /reviews/{id}/approval` | Approval may trigger publishing, scoring, or downstream workflows |
-| Generate a report | `POST /reports/generate` | `GET /reports?generate=true` | Generation is a compute side-effect that may mutate state — not a safe retrieval |
+| Cancel an order | `POST /orders/{id}:cancel` | `PATCH /orders/{id}` with `{"status":"cancelled"}` | Cancellation triggers refund + notification — not a simple field update |
+| Approve a review | `POST /reviews/{id}:approve` | `PUT /reviews/{id}/approval` | Approval may trigger publishing, scoring, or downstream workflows |
+| Generate a report | `POST /reports:generate` | `GET /reports?generate=true` | Generation is a compute side-effect that may mutate state — not a safe retrieval |
 
-Adopted pattern: Stripe (`/charges/{id}/capture`), Shopify (`/orders/{id}/cancel`),
-GitHub (`/pulls/{number}/merge`); collection-level: GitHub (`/repos/{owner}/{repo}/dispatches`).
+Adopted pattern: Google AIP-136 (`/orders/{id}:cancel`),
+Google Cloud API (`/projects/{project}:setIamPolicy`).
+
+> **Colon syntax compatibility note**: Express.js, Rails 등 `:`를 path parameter 구문으로 사용하는 프레임워크에서는 라우팅 설정 시 정규식 라우트 등 추가 처리가 필요하다. OpenAPI 명세에서 콜론 경로 지원 여부를 확인할 것.
 
 **Action response status codes:**
 

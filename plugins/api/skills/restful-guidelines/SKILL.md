@@ -137,8 +137,7 @@ GET, HEAD, DELETE must not include request bodies.
 ## CRUD Behavior
 
 **Standard method response rules:**
-- GET: return the resource itself (no Response wrapper)
-- POST (Create): return the created resource
+- POST (Create): return `201` with full resource + `Location` header
 - PATCH (Update): return the updated resource
 - DELETE: return `204` with no body
 
@@ -153,7 +152,7 @@ GET, HEAD, DELETE must not include request bodies.
 **PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead.
 
 **DELETE:** Return `204`; re-deletion policy is per-service (404 or 204).
-- Optionally support `force` parameter for cascading child resource deletion.
+- Optionally support `force` query parameter for cascading child resource deletion (`DELETE /resources/{id}?force=true`).
 
 ## API Versioning
 

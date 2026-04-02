@@ -13,9 +13,14 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 ## URL Design
 
+**Resource-oriented design** — API는 리소스(명사) 중심으로 설계한다. URL 경로는 리소스의 계층 구조를 표현하며, 행위는 HTTP 메서드와 커스텀 메서드로 표현한다.
+- 모든 리소스는 최소한 GET(조회)을 지원해야 한다
+- **표준 메서드**(GET, POST, PATCH, DELETE)를 우선 사용하고, 표현 불가능한 경우에만 커스텀 메서드를 사용한다
+- API 스키마를 데이터베이스 구조와 동일하게 설계하지 않는다
+
 - **kebab-case** for path segments: `/user-profiles`, `/product-categories/123`
 - **Plural nouns** for collections: `/articles` not `/article`
-- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with a verb sub-path (resource-level: `/{resource}/{id}/{action}`, collection-level: `/{resource}/{action}`)
+- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`)
 - **No file extensions** (`.json`, `.xml`)
 - **No trailing slash** — `/articles` not `/articles/`
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc`

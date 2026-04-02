@@ -15,7 +15,7 @@
 
 | 스킬 | 경로 | 포맷 |
 |------|------|------|
-| `docs:adr` | `docs/adr/NNNN-<title>.md` | Nygard ADR |
+| `docs:adr` | `docs/decisions/NNNN-<title>.md` | Nygard ADR |
 | `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 3.x |
 
 ## 다른 스킬과의 연계

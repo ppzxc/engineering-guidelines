@@ -15,7 +15,7 @@
 - 규범 수준: ✅필수
 
 **입력 상황:**
-`docs/adr/` 디렉토리에 `0001-use-postgresql.md`, `0002-use-kafka.md` 가 이미 존재.
+`docs/decisions/` 디렉토리에 `0001-use-postgresql.md`, `0002-use-kafka.md` 가 이미 존재.
 `/docs:adr "Use Redis for caching"` 호출.
 
 **기대 동작:**
@@ -39,7 +39,7 @@
 - 규범 수준: ✅필수
 
 **입력 상황:**
-자동 채번 결과 `0003`이지만 `docs/adr/0003-existing.md` 가 이미 존재하는 상황.
+자동 채번 결과 `0003`이지만 `docs/decisions/0003-existing.md` 가 이미 존재하는 상황.
 
 **기대 동작:**
 충돌 감지 후 사용자에게 확인 요청. "번호 충돌: 0003이 이미 존재합니다. 0004를 사용할까요? (y/N)" 형식.
@@ -249,7 +249,7 @@ variant 없이 minimal 또는 full로 기본 선택.
 `docs/decisions/` 디렉토리 자동 생성 후 `0001-use-kafka-for-event-streaming.md` 저장.
 
 **금지 동작:**
-`docs/adr/`에 저장하거나 디렉토리 없어서 에러.
+`docs/decisions/` 이외 경로에 저장하거나 디렉토리 없어서 에러.
 
 **검증 포인트:**
 파일이 `docs/decisions/NNNN-*.md` 경로에 생성됨.

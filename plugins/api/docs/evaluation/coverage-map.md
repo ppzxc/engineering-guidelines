@@ -1,6 +1,6 @@
 # Coverage Map — RESTful API Guidelines Skill
 
-**평가 날짜:** 2026-03-20
+**평가 날짜:** 2026-04-04
 **README:** README.md
 **스킬:** skills/restful-guidelines/SKILL.md
 
@@ -55,10 +55,17 @@
 | 3.1-2 | ✅필수 | 리소스 스키마는 일관된 구조 유지 (id/createdAt/updatedAt) | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 3.1-5 | ✅필수 | OUTPUT_ONLY 필드는 서버가 설정, 요청 시 무시 | COVERED | COVERED | New |
+| 3.1-6 | ✅필수 | IMMUTABLE 필드는 생성 후 변경 불가, 변경 시도 시 400 | COVERED | COVERED | New |
+| 3.1-7 | ⚠️권장 | 필드 동작은 OpenAPI x-field-behavior로 명시 (readOnly/writeOnly 매핑) | COVERED | COVERED | New |
 | 3.2-1 | ✅필수 | 서버 관리 읽기 전용 필드를 요청 본문에 포함해도 무시 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 3.2-2 | ✅필수 | 낙관적 동시성: ETag + If-Match, 불일치 시 412 | COVERED | COVERED | New |
 | 3.3-1 | ✅필수 | POST 생성 성공 시 201 Created + 생성된 리소스 반환 | COVERED | COVERED | — |
 | 3.3-2 | ✅필수 | PUT은 리소스 전체 대체, 미포함 필드는 기본값/null | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.3-3 | ✅필수 | DELETE 성공 시 204 No Content 반환 | COVERED | COVERED | — |
+| 3.3-4 | ✅필수 | Soft Delete 리소스는 deleteTime/expireTime 필드 포함 | COVERED | COVERED | New |
+| 3.3-5 | ✅필수 | Soft Delete 복구는 POST /{resource}/{id}:undelete | COVERED | COVERED | New |
+| 3.3-6 | ⚠️권장 | validateOnly=true로 변경 사전 검증 지원 | COVERED | COVERED | New |
 | 3.4-1 | ✅필수 | 모든 에러 응답은 RFC 7807/9457 구조 따름 | COVERED | COVERED | — |
 | 3.4-2 | ✅필수 | 에러 응답 Content-Type은 application/problem+json | COVERED | COVERED | — |
 | 3.4-3 | ⚠️권장 | 유효성 검사 실패 시 모든 오류 필드 한 번에 반환 | COVERED | COVERED | — |
@@ -85,6 +92,8 @@
 | 4.4-1 | ✅필수 | Enum 값은 UPPER_SNAKE_CASE 문자열 | COVERED | COVERED | — |
 | 4.4-2 | ⚠️권장 | 클라이언트가 알 수 없는 Enum 값 수신 가능하도록 설계 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 4.4-3 | ❌금지 | Enum 값으로 숫자나 불명확한 약어 사용 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 4.4-4 | ✅필수 | 상태 필드명은 state, 첫 값은 STATE_UNSPECIFIED | COVERED | COVERED | New |
+| 4.4-5 | ✅필수 | state 필드는 OUTPUT_ONLY, PATCH로 직접 변경 금지 | COVERED | COVERED | New |
 
 ---
 
@@ -106,7 +115,7 @@
 | 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
 | 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | COVERED | ~~Critical~~ Fixed |
-| 5.6-1 | ✅필수 | 속도 제한 응답에 X-RateLimit-* 헤더 포함 | COVERED | COVERED | — |
+| 5.6-1 | ✅필수 | 속도 제한 응답에 RateLimit 헤더 포함 (X- 접두사 없음, RFC 6648) | COVERED | COVERED | — |
 | 5.6-2 | ✅필수 | 429 응답에 Retry-After 헤더 포함 | COVERED | COVERED | — |
 | 5.6-3 | ✅필수 | 429 응답 본문은 RFC 7807 Problem Details 구조 | COVERED | COVERED | — |
 | 5.6-4 | ✅필수 | 클라이언트는 429 수신 시 Retry-After 값만큼 대기 후 재시도 | COVERED | COVERED | — |
@@ -157,30 +166,30 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 92 | 97.9% |
+| COVERED | 101 | 98.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 2 | 2.1% |
-| **합계** | **94** | **100%** |
+| MISSING | 2 | 1.9% |
+| **합계** | **103** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 91 | 96.8% |
+| COVERED | 100 | 97.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.2% |
-| **합계** | **94** | **100%** |
+| MISSING | 3 | 2.9% |
+| **합계** | **103** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 183 | 97.3% |
+| COVERED | 201 | 97.6% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 5 | 2.7% |
-| **합계** | **188** | **100%** |
+| MISSING | 5 | 2.4% |
+| **합계** | **206** | **100%** |
 
-\* 전체는 94개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 103개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 
@@ -280,7 +289,7 @@
 | 5.4-2 | COVERED | Api-Version 헤더 코드 예시 있음 (ISO 8601 날짜 형식 "2024-01-20") |
 | 5.4-3 | MISSING | 하위 호환성 유지 규칙 없음 |
 | 5.5-1 | COVERED | Deprecation/Sunset/Link 헤더 설정 코드 예시 있음. 커버리지 출처: Writing Mode 본문이 아닌 Code Examples 부록의 Kotlin 코드 예시에서 확인됨. |
-| 5.6-1 | COVERED | addRateLimitHeaders 함수에 X-RateLimit-* 헤더 설정 코드 있음 |
+| 5.6-1 | COVERED | Rate Limiting 섹션에 RateLimit/RateLimit-Policy 헤더 규칙 명시됨 |
 | 5.6-2 | COVERED | Retry-After 헤더 설정 코드 있음 |
 | 5.6-3 | COVERED | 429 응답에 ProblemDetail 구조 사용 코드 있음 |
 | 5.6-4 | COVERED | "On 429, wait for the Retry-After header value before retrying" 명시 |
@@ -356,7 +365,7 @@
 | 5.4-2 | COVERED | "Api-Version value uses ISO 8601 date format" 체크리스트 항목 |
 | 5.4-3 | MISSING | 하위 호환성 유지 체크 없음 |
 | 5.5-1 | MISSING | Deprecation 헤더 체크 항목 없음 |
-| 5.6-1 | COVERED | Rate Limiting 체크리스트에 X-RateLimit-* 헤더 항목 있음 |
+| 5.6-1 | COVERED | Rate Limiting 섹션에 RateLimit 헤더 규칙 포함됨 |
 | 5.6-2 | COVERED | "429 response includes Retry-After header" 체크리스트 항목 |
 | 5.6-3 | COVERED | "429 response body uses Problem Details structure" 체크리스트 항목 |
 | 5.6-4 | COVERED | "Client retry respects Retry-After value" 체크리스트 항목 |

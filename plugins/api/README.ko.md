@@ -306,6 +306,19 @@ Correlation-Id: xyz-789
 
 > **참고**: `X-Request-Id`, `X-Correlation-Id` 등 기존에 사실상 표준처럼 굳어진 헤더는 레거시 호환을 위해 허용된다. 신규 커스텀 헤더에는 `X-` 접두사를 붙이지 않는다.
 
+#### 요청 추적
+
+✅ **필수**: 모든 응답에 `Request-Id` 헤더(UUID v4)를 포함한다.
+
+```
+Request-Id: 550e8400-e29b-41d4-a716-446655440000
+```
+
+- 클라이언트가 `Request-Id`를 전송하면 서버는 이를 수용하거나 새로 생성한다
+- 마이크로서비스 간 `Request-Id`를 전파하여 분산 추적에 활용한다
+- 모든 서비스 로그에 `Request-Id`를 포함하여 디버깅 상관관계를 확보한다
+- 에러 응답(RFC 9457)의 `traceId` 필드는 `Request-Id` 헤더 값과 일치해야 한다
+
 ❌ **금지**: 표준 HTTP 헤더의 의미를 재정의하지 않는다.
 
 ---
@@ -493,7 +506,7 @@ Correlation-Id: xyz-789
 | `detail` | ✅ 필수 | 이 요청에 대한 구체적인 에러 설명 (사용자가 이해할 수 있는 언어) |
 | `instance` | ⚠️ 권장 | 문제가 발생한 요청 경로 |
 | `errors` | ⚠️ 권장 | 확장 필드 — 필드 수준 유효성 검사 상세 목록 |
-| `traceId` | ⚠️ 권장 | 확장 필드 — 요청 추적 ID (디버깅용) |
+| `traceId` | ⚠️ 권장 | 확장 필드 — `Request-Id` 응답 헤더 값과 일치해야 한다 |
 
 > **참조**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
 

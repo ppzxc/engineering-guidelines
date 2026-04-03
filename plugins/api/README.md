@@ -35,7 +35,8 @@ RESTful API design guidelines.
 5. [Authentication & Security](#5-authentication--security)
    - [Authentication Methods](#51-authentication-methods)
    - [401 vs 403 Distinction](#52-401-vs-403-distinction)
-6. [References](#6-references)
+6. [OpenAPI Specification](#6-openapi-specification)
+7. [References](#7-references)
 
 ---
 
@@ -1228,7 +1229,90 @@ Content-Type: application/problem+json
 
 ---
 
-## 6. References
+## 6. OpenAPI Specification
+
+### 6.1 API First
+
+✅ **Required**: All APIs MUST maintain an OpenAPI 3.0+ specification as the single source of truth.
+
+⚠️ **Recommended**: Define the OpenAPI spec before implementation (API First approach).
+
+### 6.2 Spec Quality
+
+✅ **Required**: Every endpoint, parameter, and schema property MUST include a `description` field.
+
+✅ **Required**: Every operation MUST have a unique `operationId` — this enables code generation and documentation automation.
+
+⚠️ **Recommended**: Key schemas and parameters SHOULD include `example` or `examples` for documentation clarity.
+
+```yaml
+# Good
+paths:
+  /articles:
+    get:
+      operationId: listArticles
+      description: Retrieve a paginated list of articles.
+      parameters:
+        - name: pageSize
+          in: query
+          description: Number of items per page.
+          schema:
+            type: integer
+            example: 20
+```
+
+### 6.3 Schema Mapping
+
+✅ **Required**: Map field behaviors to OpenAPI properties:
+
+| Field Behavior | OpenAPI Property |
+|----------------|-----------------|
+| Read-only (e.g., `id`, `createdAt`) | `readOnly: true` |
+| Create-only (e.g., write-once fields) | `writeOnly: true` |
+| Nullable (explicit need only) | `nullable: true` |
+
+⚠️ **Recommended**: Follow the field-omission principle — minimize use of `nullable`. Omit fields rather than sending `null`.
+
+✅ **Required**: Define RFC 9457 Problem Details as a shared `$ref` component for error responses.
+
+```yaml
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type.
+          example: "https://api.example.com/errors/validation-failed"
+        title:
+          type: string
+          description: Short summary of the error type.
+        status:
+          type: integer
+          description: HTTP status code.
+        detail:
+          type: string
+          description: Specific error description.
+        instance:
+          type: string
+          description: Request path where the problem occurred.
+        traceId:
+          type: string
+          description: Matches Request-Id response header.
+```
+
+### 6.4 Extensions & Validation
+
+⚠️ **Recommended**: Mark non-public endpoints with the `x-internal: true` extension.
+
+⚠️ **Recommended**: Validate spec compliance in CI using linters such as Spectral or Zally.
+
+---
+
+## 7. References
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)

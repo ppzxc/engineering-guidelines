@@ -62,6 +62,7 @@ GET, HEAD, DELETE must not include request bodies.
 - `403 Forbidden` — authenticated but not authorized
 - `404 Not Found` — resource doesn't exist
 - `409 Conflict` — duplicate or optimistic lock failure
+- `412 Precondition Failed` — `If-Match` etag mismatch (conditional request failed)
 - `422 Unprocessable Entity` — semantic validation failure
 - `429 Too Many Requests` — rate limit exceeded
 

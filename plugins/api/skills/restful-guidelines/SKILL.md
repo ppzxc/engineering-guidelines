@@ -107,7 +107,10 @@ GET, HEAD, DELETE must not include request bodies.
 
 ## Resource Schema & Field Rules
 
+- Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
 - Resource identifiers are opaque strings — clients must not parse structure
+- Omit null/missing fields entirely (do not send `"field": null`)
+- Servers must ignore read-only fields in request bodies
 
 ## CRUD Behavior
 
@@ -220,7 +223,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 ## Long-Running Operations
 
 - Return `201 Created` + `Location` header with domain resource immediately
-- Include `status` field: `PENDING` → `PROCESSING` → `COMPLETED` | `FAILED`
+- Include `status` field: `PENDING` → `IN_PROGRESS` → `COMPLETED` | `FAILED`
 - Client polls `GET {Location}` to check progress
 - On failure: include error details in response body
 

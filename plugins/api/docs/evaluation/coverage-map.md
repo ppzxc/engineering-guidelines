@@ -53,7 +53,7 @@
 |---|-----------|-----------|---------|--------|--------|
 | 3.1-1 | ✅필수 | 모든 리소스는 고유 id 가짐 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.1-2 | ✅필수 | 리소스 스키마는 일관된 구조 유지 (id/createdAt/updatedAt) | COVERED | COVERED | ~~Critical~~ Fixed |
-| 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | MISSING | MISSING | Minor |
+| 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 3.2-1 | ✅필수 | 서버 관리 읽기 전용 필드를 요청 본문에 포함해도 무시 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.3-1 | ✅필수 | POST 생성 성공 시 201 Created + 생성된 리소스 반환 | COVERED | COVERED | — |
@@ -157,30 +157,30 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 88 | 96.7% |
+| COVERED | 92 | 97.9% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.3% |
-| **합계** | **91** | **100%** |
+| MISSING | 2 | 2.1% |
+| **합계** | **94** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 88 | 96.7% |
+| COVERED | 91 | 96.8% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.3% |
-| **합계** | **91** | **100%** |
+| MISSING | 3 | 3.2% |
+| **합계** | **94** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 176 | 96.7% |
+| COVERED | 183 | 97.3% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 6 | 3.3% |
-| **합계** | **182** | **100%** |
+| MISSING | 5 | 2.7% |
+| **합계** | **188** | **100%** |
 
-\* 전체는 91개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 94개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 
@@ -246,7 +246,7 @@
 | 2.4-4 | COVERED | "표준 HTTP 헤더 의미 재정의 금지" 규칙 추가 (Minor 개선) |
 | 3.1-1 | COVERED | Standard Resource Fields에 `"id": "Server-generated"` 명시 |
 | 3.1-2 | COVERED | id/createdAt/updatedAt 표준 필드 구조가 Standard Resource Fields에 정의됨 |
-| 3.1-3 | MISSING | 식별자 불투명성 언급 없음 (Tier C — 보류) |
+| 3.1-3 | COVERED | SKILL.md 115줄: "Resource identifiers are opaque strings — clients must not parse structure" |
 | 3.1-4 | COVERED | "null 값 필드 응답에서 제외" 규칙 추가 및 bad case 예시 포함 (Minor 개선) |
 | 3.2-1 | PARTIAL | "not modifiable by client" 언급 있으나 "포함해도 무시" 동작 명확히 서술되지 않음 |
 | 3.3-1 | COVERED | POST create -> 201 Created + Location + body 코드 예시 있음 |
@@ -322,7 +322,7 @@
 | 2.4-4 | COVERED | "표준 HTTP 헤더 의미 재정의 금지" 체크 항목 추가 (Minor 개선) |
 | 3.1-1 | MISSING | 리소스 id 필수 체크 항목 없음 |
 | 3.1-2 | MISSING | 리소스 표준 필드 구조 체크 항목 없음 |
-| 3.1-3 | MISSING | 식별자 불투명성 체크 없음 (Tier C — 보류) |
+| 3.1-3 | COVERED | SKILL.md 115줄: "Resource identifiers are opaque strings — clients must not parse structure" (Writing 판정 근거 동일 적용) |
 | 3.1-4 | COVERED | "Null-valued fields excluded from response" 체크리스트 항목 |
 | 3.2-1 | MISSING | 읽기 전용 필드 무시 동작 체크 없음 |
 | 3.3-1 | COVERED | "POST create -> 201 + Location header" 체크리스트 항목 |

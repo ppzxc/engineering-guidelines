@@ -129,36 +129,58 @@
 
 ---
 
+## 섹션 7: OpenAPI & 운영 확장 (C-1, C-2, C-3)
+
+| # | 규범 수준 | 규칙 요약 | Writing | Review | 심각도 |
+|---|-----------|-----------|---------|--------|--------|
+| 7.1-1 | ✅필수 | OpenAPI 3.0+ 스펙을 SSOT으로 유지 (API First) | COVERED | COVERED | — |
+| 7.1-2 | ✅필수 | 모든 endpoint/parameter/schema에 description 포함 | COVERED | COVERED | — |
+| 7.1-3 | ✅필수 | 모든 operation에 고유 operationId 부여 | COVERED | COVERED | — |
+| 7.1-4 | ⚠️권장 | 주요 schema/parameter에 example 제공 | COVERED | COVERED | — |
+| 7.1-5 | ✅필수 | readOnly/writeOnly OpenAPI 매핑 | COVERED | COVERED | — |
+| 7.1-6 | ✅필수 | RFC 9457 에러를 $ref 공유 컴포넌트로 정의 | COVERED | COVERED | — |
+| 7.1-7 | ⚠️권장 | 비공개 엔드포인트 x-internal: true 마킹 | COVERED | COVERED | — |
+| 7.1-8 | ⚠️권장 | CI 린터로 스펙 자동 검증 | COVERED | COVERED | — |
+| 7.2-1 | ✅필수 | Breaking change 5개 분류 테이블 | COVERED | COVERED | — |
+| 7.2-2 | ✅필수 | Compatible change 3개 분류 테이블 | COVERED | COVERED | — |
+| 7.2-3 | ✅필수 | Tolerant reader 원칙 (알 수 없는 필드 무시) | COVERED | COVERED | — |
+| 7.2-4 | ✅필수 | Open-ended enum 원칙 | COVERED | COVERED | — |
+| 7.3-1 | ✅필수 | 모든 응답에 Request-Id 헤더 포함 | COVERED | COVERED | — |
+| 7.3-2 | ✅필수 | traceId와 Request-Id 값 일치 | COVERED | COVERED | — |
+| 7.3-3 | ⚠️권장 | 마이크로서비스 간 Request-Id 전파 | COVERED | COVERED | — |
+
+---
+
 ## 커버리지 합계
 
 ### Writing 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 73 | 96.1% |
+| COVERED | 88 | 96.7% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.9% |
-| **합계** | **76** | **100%** |
+| MISSING | 3 | 3.3% |
+| **합계** | **91** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 73 | 96.1% |
+| COVERED | 88 | 96.7% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.9% |
-| **합계** | **76** | **100%** |
+| MISSING | 3 | 3.3% |
+| **합계** | **91** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 146 | 96.1% |
+| COVERED | 176 | 96.7% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 6 | 3.9% |
-| **합계** | **152** | **100%** |
+| MISSING | 6 | 3.3% |
+| **합계** | **182** | **100%** |
 
-\* 전체는 76개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 91개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 

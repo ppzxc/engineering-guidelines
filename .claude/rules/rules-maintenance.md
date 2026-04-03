@@ -55,7 +55,7 @@ rules 파일은 **스켈레톤 가드레일**이다. 구현자가 매번 직접 
 
 템플릿:
 - full: `docs/decisions/0000-template.md` — 대부분의 결정에 사용
-- minimal: `docs/decisions/0000-template-minimal.md` — 검토 옵션이 2개 이하이고 트레이드오프가 경미한 결정
+- minimal: `docs/decisions/0000-template-minimal.md` — 검토 옵션이 1~2개이고 트레이드오프가 경미한 결정 (단일 옵션 결정 포함)
 
 frontmatter 필수 필드:
 - `status`: accepted / deprecated / superseded by ADR-NNNN

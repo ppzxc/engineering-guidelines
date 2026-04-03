@@ -1270,7 +1270,7 @@ paths:
 ✅ **Required**: Map field behaviors to OpenAPI properties:
 
 | Field Behavior | OpenAPI Property |
-|----------------|-----------------|
+|----------------|------------------|
 | Read-only (e.g., `id`, `createdAt`) | `readOnly: true` |
 | Create-only (e.g., write-once fields) | `writeOnly: true` |
 | Nullable (explicit need only) | `nullable: true` (OpenAPI 3.0); `type: ["string", "null"]` (OpenAPI 3.1) |

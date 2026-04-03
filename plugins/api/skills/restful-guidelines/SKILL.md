@@ -261,15 +261,6 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Key validity: minimum 24 hours
 - POST endpoints with financial impact MUST support `Idempotency-Key`
 
-## Authentication & Security
-
-- `Authorization: Bearer {token}` for JWT authentication
-- `Authorization: ApiKey {key}` for API Key authentication
-- Never pass credentials in query parameters (logged by servers)
-- `401 Unauthorized`: missing/expired authentication — include `WWW-Authenticate` header
-- `403 Forbidden`: authenticated but not authorized
-- Avoid storing sensitive data in query strings (they get logged)
-
 ## OpenAPI Specification
 
 All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API First).
@@ -284,3 +275,12 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 | Shared error schema | Define RFC 9457 Problem Details as a `$ref` shared component |
 | Internal-only marking | Mark non-public endpoints with `x-internal: true` extension |
 | Automated validation | SHOULD validate spec compliance in CI using linters (e.g., Spectral, Zally) |
+
+## Authentication & Security
+
+- `Authorization: Bearer {token}` for JWT authentication
+- `Authorization: ApiKey {key}` for API Key authentication
+- Never pass credentials in query parameters (logged by servers)
+- `401 Unauthorized`: missing/expired authentication — include `WWW-Authenticate` header
+- `403 Forbidden`: authenticated but not authorized
+- Avoid storing sensitive data in query strings (they get logged)

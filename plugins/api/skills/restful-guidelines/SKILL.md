@@ -203,6 +203,7 @@ Api-Version: 2024-01-20   (ISO 8601 date format)
 - Requests without version header receive the latest stable version
 - Responses always include the applied version
 - Maintain previous versions for minimum 6 months before deprecation
+
 **Breaking changes** (require new `Api-Version` date):
 
 | Category | Examples |

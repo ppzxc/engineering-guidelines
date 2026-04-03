@@ -1,7 +1,7 @@
 # API 플러그인 — 업계 표준 갭 분석 로드맵
 
 > 작성일: 2026-04-03  
-> 기준 버전: ppzxc/api v0.0.6 (76개 규칙, 96.1% 커버리지)  
+> 기준 버전: ppzxc/api v0.0.8 (94개 규칙, Writing 97.9% / Review 96.8% 커버리지)  
 > 목적: 업계 6대 리더 대비 누락 항목 식별 및 구현 우선순위 정리  
 > 선행 문서: [TODO.md](./TODO.md) — Google AIP 기반 갭 분석 (AIP 8개 항목)
 
@@ -11,7 +11,7 @@
 
 | 약칭 | 출처 | 특징 |
 |------|------|------|
-| **ppzxc/api** | 현재 플러그인 v0.0.6 | Google AIP 부분 도입, RFC 중심 |
+| **ppzxc/api** | 현재 플러그인 v0.0.8 | Google AIP 부분 도입, RFC 중심 |
 | **AIP** | Google API Improvement Proposals | gRPC-first, 가장 체계적 |
 | **MS** | Microsoft REST API Guidelines | 엔터프라이즈, Azure 생태계 |
 | **Stripe** | Stripe API Reference | 개발자 경험 최고 평가 |
@@ -27,8 +27,8 @@
 |------|-----------|-----|-----|--------|---------|--------|---------|
 | 리소스 중심 설계 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | RFC 2119 규범 수준 | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ |
-| OpenAPI 스펙 연동 가이드 | ❌ | ⚠️ proto | ✅ | ✅ | ✅ 필수 | ✅ | ❌ |
-| API Linter/자동 검증 도구 | ❌ | ✅ aip-linter | ❌ | ❌ | ✅ Zally | ❌ | ❌ |
+| OpenAPI 스펙 연동 가이드 | ✅ | ⚠️ proto | ✅ | ✅ | ✅ 필수 | ✅ | ❌ |
+| API Linter/자동 검증 도구 | ✅ CI | ✅ aip-linter | ❌ | ❌ | ✅ Zally | ❌ | ❌ |
 | 다국어 문서 (한/영) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ---
@@ -79,8 +79,8 @@
 | Top-level array 응답 | ✅ | ❌ wrapper | ❌ wrapper | ❌ wrapper | 혼합 | ✅ | ❌ wrapper |
 | Link 헤더 네비게이션 | ✅ | ❌ nextPageToken | ❌ @odata | ❌ has_more | ✅ | ✅ | ❌ links{} |
 | Total-Count 헤더 | ✅ | ⚠️ total_size | ✅ | ⚠️ | ❌ 비권장 | ❌ | ⚠️ meta |
-| 기본 페이지 크기 명시 | ❌ | ✅ | ✅ | ✅ 10 | ✅ | ✅ 30 | ❌ |
-| 최대 페이지 크기 명시 | ❌ | ✅ 1000 | ✅ | ✅ 100 | ✅ | ✅ 100 | ❌ |
+| 기본 페이지 크기 명시 | ✅ 20 | ✅ | ✅ | ✅ 10 | ✅ | ✅ 30 | ❌ |
+| 최대 페이지 크기 명시 | ✅ 100 | ✅ 1000 | ✅ | ✅ 100 | ✅ | ✅ 100 | ❌ |
 
 ---
 
@@ -101,8 +101,8 @@
 | 항목 | ppzxc/api | AIP | MS | Stripe | Zalando | GitHub | JSON:API |
 |------|-----------|-----|-----|--------|---------|--------|---------|
 | 날짜 기반 버전 헤더 | ✅ Api-Version | ❌ URL | ❌ URL | ✅ Stripe-Version | ❌ URL | ❌ URL | 미정 |
-| Breaking Change 정의 | ❌ | ✅ AIP-180 | ✅ | ✅ | ✅ | ✅ | ❌ |
-| 하위 호환성 정책 | ❌ | ✅ 상세 | ✅ 상세 | ✅ | ✅ 상세 | ✅ | ❌ |
+| Breaking Change 정의 | ✅ | ✅ AIP-180 | ✅ | ✅ | ✅ | ✅ | ❌ |
+| 하위 호환성 정책 | ✅ | ✅ 상세 | ✅ 상세 | ✅ | ✅ 상세 | ✅ | ❌ |
 | Deprecation 헤더 | ✅ RFC 9745 | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
 
 ---
@@ -123,7 +123,7 @@
 | Expand/Embed | ⚠️ 간략 | ❌ | ✅ $expand | ✅ expand[] | ✅ embed | ❌ | ✅ include |
 | Bulk Operations | ⚠️ 간략 | ❌ | ✅ $batch | ❌ | ✅ | ❌ | ✅ |
 | Webhooks / Events | ❌ | ❌ | ❌ | ✅ 상세 | ✅ | ✅ | ❌ |
-| Request ID / 분산 추적 | ❌ | ❌ | ✅ | ✅ | ✅ X-Flow-ID | ✅ | ❌ |
+| Request ID / 분산 추적 | ✅ | ❌ | ✅ | ✅ | ✅ X-Flow-ID | ✅ | ❌ |
 | Caching 가이드 | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
 | Health Check 엔드포인트 | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 

@@ -38,6 +38,102 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 | Reviews on an order item | `/order-items/{orderItemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
 | Delivery zones under address | `/addresses/{addressId}/delivery-zones/{zoneId}` | `/users/{userId}/addresses/{addressId}/delivery-zones/{zoneId}` |
 
+## HTTP Methods & Status Codes
+
+| Method | Purpose | Idempotent | Safe |
+|--------|---------|-----------|------|
+| GET | Retrieve | Yes | Yes |
+| POST | Create / execute custom method | No | No |
+| PUT | Full content replacement (file/binary upload) | Yes | No |
+| PATCH | Partial update (default update method) | No | No |
+| DELETE | Remove | Yes | No |
+
+GET, HEAD, DELETE must not include request bodies.
+
+**2xx Success:**
+- `200 OK` — standard success
+- `201 Created` — creation success; include `Location` header with new resource URL
+- `202 Accepted` — request accepted, processing not complete; used for async or deferred operations
+- `204 No Content` — success with no body (DELETE, etc.)
+
+**4xx Client Error:**
+- `400 Bad Request` — malformed request, validation failure
+- `401 Unauthorized` — missing/expired authentication
+- `403 Forbidden` — authenticated but not authorized
+- `404 Not Found` — resource doesn't exist
+- `409 Conflict` — duplicate or optimistic lock failure
+- `422 Unprocessable Entity` — semantic validation failure
+- `429 Too Many Requests` — rate limit exceeded
+
+**5xx Server Error:**
+- `500 Internal Server Error` — unexpected failure
+- `503 Service Unavailable` — temporary unavailability
+
+## Headers
+
+- `Content-Type: application/json` for bodies
+- `Accept: application/json` for content negotiation
+- `Location` header on 201 Created
+- `Total-Count` for collection size
+- RFC 8288 `Link` header for pagination
+- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility
+- `Cache-Control` header specifies caching strategy
+
+## JSON Format
+
+- **camelCase** field names: `userId`, `createdAt`, `isActive`
+- Never snake_case or abbreviations
+- Omit null/missing fields entirely (do not send `"field": null`)
+- Date/time values as RFC 3339 strings; server responses in UTC (`Z`)
+- Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
+- Servers must ignore read-only fields in request bodies
+
+## Error Response (RFC 7807/9457 Problem Details)
+
+```json
+{
+  "type": "https://api.example.com/errors/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "User-friendly explanation",
+  "instance": "/articles/999",
+  "traceId": "abc-123-xyz"
+}
+```
+
+- `Content-Type: application/problem+json`
+- Include **all** validation failures at once, not incrementally
+- Never expose stack traces, internal paths, or DB errors
+
+## Resource Schema & Field Rules
+
+- Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
+- Resource identifiers are opaque strings — clients must not parse structure
+- Omit null/missing fields entirely (do not send `"field": null`)
+- Servers must ignore read-only fields in request bodies
+
+## CRUD Behavior
+
+**Standard method response rules:**
+- POST (Create): return `201` with full resource + `Location` header
+- PATCH (Update): return the updated resource
+- DELETE: return `204` with no body
+
+**POST (Create):** Return `201` with full resource + `Location` header.
+- Clients SHOULD be able to specify resource ID (optional).
+- Duplicate creation MUST return `409 Conflict`.
+
+**PATCH (Update — default):** Only modify fields present in body; others unchanged.
+- Response MUST return the updated full resource.
+- Optionally support `updateMask` query parameter to explicitly specify fields to update.
+
+**PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead.
+
+**DELETE:** Return `204`; re-deletion policy is per-service (404 or 204).
+- Optionally support `force` query parameter for cascading child resource deletion (`DELETE /resources/{id}?force=true`).
+
+## Actions
+
 **Non-CRUD actions:**
 
 Some operations carry side-effects that go beyond simple field updates (e.g., refunds,
@@ -66,93 +162,28 @@ Adopted pattern: Google AIP-136 (`/orders/{id}:cancel`), Google Cloud API (`/pro
 
 For async actions that create a pollable job resource, use `201 Created` + `Location` header instead (see [Long-Running Operations](#long-running-operations)).
 
-## HTTP Methods
+## Collections & Pagination
 
-| Method | Purpose | Idempotent | Safe |
-|--------|---------|-----------|------|
-| GET | Retrieve | Yes | Yes |
-| POST | Create / execute custom method | No | No |
-| PUT | Full content replacement (file/binary upload) | Yes | No |
-| PATCH | Partial update (default update method) | No | No |
-| DELETE | Remove | Yes | No |
+- Collections return **top-level JSON array** `[]` — never wrapped in an envelope object
+- **Empty collections**: return `200 OK` + `[]` — never `404`; include `Total-Count: 0`
+- Use `Link` header (RFC 8288) with `rel="next"`, `prev`, `first`, `last` for navigation
+- `Total-Count` header for total item count
+- **Cursor-based** (recommended): `pageSize` + `pageToken` — `pageToken` is an opaque value, clients MUST NOT parse or construct it
+- **Offset-based**: `page` + `pageSize` — acceptable for small datasets
+- **Keyset**: `after`/`before` opaque cursor + `orderBy` — O(1) regardless of page depth; cannot jump to arbitrary pages
+- Default `pageSize`: 20, max: 100
+- `pageSize < 1` → `400 Bad Request`; `pageSize > max` → cap to max (no error)
+- Exclude `rel="next"` when there is no next page
 
-GET, HEAD, DELETE must not include request bodies.
+## Filtering & Sorting
 
-## Status Codes
-
-**2xx Success:**
-- `200 OK` — standard success
-- `201 Created` — creation success; include `Location` header with new resource URL
-- `202 Accepted` — request accepted, processing not complete; used for async or deferred operations
-- `204 No Content` — success with no body (DELETE, etc.)
-
-**4xx Client Error:**
-- `400 Bad Request` — malformed request, validation failure
-- `401 Unauthorized` — missing/expired authentication
-- `403 Forbidden` — authenticated but not authorized
-- `404 Not Found` — resource doesn't exist
-- `409 Conflict` — duplicate or optimistic lock failure
-- `422 Unprocessable Entity` — semantic validation failure
-- `429 Too Many Requests` — rate limit exceeded
-
-**5xx Server Error:**
-- `500 Internal Server Error` — unexpected failure
-- `503 Service Unavailable` — temporary unavailability
-
-## JSON Format
-
-- **camelCase** field names: `userId`, `createdAt`, `isActive`
-- Never snake_case or abbreviations
-- Omit null/missing fields entirely (do not send `"field": null`)
-- Date/time values as RFC 3339 strings; server responses in UTC (`Z`)
-- Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
-- Servers must ignore read-only fields in request bodies
-
-## Error Response (RFC 7807/9457 Problem Details)
-
-```json
-{
-  "type": "https://api.example.com/errors/resource-not-found",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "User-friendly explanation",
-  "instance": "/articles/999",
-  "traceId": "abc-123-xyz"
-}
-```
-
-- `Content-Type: application/problem+json`
-- Include **all** validation failures at once, not incrementally
-- Never expose stack traces, internal paths, or DB errors
-
-## Headers
-
-- `Content-Type: application/json` for bodies
-- `Accept: application/json` for content negotiation
-- `Location` header on 201 Created
-- `Total-Count` for collection size
-- RFC 8288 `Link` header for pagination
-- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility
-
-## CRUD Behavior
-
-**Standard method response rules:**
-- POST (Create): return `201` with full resource + `Location` header
-- PATCH (Update): return the updated resource
-- DELETE: return `204` with no body
-
-**POST (Create):** Return `201` with full resource + `Location` header.
-- Clients SHOULD be able to specify resource ID (optional).
-- Duplicate creation MUST return `409 Conflict`.
-
-**PATCH (Update — default):** Only modify fields present in body; others unchanged.
-- Response MUST return the updated full resource.
-- Optionally support `updateMask` query parameter to explicitly specify fields to update.
-
-**PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead.
-
-**DELETE:** Return `204`; re-deletion policy is per-service (404 or 204).
-- Optionally support `force` query parameter for cascading child resource deletion (`DELETE /resources/{id}?force=true`).
+- Equality: `?status=PUBLISHED&authorId=123`
+- Date range: `After`/`Before` suffix — `?createdAfter=2024-01-01T00:00:00Z`
+- Numeric range: `Min`/`Max` suffix — `?priceMin=100&priceMax=500`
+- Multi-value (IN): repeat param = OR — `?status=a&status=b`
+- Cross-param = AND: `?status=PUBLISHED&authorId=123`
+- Contains: `?q=keyword` (full-text) or `?titleContains=keyword` (field)
+- Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
 
 ## API Versioning
 
@@ -183,36 +214,6 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 
 - Deprecation notice must be given at least 6 months before the sunset date
 
-## Key Principles
-
-- Resource identifiers are opaque strings — clients must not parse structure
-- Avoid storing sensitive data in query strings (they get logged)
-- `Cache-Control` header specifies caching strategy
-- Custom header names MUST NOT use `X-` prefix (RFC 6648/BCP 178) — applies to all new APIs; `X-Forwarded-For` and other headers already standardized with `X-` are grandfathered exceptions
-
-## Filtering & Sorting
-
-- Equality: `?status=PUBLISHED&authorId=123`
-- Date range: `After`/`Before` suffix — `?createdAfter=2024-01-01T00:00:00Z`
-- Numeric range: `Min`/`Max` suffix — `?priceMin=100&priceMax=500`
-- Multi-value (IN): repeat param = OR — `?status=a&status=b`
-- Cross-param = AND: `?status=PUBLISHED&authorId=123`
-- Contains: `?q=keyword` (full-text) or `?titleContains=keyword` (field)
-- Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
-
-## Pagination
-
-- Collections return **top-level JSON array** `[]` — never wrapped in an envelope object
-- **Empty collections**: return `200 OK` + `[]` — never `404`; include `Total-Count: 0`
-- Use `Link` header (RFC 8288) with `rel="next"`, `prev`, `first`, `last` for navigation
-- `Total-Count` header for total item count
-- **Cursor-based** (recommended): `pageSize` + `pageToken` — `pageToken` is an opaque value, clients MUST NOT parse or construct it
-- **Offset-based**: `page` + `pageSize` — acceptable for small datasets
-- **Keyset**: `after`/`before` opaque cursor + `orderBy` — O(1) regardless of page depth; cannot jump to arbitrary pages
-- Default `pageSize`: 20, max: 100
-- `pageSize < 1` → `400 Bad Request`; `pageSize > max` → cap to max (no error)
-- Exclude `rel="next"` when there is no next page
-
 ## Rate Limiting
 
 - Response headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
@@ -222,6 +223,24 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 ## Long-Running Operations
 
 - Return `201 Created` + `Location` header with domain resource immediately
-- Include `status` field: `PENDING` → `PROCESSING` → `COMPLETED` | `FAILED`
+- Include `status` field: `PENDING` → `IN_PROGRESS` → `COMPLETED` | `FAILED`
 - Client polls `GET {Location}` to check progress
 - On failure: include error details in response body
+
+## Idempotency-Key
+
+- Support `Idempotency-Key` header for POST endpoints where duplicate execution is risky (payments, orders)
+- Client-generated UUID v4
+- First request: process normally and store result
+- Re-request with same key: return stored result without reprocessing
+- Key validity: minimum 24 hours
+- POST endpoints with financial impact MUST support `Idempotency-Key`
+
+## Authentication & Security
+
+- `Authorization: Bearer {token}` for JWT authentication
+- `Authorization: ApiKey {key}` for API Key authentication
+- Never pass credentials in query parameters (logged by servers)
+- `401 Unauthorized`: missing/expired authentication — include `WWW-Authenticate` header
+- `403 Forbidden`: authenticated but not authorized
+- Avoid storing sensitive data in query strings (they get logged)

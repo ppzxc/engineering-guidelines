@@ -6,51 +6,36 @@ RESTful API design guidelines.
 
 ---
 
-## Compliance Levels
-
-The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document are to be interpreted as described in [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) and [RFC 8174](https://datatracker.ietf.org/doc/html/rfc8174).
-
-| Symbol | Level | Description |
-|--------|-------|-------------|
-| ✅ **Required** | MUST / DO | Rules that must be followed |
-| ⚠️ **Recommended** | SHOULD / MAY | Rules that should be followed when possible |
-| ❌ **Prohibited** | MUST NOT / DO NOT | Patterns that must not be used |
-
----
-
 ## Table of Contents
 
 1. [Overview](#1-overview)
-2. [HTTP Fundamentals](#2-http-fundamentals)
+   - [Compliance Levels](#compliance-levels)
+2. [REST Basics](#2-rest-basics)
    - [URL Design](#21-url-design)
-   - [HTTP Request/Response Patterns](#22-http-requestresponse-patterns)
+   - [HTTP Methods & Status Codes](#22-http-methods--status-codes)
    - [Query Parameters](#23-query-parameters)
    - [HTTP Headers](#24-http-headers)
-3. [REST Principles](#3-rest-principles)
-   - [Resource Schema](#31-resource-schema)
-   - [Field Mutability](#32-field-mutability)
-   - [Create/Update/Replace Handling](#33-createupdatereplace-handling)
-   - [Error Handling](#34-error-handling)
-4. [JSON Rules](#4-json-rules)
-   - [Field Naming](#41-field-naming)
-   - [Type System](#42-type-system)
-   - [Dates and Times](#43-dates-and-times)
-   - [Enum Handling](#44-enum-handling)
-5. [Common API Patterns](#5-common-api-patterns)
-   - [Actions](#51-actions)
-   - [Collections and Pagination](#52-collections-and-pagination)
-   - [Filtering and Sorting](#53-filtering-and-sorting)
-   - [API Versioning](#54-api-versioning)
-   - [Deprecation](#55-deprecation)
-   - [Rate Limiting](#56-rate-limiting)
-   - [Long-Running Operations](#57-long-running-operations)
-   - [Partial Response](#58-partial-response)
-   - [Expand/Embed](#59-expandembed)
-   - [Bulk Operations](#510-bulk-operations)
-6. [Authentication & Security](#6-authentication--security)
-   - [Authentication Methods](#61-authentication-methods)
-   - [401 vs 403 Distinction](#62-401-vs-403-distinction)
-   - [Idempotency-Key](#63-idempotency-key)
+   - [JSON Data Format](#25-json-data-format)
+   - [Error Response](#26-error-response)
+3. [REST Design](#3-rest-design)
+   - [Resource Schema & Field Rules](#31-resource-schema--field-rules)
+   - [CRUD Operations](#32-crud-operations)
+   - [Actions](#33-actions)
+   - [Collections & Pagination](#34-collections--pagination)
+   - [Filtering & Sorting](#35-filtering--sorting)
+   - [Partial Response](#36-partial-response)
+   - [Expand/Embed](#37-expandembed)
+   - [Bulk Operations](#38-bulk-operations)
+4. [API Operations](#4-api-operations)
+   - [API Versioning](#41-api-versioning)
+   - [Deprecation](#42-deprecation)
+   - [Rate Limiting](#43-rate-limiting)
+   - [Long-Running Operations](#44-long-running-operations)
+   - [Idempotency-Key](#45-idempotency-key)
+5. [Authentication & Security](#5-authentication--security)
+   - [Authentication Methods](#51-authentication-methods)
+   - [401 vs 403 Distinction](#52-401-vs-403-distinction)
+6. [References](#6-references)
 
 ---
 
@@ -71,9 +56,19 @@ The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document
 - All new HTTP/HTTPS APIs developed within the organization
 - Applied as much as possible when improving existing APIs
 
+### Compliance Levels
+
+The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document are to be interpreted as described in [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) and [RFC 8174](https://datatracker.ietf.org/doc/html/rfc8174).
+
+| Symbol | Level | Description |
+|--------|-------|-------------|
+| ✅ **Required** | MUST / DO | Rules that must be followed |
+| ⚠️ **Recommended** | SHOULD / MAY | Rules that should be followed when possible |
+| ❌ **Prohibited** | MUST NOT / DO NOT | Patterns that must not be used |
+
 ---
 
-## 2. HTTP Fundamentals
+## 2. REST Basics
 
 ### 2.1 URL Design
 
@@ -152,7 +147,7 @@ GET /articles?page_size=20&sort_order=desc
 
 ---
 
-### 2.2 HTTP Request/Response Patterns
+### 2.2 HTTP Methods & Status Codes
 
 #### HTTP Methods
 
@@ -294,9 +289,217 @@ Correlation-Id: xyz-789
 
 ---
 
-## 3. REST Principles
+### 2.5 JSON Data Format
 
-### 3.1 Resource Schema
+#### Field Naming
+
+✅ **Required**: Use camelCase for JSON field names.
+
+```json
+// Good
+{
+  "userId": "123",
+  "createdAt": "2024-01-20T10:00:00Z",
+  "isActive": true
+}
+
+// Bad
+{
+  "user_id": "123",
+  "created_at": "2024-01-20T10:00:00Z",
+  "is_active": true
+}
+```
+
+✅ **Required**: Field names must start with a lowercase letter.
+
+❌ **Prohibited**: Do not overuse abbreviations in field names. Prefer clear, complete words.
+
+```json
+// Bad
+{
+  "usr": "john",
+  "ts": "2024-01-20T10:00:00Z",
+  "cnt": 5
+}
+
+// Good
+{
+  "username": "john",
+  "timestamp": "2024-01-20T10:00:00Z",
+  "count": 5
+}
+```
+
+#### Type System
+
+##### Boolean
+
+✅ **Required**: Use JSON `true`/`false` for boolean values. Do not use strings `"true"`/`"false"` or numbers `1`/`0`.
+
+✅ **Required**: Use prefixes like `is`, `has`, `can` for boolean field names.
+
+```json
+{
+  "isActive": true,
+  "hasPermission": false,
+  "canEdit": true
+}
+```
+
+##### Number
+
+✅ **Required**: Use JSON number type for numeric values.
+
+⚠️ **Recommended**: Return large integers that exceed JavaScript's safe integer range (2^53 - 1) as strings.
+
+```json
+{
+  "count": 42,
+  "price": 19.99,
+  "largeId": "9007199254740993"
+}
+```
+
+##### String
+
+⚠️ **Recommended**: Distinguish between empty string (`""`) and `null`. Omit the field for meaningful "no value" cases; use empty string only when the value is intentionally empty.
+
+#### Dates and Times
+
+✅ **Required**: Represent all date/time values as strings in RFC 3339 format (ISO 8601 profile).
+
+✅ **Required**: Always include the timezone when present. Use `Z` for UTC.
+
+✅ **Required**: Return all time values in server responses as UTC (`Z`). Clients handle conversion to local timezone.
+
+⚠️ **Recommended**: Send time values in client requests as UTC (`Z`). If an offset is included, the server normalizes to UTC before storing.
+
+⚠️ **Recommended**: Use `YYYY-MM-DD` format without timezone for date-only fields (e.g., date of birth).
+
+❌ **Prohibited**: Do not use Unix timestamps (epoch milliseconds/seconds) as the default time format.
+
+##### Server Response Example
+
+```json
+{
+  "createdAt": "2024-01-20T10:00:00Z",
+  "scheduledAt": "2024-01-25T00:30:00Z",
+  "birthDate": "1990-05-15"
+}
+```
+
+##### Client Request Example
+
+```json
+// ⚠️ Recommended: UTC
+{ "scheduledAt": "2024-01-25T00:30:00Z" }
+
+// Allowed: with offset → server normalizes to UTC before storing
+{ "scheduledAt": "2024-01-25T09:30:00+09:00" }
+```
+
+##### Server Normalization Rules
+
+✅ **Required**: When a client sends a time with an offset, the server converts it to UTC before storing. Do not return an error.
+
+✅ **Required**: Responses after server normalization must always be returned as UTC (`Z`).
+
+⚠️ **Recommended**: If timezone information is business-critical (e.g., preserving the user's original timezone), use a separate `timeZone` field.
+
+```json
+{
+  "scheduledAt": "2024-01-25T00:30:00Z",
+  "timeZone": "Asia/Seoul"
+}
+```
+
+#### Enum Handling
+
+✅ **Required**: Use UPPER_SNAKE_CASE strings for enum values.
+
+```json
+{
+  "status": "PUBLISHED",
+  "priority": "HIGH"
+}
+```
+
+⚠️ **Recommended**: Design for clients to receive unknown enum values. Handle new enum values being added without breaking existing clients.
+
+❌ **Prohibited**: Do not use numbers or unclear abbreviations for enum values.
+
+```json
+// Bad
+{
+  "status": 1,
+  "priority": "hi"
+}
+
+// Good
+{
+  "status": "PUBLISHED",
+  "priority": "HIGH"
+}
+```
+
+---
+
+### 2.6 Error Response
+
+#### Error Response Structure
+
+✅ **Required**: All error responses must follow the RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) standard.
+
+✅ **Required**: Use `application/problem+json` as the `Content-Type` for error responses.
+
+```json
+{
+  "type": "https://api.example.com/errors/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "The requested article could not be found.",
+  "instance": "/articles/999",
+  "traceId": "abc-123-xyz"
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `type` | ✅ Required | URI identifying the error type (serves as documentation link; `about:blank` allowed) |
+| `title` | ✅ Required | Short, human-readable summary of the error type |
+| `status` | ✅ Required | HTTP status code (numeric) |
+| `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
+| `instance` | ⚠️ Recommended | Request path where the problem occurred |
+| `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
+| `traceId` | ⚠️ Recommended | Extension field — request trace ID (for debugging) |
+
+> **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
+
+⚠️ **Recommended**: Return all validation errors at once on validation failure (do not return one at a time).
+
+```json
+{
+  "type": "https://api.example.com/errors/validation-failed",
+  "title": "Validation Failed",
+  "status": 400,
+  "detail": "Request data failed validation.",
+  "instance": "/articles",
+  "errors": [
+    { "field": "title", "message": "Title is required." },
+    { "field": "content", "message": "Content must be at least 10 characters." }
+  ],
+  "traceId": "abc-123-xyz"
+}
+```
+
+❌ **Prohibited**: Do not expose internal implementation details in error responses, such as stack traces, internal system paths, or database error messages.
+
+---
+
+## 3. REST Design
+
+### 3.1 Resource Schema & Field Rules
 
 Resources are the core entities exposed by a service. Each resource must be accessible via a unique URL.
 
@@ -343,9 +546,7 @@ Example:
 }
 ```
 
----
-
-### 3.2 Field Mutability
+#### Field Mutability
 
 Fields are classified by whether they can be changed after creation.
 
@@ -361,7 +562,7 @@ Fields are classified by whether they can be changed after creation.
 
 ---
 
-### 3.3 Create/Update/Replace Handling
+### 3.2 CRUD Operations
 
 #### POST — Create Resource
 
@@ -418,223 +619,7 @@ Content-Type: application/json
 
 ---
 
-### 3.4 Error Handling
-
-#### Error Response Structure
-
-✅ **Required**: All error responses must follow the RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) standard.
-
-✅ **Required**: Use `application/problem+json` as the `Content-Type` for error responses.
-
-```json
-{
-  "type": "https://api.example.com/errors/resource-not-found",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "The requested article could not be found.",
-  "instance": "/articles/999",
-  "traceId": "abc-123-xyz"
-}
-```
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| `type` | ✅ Required | URI identifying the error type (serves as documentation link; `about:blank` allowed) |
-| `title` | ✅ Required | Short, human-readable summary of the error type |
-| `status` | ✅ Required | HTTP status code (numeric) |
-| `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
-| `instance` | ⚠️ Recommended | Request path where the problem occurred |
-| `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
-| `traceId` | ⚠️ Recommended | Extension field — request trace ID (for debugging) |
-
-> **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
-
-⚠️ **Recommended**: Return all validation errors at once on validation failure (do not return one at a time).
-
-```json
-{
-  "type": "https://api.example.com/errors/validation-failed",
-  "title": "Validation Failed",
-  "status": 400,
-  "detail": "Request data failed validation.",
-  "instance": "/articles",
-  "errors": [
-    { "field": "title", "message": "Title is required." },
-    { "field": "content", "message": "Content must be at least 10 characters." }
-  ],
-  "traceId": "abc-123-xyz"
-}
-```
-
-❌ **Prohibited**: Do not expose internal implementation details in error responses, such as stack traces, internal system paths, or database error messages.
-
----
-
-## 4. JSON Rules
-
-### 4.1 Field Naming
-
-✅ **Required**: Use camelCase for JSON field names.
-
-```json
-// Good
-{
-  "userId": "123",
-  "createdAt": "2024-01-20T10:00:00Z",
-  "isActive": true
-}
-
-// Bad
-{
-  "user_id": "123",
-  "created_at": "2024-01-20T10:00:00Z",
-  "is_active": true
-}
-```
-
-✅ **Required**: Field names must start with a lowercase letter.
-
-❌ **Prohibited**: Do not overuse abbreviations in field names. Prefer clear, complete words.
-
-```json
-// Bad
-{
-  "usr": "john",
-  "ts": "2024-01-20T10:00:00Z",
-  "cnt": 5
-}
-
-// Good
-{
-  "username": "john",
-  "timestamp": "2024-01-20T10:00:00Z",
-  "count": 5
-}
-```
-
----
-
-### 4.2 Type System
-
-#### Boolean
-
-✅ **Required**: Use JSON `true`/`false` for boolean values. Do not use strings `"true"`/`"false"` or numbers `1`/`0`.
-
-✅ **Required**: Use prefixes like `is`, `has`, `can` for boolean field names.
-
-```json
-{
-  "isActive": true,
-  "hasPermission": false,
-  "canEdit": true
-}
-```
-
-#### Number
-
-✅ **Required**: Use JSON number type for numeric values.
-
-⚠️ **Recommended**: Return large integers that exceed JavaScript's safe integer range (2^53 - 1) as strings.
-
-```json
-{
-  "count": 42,
-  "price": 19.99,
-  "largeId": "9007199254740993"
-}
-```
-
-#### String
-
-⚠️ **Recommended**: Distinguish between empty string (`""`) and `null`. Omit the field for meaningful "no value" cases; use empty string only when the value is intentionally empty.
-
----
-
-### 4.3 Dates and Times
-
-✅ **Required**: Represent all date/time values as strings in RFC 3339 format (ISO 8601 profile).
-
-✅ **Required**: Always include the timezone when present. Use `Z` for UTC.
-
-✅ **Required**: Return all time values in server responses as UTC (`Z`). Clients handle conversion to local timezone.
-
-⚠️ **Recommended**: Send time values in client requests as UTC (`Z`). If an offset is included, the server normalizes to UTC before storing.
-
-⚠️ **Recommended**: Use `YYYY-MM-DD` format without timezone for date-only fields (e.g., date of birth).
-
-❌ **Prohibited**: Do not use Unix timestamps (epoch milliseconds/seconds) as the default time format.
-
-#### Server Response Example
-
-```json
-{
-  "createdAt": "2024-01-20T10:00:00Z",
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "birthDate": "1990-05-15"
-}
-```
-
-#### Client Request Example
-
-```json
-// ⚠️ Recommended: UTC
-{ "scheduledAt": "2024-01-25T00:30:00Z" }
-
-// Allowed: with offset → server normalizes to UTC before storing
-{ "scheduledAt": "2024-01-25T09:30:00+09:00" }
-```
-
-#### Server Normalization Rules
-
-✅ **Required**: When a client sends a time with an offset, the server converts it to UTC before storing. Do not return an error.
-
-✅ **Required**: Responses after server normalization must always be returned as UTC (`Z`).
-
-⚠️ **Recommended**: If timezone information is business-critical (e.g., preserving the user's original timezone), use a separate `timeZone` field.
-
-```json
-{
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "timeZone": "Asia/Seoul"
-}
-```
-
----
-
-### 4.4 Enum Handling
-
-✅ **Required**: Use UPPER_SNAKE_CASE strings for enum values.
-
-```json
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
-⚠️ **Recommended**: Design for clients to receive unknown enum values. Handle new enum values being added without breaking existing clients.
-
-❌ **Prohibited**: Do not use numbers or unclear abbreviations for enum values.
-
-```json
-// Bad
-{
-  "status": 1,
-  "priority": "hi"
-}
-
-// Good
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
----
-
-## 5. Common API Patterns
-
-### 5.1 Actions
+### 3.3 Actions
 
 Use the action pattern for operations that are difficult to express as CRUD (e.g., approve, send, lock).
 
@@ -672,7 +657,7 @@ Content-Type: application/json
 
 ---
 
-### 5.2 Collections and Pagination
+### 3.4 Collections & Pagination
 
 #### Collection Response Structure
 
@@ -827,7 +812,7 @@ Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after
 
 ---
 
-### 5.3 Filtering and Sorting
+### 3.5 Filtering & Sorting
 
 #### Filtering
 
@@ -893,7 +878,27 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 ---
 
-### 5.4 API Versioning
+### 3.6 Partial Response
+
+> 🚧 Coming soon
+
+---
+
+### 3.7 Expand/Embed
+
+> 🚧 Coming soon
+
+---
+
+### 3.8 Bulk Operations
+
+> 🚧 Coming soon
+
+---
+
+## 4. API Operations
+
+### 4.1 API Versioning
 
 #### Version Notation
 
@@ -934,7 +939,7 @@ Api-Version: 2024-01-20
 
 ---
 
-### 5.5 Deprecation
+### 4.2 Deprecation
 
 ✅ **Required**: Notify clients of deprecated APIs via response headers.
 
@@ -962,7 +967,7 @@ Link: <https://api.example.com/users/articles>; rel="successor-version"
 
 ---
 
-### 5.6 Rate Limiting
+### 4.3 Rate Limiting
 
 API servers limit request frequency per client to ensure service stability.
 
@@ -1060,7 +1065,7 @@ Example: attempt=1 → `min(60, 1 × 2^0) + random(0,1)` = 1~2 seconds
 
 ---
 
-### 5.7 Long-Running Operations
+### 4.4 Long-Running Operations
 
 For operations that do not complete immediately (report generation, data import, etc.), create a domain resource immediately and track processing progress via the resource's status field.
 
@@ -1097,27 +1102,41 @@ GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 
 ---
 
-### 5.8 Partial Response
+### 4.5 Idempotency-Key
 
-> 🚧 Coming soon
+POST is not idempotent, so retrying after a network error can result in duplicate resource creation. Use the `Idempotency-Key` header for APIs where duplicate execution is dangerous, such as payments, orders, and email sending.
+
+✅ **Required**: Support the `Idempotency-Key` header for POST endpoints where duplicate execution is risky.
+
+```
+POST /orders
+Content-Type: application/json
+Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
+
+{
+  "productId": "123",
+  "quantity": 2
+}
+```
+
+**Server Behavior:**
+- First request: Process normally and store the result
+- Re-request with same key: Return the stored result without reprocessing
+- Same request with different key: Treat as a separate request
+
+✅ **Required**: Use client-generated UUID v4 for `Idempotency-Key` values.
+
+⚠️ **Recommended**: Return the same status code and body as the original response for re-requests with the same key.
+
+⚠️ **Recommended**: Set the validity period of `Idempotency-Key` to at least 24 hours.
+
+❌ **Prohibited**: Do not design POST endpoints with financial impact (payments, orders, etc.) without `Idempotency-Key` support.
 
 ---
 
-### 5.9 Expand/Embed
+## 5. Authentication & Security
 
-> 🚧 Coming soon
-
----
-
-### 5.10 Bulk Operations
-
-> 🚧 Coming soon
-
----
-
-## 6. Authentication & Security
-
-### 6.1 Authentication Methods
+### 5.1 Authentication Methods
 
 #### Bearer Token (JWT)
 
@@ -1144,7 +1163,7 @@ GET /articles?apiKey=secret-key
 
 ---
 
-### 6.2 401 vs 403 Distinction
+### 5.2 401 vs 403 Distinction
 
 | Status Code | Meaning | When to Use |
 |-------------|---------|-------------|
@@ -1182,39 +1201,7 @@ Content-Type: application/problem+json
 
 ---
 
-### 6.3 Idempotency-Key
-
-POST is not idempotent, so retrying after a network error can result in duplicate resource creation. Use the `Idempotency-Key` header for APIs where duplicate execution is dangerous, such as payments, orders, and email sending.
-
-✅ **Required**: Support the `Idempotency-Key` header for POST endpoints where duplicate execution is risky.
-
-```
-POST /orders
-Content-Type: application/json
-Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
-
-{
-  "productId": "123",
-  "quantity": 2
-}
-```
-
-**Server Behavior:**
-- First request: Process normally and store the result
-- Re-request with same key: Return the stored result without reprocessing
-- Same request with different key: Treat as a separate request
-
-✅ **Required**: Use client-generated UUID v4 for `Idempotency-Key` values.
-
-⚠️ **Recommended**: Return the same status code and body as the original response for re-requests with the same key.
-
-⚠️ **Recommended**: Set the validity period of `Idempotency-Key` to at least 24 hours.
-
-❌ **Prohibited**: Do not design POST endpoints with financial impact (payments, orders, etc.) without `Idempotency-Key` support.
-
----
-
-## References
+## 6. References
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
@@ -1228,4 +1215,3 @@ Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
 - [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
 - [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
-- [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)

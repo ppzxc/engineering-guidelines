@@ -6,12 +6,5 @@
     "name": "ppzxc",
     "email": "cjh8487@naver.com",
     "url": "https://ppzxc.github.io"
-  },
-  "skills": [
-    {
-      "name": "restful-guidelines",
-      "source": "./skills/restful-guidelines",
-      "description": "RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, and headers"
-    }
-  ]
+  }
 }

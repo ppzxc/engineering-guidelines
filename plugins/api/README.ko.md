@@ -2,11 +2,61 @@
 
 > [English](README.md)
 
-RESTful API 설계 가이드라인입니다.
+RESTful API 설계 가이드라인이다.
 
 ---
 
-## 규범 수준 표기
+## 목차
+
+1. [개요](#1-개요)
+   - [규범 수준 표기](#규범-수준-표기)
+2. [REST Basics](#2-rest-basics)
+   - [URL 설계](#21-url-설계)
+   - [HTTP 메서드 & 상태 코드](#22-http-메서드--상태-코드)
+   - [쿼리 파라미터](#23-쿼리-파라미터)
+   - [HTTP 헤더](#24-http-헤더)
+   - [JSON 데이터 포맷](#25-json-데이터-포맷)
+   - [에러 응답](#26-에러-응답)
+3. [REST Design](#3-rest-design)
+   - [리소스 스키마 & 필드 규칙](#31-리소스-스키마--필드-규칙)
+   - [CRUD 처리](#32-crud-처리)
+   - [액션](#33-액션)
+   - [컬렉션 & 페이지네이션](#34-컬렉션--페이지네이션)
+   - [필터링 & 정렬](#35-필터링--정렬)
+   - [Partial Response](#36-partial-response)
+   - [Expand/Embed](#37-expandembed)
+   - [Bulk Operations](#38-bulk-operations)
+4. [API 운영](#4-api-운영)
+   - [API 버전 관리](#41-api-버전-관리)
+   - [Deprecation](#42-deprecation)
+   - [속도 제한](#43-속도-제한)
+   - [장기 실행 작업](#44-장기-실행-작업)
+   - [Idempotency-Key](#45-idempotency-key)
+5. [인증 & 보안](#5-인증--보안)
+   - [인증 방식](#51-인증-방식)
+   - [401 vs 403 구분](#52-401-vs-403-구분)
+6. [참고 자료](#6-참고-자료)
+
+---
+
+## 1. 개요
+
+### 목적
+
+- 모든 RESTful API의 일관성, 예측 가능성, 유지보수성을 보장한다.
+- API는 개발자가 소비하는 제품이다.
+  - 직관적으로 이해 가능해야 한다.
+  - 오류 발생 시 명확한 메시지를 제공해야 한다.
+  - 버전이 바뀌어도 하위 호환성을 유지해야 한다.
+- Roy Fielding의 RESTful 원칙 ([Architectural Styles and the Design of Network-based Software Architectures](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf))을 참고한다.
+  - HATEOAS는 구현하지 않는다.
+
+### 적용 범위
+
+- 조직 내 신규 개발되는 모든 HTTP/HTTPS API
+- 기존 API 개선 시 가능한 한 적용
+
+### 규범 수준 표기
 
 이 문서에서 사용하는 "MUST", "MUST NOT", "SHOULD", "MAY", "DO NOT" 키워드는 [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) 및 [RFC 8174](https://datatracker.ietf.org/doc/html/rfc8174)에 따라 해석한다.
 
@@ -18,62 +68,7 @@ RESTful API 설계 가이드라인입니다.
 
 ---
 
-## 목차
-
-1. [개요](#1-개요)
-2. [HTTP 기본 규칙](#2-http-기본-규칙)
-   - [URL 설계](#21-url-설계)
-   - [HTTP 요청/응답 패턴](#22-http-요청응답-패턴)
-   - [쿼리 파라미터](#23-쿼리-파라미터)
-   - [HTTP 헤더](#24-http-헤더)
-3. [REST 원칙](#3-rest-원칙)
-   - [리소스 스키마](#31-리소스-스키마)
-   - [필드 변경 가능성](#32-필드-변경-가능성)
-   - [생성/수정/대체 처리](#33-생성수정대체-처리)
-   - [에러 처리](#34-에러-처리)
-4. [JSON 규칙](#4-json-규칙)
-   - [필드 네이밍](#41-필드-네이밍)
-   - [타입 시스템](#42-타입-시스템)
-   - [날짜와 시간](#43-날짜와-시간)
-   - [Enum 처리](#44-enum-처리)
-5. [공통 API 패턴](#5-공통-api-패턴)
-   - [액션 수행](#51-액션-수행)
-   - [컬렉션 및 페이지네이션](#52-컬렉션-및-페이지네이션)
-   - [필터링과 정렬](#53-필터링과-정렬)
-   - [API 버전 관리](#54-api-버전-관리)
-   - [Deprecation](#55-deprecation)
-   - [속도 제한](#56-속도-제한)
-   - [장기 실행 작업](#57-장기-실행-작업)
-   - [Partial Response](#58-partial-response)
-   - [Expand/Embed](#59-expandembed)
-   - [Bulk Operations](#510-bulk-operations)
-6. [인증 및 보안](#6-인증-및-보안)
-   - [인증 방식](#61-인증-방식)
-   - [401 vs 403 구분](#62-401-vs-403-구분)
-   - [Idempotency-Key](#63-idempotency-key)
-
----
-
-## 1. 개요
-
-### 목적
-
-- 모든 RESTful API의 일관성, 예측 가능성, 유지보수성을 보장합니다.
-- API는 개발자가 소비하는 제품입니다.
-  - 직관적으로 이해 가능해야 합니다.
-  - 오류 발생 시 명확한 메시지를 제공해야 합니다.
-  - 버전이 바뀌어도 하위 호환성을 유지해야 합니다.
-- Roy Fielding의 RESTful 원칙 ([Architectural Styles and the Design of Network-based Software Architectures](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf))을 참고합니다.
-  - HATEOAS는 구현하지 않습니다.
-
-### 적용 범위
-
-- 조직 내 신규 개발되는 모든 HTTP/HTTPS API
-- 기존 API 개선 시 가능한 한 적용
-
----
-
-## 2. HTTP 기본 규칙
+## 2. REST Basics
 
 ### 2.1 URL 설계
 
@@ -173,7 +168,7 @@ GET /articles?page_size=20&sort_order=desc
 
 ---
 
-### 2.2 HTTP 요청/응답 패턴
+### 2.2 HTTP 메서드 & 상태 코드
 
 #### HTTP 메서드
 
@@ -315,11 +310,219 @@ Correlation-Id: xyz-789
 
 ---
 
-## 3. REST 원칙
+### 2.5 JSON 데이터 포맷
 
-### 3.1 리소스 스키마
+#### 필드 네이밍
 
-리소스는 서비스가 노출하는 핵심 엔티티입니다. 각 리소스는 고유한 URL을 통해 접근 가능해야 합니다.
+✅ **필수**: JSON 필드 이름은 camelCase를 사용한다.
+
+```json
+// Good
+{
+  "userId": "123",
+  "createdAt": "2024-01-20T10:00:00Z",
+  "isActive": true
+}
+
+// Bad
+{
+  "user_id": "123",
+  "created_at": "2024-01-20T10:00:00Z",
+  "is_active": true
+}
+```
+
+✅ **필수**: 필드 이름은 영소문자로 시작한다.
+
+❌ **금지**: 필드 이름에 약어를 남용하지 않는다. 명확한 전체 단어를 우선한다.
+
+```json
+// Bad
+{
+  "usr": "john",
+  "ts": "2024-01-20T10:00:00Z",
+  "cnt": 5
+}
+
+// Good
+{
+  "username": "john",
+  "timestamp": "2024-01-20T10:00:00Z",
+  "count": 5
+}
+```
+
+#### 타입 시스템
+
+##### Boolean
+
+✅ **필수**: Boolean 값에는 JSON `true`/`false`를 사용한다. 문자열 `"true"`/`"false"` 또는 숫자 `1`/`0`을 사용하지 않는다.
+
+✅ **필수**: Boolean 필드 이름은 `is`, `has`, `can` 등의 접두사를 사용한다.
+
+```json
+{
+  "isActive": true,
+  "hasPermission": false,
+  "canEdit": true
+}
+```
+
+##### Number
+
+✅ **필수**: 숫자 값은 JSON number 타입을 사용한다.
+
+⚠️ **권장**: JavaScript의 안전한 정수 범위(2^53 - 1)를 초과하는 큰 정수는 문자열로 반환한다.
+
+```json
+{
+  "count": 42,
+  "price": 19.99,
+  "largeId": "9007199254740993"
+}
+```
+
+##### String
+
+⚠️ **권장**: 빈 문자열(`""`)과 `null`을 구분하여 사용한다. 의미 있는 "값 없음"에는 필드를 제외하고, 의도적으로 빈 값임을 나타낼 때만 빈 문자열을 사용한다.
+
+#### 날짜와 시간
+
+✅ **필수**: 모든 날짜/시간 값은 RFC 3339 형식(ISO 8601 프로파일)의 문자열로 표현한다.
+
+✅ **필수**: 시간대(timezone)가 있는 경우 반드시 포함한다. UTC인 경우 `Z`를 사용한다.
+
+✅ **필수**: 서버 응답의 모든 시간 값은 UTC(`Z`)로 반환한다. 클라이언트가 로컬 시간대로 변환한다.
+
+⚠️ **권장**: 클라이언트 요청의 시간 값도 UTC(`Z`)로 전송한다. 오프셋이 포함된 경우 서버가 UTC로 정규화하여 저장한다.
+
+⚠️ **권장**: 날짜만 필요한 필드(생년월일 등)는 `YYYY-MM-DD` 형식을 사용하며 시간대를 포함하지 않는다.
+
+❌ **금지**: Unix timestamp(epoch milliseconds/seconds)를 기본 시간 형식으로 사용하지 않는다.
+
+##### 서버 응답 예시
+
+```json
+{
+  "createdAt": "2024-01-20T10:00:00Z",
+  "scheduledAt": "2024-01-25T00:30:00Z",
+  "birthDate": "1990-05-15"
+}
+```
+
+##### 클라이언트 요청 예시
+
+```json
+// ⚠️ 권장: UTC
+{ "scheduledAt": "2024-01-25T00:30:00Z" }
+
+// 허용: 오프셋 포함 → 서버가 UTC로 정규화 저장
+{ "scheduledAt": "2024-01-25T09:30:00+09:00" }
+```
+
+##### 서버 정규화 규칙
+
+✅ **필수**: 클라이언트가 오프셋이 포함된 시간을 전송하면, 서버는 이를 UTC로 변환하여 저장한다. 에러를 반환하지 않는다.
+
+✅ **필수**: 서버가 정규화한 후의 응답은 항상 UTC(`Z`)로 반환한다.
+
+⚠️ **권장**: 시간대 정보가 비즈니스적으로 중요한 경우(예: 사용자의 원래 시간대 보존), 별도의 `timeZone` 필드를 사용한다.
+
+```json
+{
+  "scheduledAt": "2024-01-25T00:30:00Z",
+  "timeZone": "Asia/Seoul"
+}
+```
+
+#### Enum 처리
+
+✅ **필수**: Enum 값은 UPPER_SNAKE_CASE 문자열을 사용한다.
+
+```json
+{
+  "status": "PUBLISHED",
+  "priority": "HIGH"
+}
+```
+
+⚠️ **권장**: 클라이언트가 알 수 없는 Enum 값을 수신할 수 있도록 설계한다. 새로운 Enum 값이 추가될 때 기존 클라이언트가 깨지지 않도록 처리한다.
+
+❌ **금지**: Enum 값으로 숫자나 불명확한 약어를 사용하지 않는다.
+
+```json
+// Bad
+{
+  "status": 1,
+  "priority": "hi"
+}
+
+// Good
+{
+  "status": "PUBLISHED",
+  "priority": "HIGH"
+}
+```
+
+---
+
+### 2.6 에러 응답
+
+#### 에러 응답 구조
+
+✅ **필수**: 모든 에러 응답은 RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) 표준을 따른다.
+
+✅ **필수**: 에러 응답의 `Content-Type`은 `application/problem+json`을 사용한다.
+
+```json
+{
+  "type": "https://api.example.com/errors/resource-not-found",
+  "title": "리소스를 찾을 수 없음",
+  "status": 404,
+  "detail": "요청한 게시글을 찾을 수 없습니다.",
+  "instance": "/articles/999",
+  "traceId": "abc-123-xyz"
+}
+```
+
+| 필드 | 필수 여부 | 설명 |
+|------|-----------|------|
+| `type` | ✅ 필수 | 에러 유형을 식별하는 URI (문서 링크 역할, `about:blank` 허용) |
+| `title` | ✅ 필수 | 에러 유형의 짧은 요약 (사람이 읽을 수 있는 텍스트) |
+| `status` | ✅ 필수 | HTTP 상태 코드 (숫자) |
+| `detail` | ✅ 필수 | 이 요청에 대한 구체적인 에러 설명 (사용자가 이해할 수 있는 언어) |
+| `instance` | ⚠️ 권장 | 문제가 발생한 요청 경로 |
+| `errors` | ⚠️ 권장 | 확장 필드 — 필드 수준 유효성 검사 상세 목록 |
+| `traceId` | ⚠️ 권장 | 확장 필드 — 요청 추적 ID (디버깅용) |
+
+> **참조**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
+
+⚠️ **권장**: 유효성 검사 실패 시 모든 오류 필드를 한 번에 반환한다 (하나씩 반환하지 않는다).
+
+```json
+{
+  "type": "https://api.example.com/errors/validation-failed",
+  "title": "유효성 검사 실패",
+  "status": 400,
+  "detail": "요청 데이터 유효성 검사에 실패했습니다.",
+  "instance": "/articles",
+  "errors": [
+    { "field": "title", "message": "제목은 필수 입력값입니다." },
+    { "field": "content", "message": "본문은 10자 이상이어야 합니다." }
+  ],
+  "traceId": "abc-123-xyz"
+}
+```
+
+❌ **금지**: 에러 응답에 스택 트레이스, 내부 시스템 경로, DB 오류 메시지 등 내부 구현 정보를 노출하지 않는다.
+
+---
+
+## 3. REST Design
+
+### 3.1 리소스 스키마 & 필드 규칙
+
+리소스는 서비스가 노출하는 핵심 엔티티다. 각 리소스는 고유한 URL을 통해 접근 가능해야 한다.
 
 ✅ **필수**: 모든 리소스는 고유 식별자(`id`)를 가진다.
 
@@ -364,11 +567,9 @@ Correlation-Id: xyz-789
 }
 ```
 
----
+#### 필드 변경 가능성
 
-### 3.2 필드 변경 가능성
-
-필드는 생성 후 변경 가능 여부에 따라 분류됩니다.
+필드는 생성 후 변경 가능 여부에 따라 분류된다.
 
 | 분류 | 설명 | 예시 |
 |------|------|------|
@@ -382,7 +583,7 @@ Correlation-Id: xyz-789
 
 ---
 
-### 3.3 생성/수정/대체 처리
+### 3.2 CRUD 처리
 
 #### POST — 리소스 생성
 
@@ -439,225 +640,9 @@ Content-Type: application/json
 
 ---
 
-### 3.4 에러 처리
+### 3.3 액션
 
-#### 에러 응답 구조
-
-✅ **필수**: 모든 에러 응답은 RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) 표준을 따른다.
-
-✅ **필수**: 에러 응답의 `Content-Type`은 `application/problem+json`을 사용한다.
-
-```json
-{
-  "type": "https://api.example.com/errors/resource-not-found",
-  "title": "리소스를 찾을 수 없음",
-  "status": 404,
-  "detail": "요청한 게시글을 찾을 수 없습니다.",
-  "instance": "/articles/999",
-  "traceId": "abc-123-xyz"
-}
-```
-
-| 필드 | 필수 여부 | 설명 |
-|------|-----------|------|
-| `type` | ✅ 필수 | 에러 유형을 식별하는 URI (문서 링크 역할, `about:blank` 허용) |
-| `title` | ✅ 필수 | 에러 유형의 짧은 요약 (사람이 읽을 수 있는 텍스트) |
-| `status` | ✅ 필수 | HTTP 상태 코드 (숫자) |
-| `detail` | ✅ 필수 | 이 요청에 대한 구체적인 에러 설명 (사용자가 이해할 수 있는 언어) |
-| `instance` | ⚠️ 권장 | 문제가 발생한 요청 경로 |
-| `errors` | ⚠️ 권장 | 확장 필드 — 필드 수준 유효성 검사 상세 목록 |
-| `traceId` | ⚠️ 권장 | 확장 필드 — 요청 추적 ID (디버깅용) |
-
-> **참조**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
-
-⚠️ **권장**: 유효성 검사 실패 시 모든 오류 필드를 한 번에 반환한다 (하나씩 반환하지 않는다).
-
-```json
-{
-  "type": "https://api.example.com/errors/validation-failed",
-  "title": "유효성 검사 실패",
-  "status": 400,
-  "detail": "요청 데이터 유효성 검사에 실패했습니다.",
-  "instance": "/articles",
-  "errors": [
-    { "field": "title", "message": "제목은 필수 입력값입니다." },
-    { "field": "content", "message": "본문은 10자 이상이어야 합니다." }
-  ],
-  "traceId": "abc-123-xyz"
-}
-```
-
-❌ **금지**: 에러 응답에 스택 트레이스, 내부 시스템 경로, DB 오류 메시지 등 내부 구현 정보를 노출하지 않는다.
-
----
-
-## 4. JSON 규칙
-
-### 4.1 필드 네이밍
-
-✅ **필수**: JSON 필드 이름은 camelCase를 사용한다.
-
-```json
-// Good
-{
-  "userId": "123",
-  "createdAt": "2024-01-20T10:00:00Z",
-  "isActive": true
-}
-
-// Bad
-{
-  "user_id": "123",
-  "created_at": "2024-01-20T10:00:00Z",
-  "is_active": true
-}
-```
-
-✅ **필수**: 필드 이름은 영소문자로 시작한다.
-
-❌ **금지**: 필드 이름에 약어를 남용하지 않는다. 명확한 전체 단어를 우선한다.
-
-```json
-// Bad
-{
-  "usr": "john",
-  "ts": "2024-01-20T10:00:00Z",
-  "cnt": 5
-}
-
-// Good
-{
-  "username": "john",
-  "timestamp": "2024-01-20T10:00:00Z",
-  "count": 5
-}
-```
-
----
-
-### 4.2 타입 시스템
-
-#### Boolean
-
-✅ **필수**: Boolean 값에는 JSON `true`/`false`를 사용한다. 문자열 `"true"`/`"false"` 또는 숫자 `1`/`0`을 사용하지 않는다.
-
-✅ **필수**: Boolean 필드 이름은 `is`, `has`, `can` 등의 접두사를 사용한다.
-
-```json
-{
-  "isActive": true,
-  "hasPermission": false,
-  "canEdit": true
-}
-```
-
-#### Number
-
-✅ **필수**: 숫자 값은 JSON number 타입을 사용한다.
-
-⚠️ **권장**: JavaScript의 안전한 정수 범위(2^53 - 1)를 초과하는 큰 정수는 문자열로 반환한다.
-
-```json
-{
-  "count": 42,
-  "price": 19.99,
-  "largeId": "9007199254740993"
-}
-```
-
-#### String
-
-⚠️ **권장**: 빈 문자열(`""`)과 `null`을 구분하여 사용한다. 의미 있는 "값 없음"에는 필드를 제외하고, 의도적으로 빈 값임을 나타낼 때만 빈 문자열을 사용한다.
-
----
-
-### 4.3 날짜와 시간
-
-✅ **필수**: 모든 날짜/시간 값은 RFC 3339 형식(ISO 8601 프로파일)의 문자열로 표현한다.
-
-✅ **필수**: 시간대(timezone)가 있는 경우 반드시 포함한다. UTC인 경우 `Z`를 사용한다.
-
-✅ **필수**: 서버 응답의 모든 시간 값은 UTC(`Z`)로 반환한다. 클라이언트가 로컬 시간대로 변환한다.
-
-⚠️ **권장**: 클라이언트 요청의 시간 값도 UTC(`Z`)로 전송한다. 오프셋이 포함된 경우 서버가 UTC로 정규화하여 저장한다.
-
-⚠️ **권장**: 날짜만 필요한 필드(생년월일 등)는 `YYYY-MM-DD` 형식을 사용하며 시간대를 포함하지 않는다.
-
-❌ **금지**: Unix timestamp(epoch milliseconds/seconds)를 기본 시간 형식으로 사용하지 않는다.
-
-#### 서버 응답 예시
-
-```json
-{
-  "createdAt": "2024-01-20T10:00:00Z",
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "birthDate": "1990-05-15"
-}
-```
-
-#### 클라이언트 요청 예시
-
-```json
-// ⚠️ 권장: UTC
-{ "scheduledAt": "2024-01-25T00:30:00Z" }
-
-// 허용: 오프셋 포함 → 서버가 UTC로 정규화 저장
-{ "scheduledAt": "2024-01-25T09:30:00+09:00" }
-```
-
-#### 서버 정규화 규칙
-
-✅ **필수**: 클라이언트가 오프셋이 포함된 시간을 전송하면, 서버는 이를 UTC로 변환하여 저장한다. 에러를 반환하지 않는다.
-
-✅ **필수**: 서버가 정규화한 후의 응답은 항상 UTC(`Z`)로 반환한다.
-
-⚠️ **권장**: 시간대 정보가 비즈니스적으로 중요한 경우(예: 사용자의 원래 시간대 보존), 별도의 `timeZone` 필드를 사용한다.
-
-```json
-{
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "timeZone": "Asia/Seoul"
-}
-```
-
----
-
-### 4.4 Enum 처리
-
-✅ **필수**: Enum 값은 UPPER_SNAKE_CASE 문자열을 사용한다.
-
-```json
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
-⚠️ **권장**: 클라이언트가 알 수 없는 Enum 값을 수신할 수 있도록 설계한다. 새로운 Enum 값이 추가될 때 기존 클라이언트가 깨지지 않도록 처리한다.
-
-❌ **금지**: Enum 값으로 숫자나 불명확한 약어를 사용하지 않는다.
-
-```json
-// Bad
-{
-  "status": 1,
-  "priority": "hi"
-}
-
-// Good
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
----
-
-## 5. 공통 API 패턴
-
-### 5.1 액션 수행
-
-CRUD로 표현하기 어려운 동작(예: 승인, 전송, 잠금)에는 액션 패턴을 사용합니다.
+CRUD로 표현하기 어려운 동작(예: 승인, 전송, 잠금)에는 액션 패턴을 사용한다.
 
 ✅ **필수**: 액션은 리소스 URL 뒤에 `:action` 형태로 표현한다.
 
@@ -693,7 +678,7 @@ Content-Type: application/json
 
 ---
 
-### 5.2 컬렉션 및 페이지네이션
+### 3.4 컬렉션 & 페이지네이션
 
 #### 컬렉션 응답 구조
 
@@ -773,7 +758,7 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
 
 #### 오프셋 기반 페이지네이션
 
-소규모 데이터셋에서는 오프셋 기반 페이지네이션도 허용됩니다.
+소규모 데이터셋에서는 오프셋 기반 페이지네이션도 허용된다.
 
 **요청:**
 
@@ -848,7 +833,7 @@ Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after
 
 ---
 
-### 5.3 필터링과 정렬
+### 3.5 필터링 & 정렬
 
 #### 필터링
 
@@ -915,7 +900,27 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 ---
 
-### 5.4 API 버전 관리
+### 3.6 Partial Response
+
+> 🚧 Coming soon
+
+---
+
+### 3.7 Expand/Embed
+
+> 🚧 Coming soon
+
+---
+
+### 3.8 Bulk Operations
+
+> 🚧 Coming soon
+
+---
+
+## 4. API 운영
+
+### 4.1 API 버전 관리
 
 #### 버전 표기
 
@@ -956,7 +961,7 @@ Api-Version: 2024-01-20
 
 ---
 
-### 5.5 Deprecation
+### 4.2 Deprecation
 
 ✅ **필수**: Deprecated된 API에는 응답 헤더로 알림을 제공한다.
 
@@ -984,7 +989,7 @@ Link: <https://api.example.com/users/articles>; rel="successor-version"
 
 ---
 
-### 5.6 속도 제한
+### 4.3 속도 제한
 
 API 서버는 클라이언트별 요청 빈도를 제한하여 서비스 안정성을 보장한다.
 
@@ -1082,7 +1087,7 @@ RateLimit-Policy: 100;w=3600
 
 ---
 
-### 5.7 장기 실행 작업
+### 4.4 장기 실행 작업
 
 즉시 완료되지 않는 작업(보고서 생성, 데이터 가져오기 등)은 도메인 리소스를 즉시 생성하고 리소스의 상태 필드로 처리 진행 상황을 추적한다.
 
@@ -1119,27 +1124,41 @@ GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
 
 ---
 
-### 5.8 Partial Response
+### 4.5 Idempotency-Key
 
-> 🚧 Coming soon
+POST는 멱등하지 않아 네트워크 오류 후 재시도하면 리소스가 중복 생성될 수 있다. 결제, 주문, 이메일 발송 등 중복 실행이 위험한 API에는 `Idempotency-Key` 헤더를 사용한다.
+
+✅ **필수**: 중복 실행 위험이 있는 POST 엔드포인트는 `Idempotency-Key` 헤더를 지원한다.
+
+```
+POST /orders
+Content-Type: application/json
+Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
+
+{
+  "productId": "123",
+  "quantity": 2
+}
+```
+
+**서버 동작:**
+- 처음 요청: 정상 처리 후 결과 저장
+- 같은 키로 재요청: 새로 처리하지 않고 저장된 결과 그대로 반환
+- 키가 다른 동일 요청: 별도 요청으로 처리
+
+✅ **필수**: `Idempotency-Key` 값은 클라이언트가 생성한 UUID v4를 사용한다.
+
+⚠️ **권장**: 동일 키로 재요청 시 원래 응답과 동일한 상태 코드 및 본문을 반환한다.
+
+⚠️ **권장**: `Idempotency-Key`의 유효 기간은 최소 24시간으로 설정한다.
+
+❌ **금지**: `Idempotency-Key` 없이 결제·주문 등 금전적 영향을 주는 POST 엔드포인트를 설계하지 않는다.
 
 ---
 
-### 5.9 Expand/Embed
+## 5. 인증 & 보안
 
-> 🚧 Coming soon
-
----
-
-### 5.10 Bulk Operations
-
-> 🚧 Coming soon
-
----
-
-## 6. 인증 및 보안
-
-### 6.1 인증 방식
+### 5.1 인증 방식
 
 #### Bearer Token (JWT)
 
@@ -1166,7 +1185,7 @@ GET /articles?apiKey=secret-key
 
 ---
 
-### 6.2 401 vs 403 구분
+### 5.2 401 vs 403 구분
 
 | 상태 코드 | 의미 | 사용 시점 |
 |-----------|------|-----------|
@@ -1204,39 +1223,7 @@ Content-Type: application/problem+json
 
 ---
 
-### 6.3 Idempotency-Key
-
-POST는 멱등하지 않아 네트워크 오류 후 재시도하면 리소스가 중복 생성될 수 있다. 결제, 주문, 이메일 발송 등 중복 실행이 위험한 API에는 `Idempotency-Key` 헤더를 사용한다.
-
-✅ **필수**: 중복 실행 위험이 있는 POST 엔드포인트는 `Idempotency-Key` 헤더를 지원한다.
-
-```
-POST /orders
-Content-Type: application/json
-Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
-
-{
-  "productId": "123",
-  "quantity": 2
-}
-```
-
-**서버 동작:**
-- 처음 요청: 정상 처리 후 결과 저장
-- 같은 키로 재요청: 새로 처리하지 않고 저장된 결과 그대로 반환
-- 키가 다른 동일 요청: 별도 요청으로 처리
-
-✅ **필수**: `Idempotency-Key` 값은 클라이언트가 생성한 UUID v4를 사용한다.
-
-⚠️ **권장**: 동일 키로 재요청 시 원래 응답과 동일한 상태 코드 및 본문을 반환한다.
-
-⚠️ **권장**: `Idempotency-Key`의 유효 기간은 최소 24시간으로 설정한다.
-
-❌ **금지**: `Idempotency-Key` 없이 결제·주문 등 금전적 영향을 주는 POST 엔드포인트를 설계하지 않는다.
-
----
-
-## 참고 자료
+## 6. 참고 자료
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)

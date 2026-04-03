@@ -1,6 +1,6 @@
 # Coverage Map — RESTful API Guidelines Skill
 
-**평가 날짜:** 2026-03-20
+**평가 날짜:** 2026-04-04
 **README:** README.md
 **스킬:** skills/restful-guidelines/SKILL.md
 
@@ -115,7 +115,7 @@
 | 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
 | 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | COVERED | COVERED | ~~Critical~~ Fixed |
 | 5.5-1 | ✅필수 | Deprecated API에 Deprecation/Sunset/Link 응답 헤더 제공 | COVERED | COVERED | ~~Critical~~ Fixed |
-| 5.6-1 | ✅필수 | 속도 제한 응답에 X-RateLimit-* 헤더 포함 | COVERED | COVERED | — |
+| 5.6-1 | ✅필수 | 속도 제한 응답에 RateLimit 헤더 포함 (X- 접두사 없음, RFC 6648) | COVERED | COVERED | — |
 | 5.6-2 | ✅필수 | 429 응답에 Retry-After 헤더 포함 | COVERED | COVERED | — |
 | 5.6-3 | ✅필수 | 429 응답 본문은 RFC 7807 Problem Details 구조 | COVERED | COVERED | — |
 | 5.6-4 | ✅필수 | 클라이언트는 429 수신 시 Retry-After 값만큼 대기 후 재시도 | COVERED | COVERED | — |
@@ -289,7 +289,7 @@
 | 5.4-2 | COVERED | Api-Version 헤더 코드 예시 있음 (ISO 8601 날짜 형식 "2024-01-20") |
 | 5.4-3 | MISSING | 하위 호환성 유지 규칙 없음 |
 | 5.5-1 | COVERED | Deprecation/Sunset/Link 헤더 설정 코드 예시 있음. 커버리지 출처: Writing Mode 본문이 아닌 Code Examples 부록의 Kotlin 코드 예시에서 확인됨. |
-| 5.6-1 | COVERED | addRateLimitHeaders 함수에 X-RateLimit-* 헤더 설정 코드 있음 |
+| 5.6-1 | COVERED | Rate Limiting 섹션에 RateLimit/RateLimit-Policy 헤더 규칙 명시됨 |
 | 5.6-2 | COVERED | Retry-After 헤더 설정 코드 있음 |
 | 5.6-3 | COVERED | 429 응답에 ProblemDetail 구조 사용 코드 있음 |
 | 5.6-4 | COVERED | "On 429, wait for the Retry-After header value before retrying" 명시 |
@@ -365,7 +365,7 @@
 | 5.4-2 | COVERED | "Api-Version value uses ISO 8601 date format" 체크리스트 항목 |
 | 5.4-3 | MISSING | 하위 호환성 유지 체크 없음 |
 | 5.5-1 | MISSING | Deprecation 헤더 체크 항목 없음 |
-| 5.6-1 | COVERED | Rate Limiting 체크리스트에 X-RateLimit-* 헤더 항목 있음 |
+| 5.6-1 | COVERED | Rate Limiting 섹션에 RateLimit 헤더 규칙 포함됨 |
 | 5.6-2 | COVERED | "429 response includes Retry-After header" 체크리스트 항목 |
 | 5.6-3 | COVERED | "429 response body uses Problem Details structure" 체크리스트 항목 |
 | 5.6-4 | COVERED | "Client retry respects Retry-After value" 체크리스트 항목 |

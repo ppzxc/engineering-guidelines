@@ -81,6 +81,8 @@ GET, HEAD, DELETE must not include request bodies.
 - `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one
 - Propagate `Request-Id` across microservices for distributed tracing
 - Log `Request-Id` in all service logs for debugging correlation
+- `ETag` — 리소스 버전을 나타내는 불투명 문자열; 서버가 응답에 포함
+- `If-Match` — 클라이언트가 Update/Delete 시 etag 값을 전달; 낙관적 동시성 제어에 사용
 
 ## JSON Format
 
@@ -90,6 +92,12 @@ GET, HEAD, DELETE must not include request bodies.
 - Date/time values as RFC 3339 strings; server responses in UTC (`Z`)
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
 - Servers must ignore read-only fields in request bodies
+
+**State Enum 패턴 (AIP-216):** 리소스 상태 표현 시:
+- 상태 필드명은 `state` (not `status` — HTTP 상태 코드와 혼동 방지)
+- 첫 번째 Enum 값은 항상 `STATE_UNSPECIFIED` (초기/알 수 없는 상태)
+- `state`는 OUTPUT_ONLY — PATCH로 직접 변경 금지, 상태 전이는 커스텀 메서드로만
+- 일반 패턴 예시: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
 
 ## Error Response (RFC 7807/9457 Problem Details)
 
@@ -116,6 +124,19 @@ GET, HEAD, DELETE must not include request bodies.
 - Omit null/missing fields entirely (do not send `"field": null`)
 - Servers must ignore read-only fields in request bodies
 
+**Field Behavior Annotations** (AIP-203) — 필드 동작을 OpenAPI 스키마에서 `x-field-behavior` 확장 필드로 명시한다.
+
+| Annotation | 의미 | Create 시 서버 동작 | Update 시 서버 동작 |
+|-----------|------|-------------------|-------------------|
+| `REQUIRED` | 클라이언트가 반드시 제공 | 누락 시 `400 Bad Request` | 누락 시 `400 Bad Request` |
+| `OUTPUT_ONLY` | 서버가 설정, 클라이언트 제공 불가 | 요청 값 무시 | 요청 값 무시 |
+| `INPUT_ONLY` | 클라이언트가 제공, 응답에 미포함 | 처리 후 응답에서 제외 | 처리 후 응답에서 제외 |
+| `IMMUTABLE` | 생성 후 변경 불가 | 클라이언트 제공 허용 | 변경 시도 시 `400 Bad Request` |
+| `OPTIONAL` | 선택적으로 제공 | 기본값 적용 | 미포함 시 기존 값 유지 |
+| `IDENTIFIER` | 리소스 식별자, 변경 불가 | 클라이언트 제공 허용 (선택) | 변경 시도 시 `400 Bad Request` |
+
+OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly: true`, 기타 annotation → `x-field-behavior` 확장.
+
 ## CRUD Behavior
 
 **Standard method response rules:**
@@ -131,10 +152,29 @@ GET, HEAD, DELETE must not include request bodies.
 - Response MUST return the updated full resource.
 - Optionally support `updateMask` query parameter to explicitly specify fields to update.
 
+**낙관적 동시성 제어 (AIP-154):** 리소스는 `etag` 필드를 포함한다 (opaque string, 변경마다 갱신).
+
+- Update/Delete 요청 시 `If-Match: {etag}` 헤더로 etag 전달
+- etag 불일치 시 `412 Precondition Failed` 반환 (현재 리소스를 응답 본문에 포함)
+- `If-Match` 헤더 미전달 시 무조건 실행 (opt-in 방식)
+
 **PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead.
 
 **DELETE:** Return `204`; re-deletion policy is per-service (404 or 204).
 - Optionally support `force` query parameter for cascading child resource deletion (`DELETE /resources/{id}?force=true`).
+
+**Soft Delete (AIP-164):** 즉시 영구 삭제 대신 삭제 표시 후 복구 가능한 패턴이 필요한 경우:
+- 리소스에 `deleteTime` (삭제 시각), `expireTime` (영구 삭제 예정 시각) 필드 추가 (OUTPUT_ONLY)
+- 복구: `POST /{resource}/{id}:undelete` 커스텀 메서드
+- List: 기본적으로 soft-deleted 리소스 제외, `?showDeleted=true`로 포함
+- Get: soft-deleted 리소스 정상 반환 (`deleteTime` 포함)
+- 보존 기간 경과(기본 30일) 후 자동 영구 삭제
+
+**Change Validation / Dry Run (AIP-163):** Create/Update 요청의 사전 검증:
+- `?validateOnly=true` 쿼리 파라미터
+- `true`이면 검증만 수행 — 리소스 변경 없음, 부수 효과 없음
+- 검증 성공 시 실제 실행과 유사한 응답 반환 (서버 생성 필드 제외 가능)
+- 검증 실패 시 동일한 RFC 9457 에러 형식
 
 ## Actions
 

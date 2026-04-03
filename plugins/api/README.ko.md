@@ -35,7 +35,12 @@ RESTful API 설계 가이드라인이다.
 5. [인증 & 보안](#5-인증--보안)
    - [인증 방식](#51-인증-방식)
    - [401 vs 403 구분](#52-401-vs-403-구분)
-6. [참고 자료](#6-참고-자료)
+- [6. OpenAPI Specification](#6-openapi-specification)
+  - [6.1 API First](#61-api-first)
+  - [6.2 스펙 품질](#62-스펙-품질)
+  - [6.3 스키마 매핑](#63-스키마-매핑)
+  - [6.4 확장 & 검증](#64-확장--검증)
+- [7. 참고 자료](#7-참고-자료)
 
 ---
 
@@ -1250,7 +1255,90 @@ Content-Type: application/problem+json
 
 ---
 
-## 6. 참고 자료
+## 6. OpenAPI Specification
+
+### 6.1 API First
+
+✅ **필수**: 모든 API는 OpenAPI 3.0+ 스펙을 단일 진실 원천(SSOT)으로 유지한다.
+
+⚠️ **권장**: 구현 전 OpenAPI 스펙을 먼저 정의한다 (API First 접근법).
+
+### 6.2 스펙 품질
+
+✅ **필수**: 모든 엔드포인트, 파라미터, 스키마 속성에 `description` 필드를 포함한다.
+
+✅ **필수**: 모든 operation에 고유한 `operationId`를 부여한다 — 코드 생성 및 문서 자동화의 기반이 된다.
+
+⚠️ **권장**: 주요 스키마와 파라미터에 `example` 또는 `examples`를 포함하여 문서 가독성을 높인다.
+
+```yaml
+# Good
+paths:
+  /articles:
+    get:
+      operationId: listArticles
+      description: 페이지네이션된 게시글 목록을 조회한다.
+      parameters:
+        - name: pageSize
+          in: query
+          description: 페이지당 항목 수.
+          schema:
+            type: integer
+            example: 20
+```
+
+### 6.3 스키마 매핑
+
+✅ **필수**: 필드 동작을 OpenAPI 속성으로 매핑한다:
+
+| 필드 동작 | OpenAPI 속성 |
+|-----------|-------------|
+| 읽기 전용 (예: `id`, `createdAt`) | `readOnly: true` |
+| 생성 전용 (예: 한 번만 쓰는 필드) | `writeOnly: true` |
+| Nullable (명시적으로 필요한 경우만) | `nullable: true` (OpenAPI 3.0); `type: ["string", "null"]` (OpenAPI 3.1) |
+
+⚠️ **권장**: 필드 생략 원칙을 따른다 — `nullable` 사용을 최소화하고, `null` 대신 필드를 생략한다.
+
+✅ **필수**: RFC 9457 Problem Details를 공유 `$ref` 컴포넌트로 정의한다.
+
+```yaml
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: 에러 유형을 식별하는 URI.
+          example: "https://api.example.com/errors/validation-failed"
+        title:
+          type: string
+          description: 에러 유형의 짧은 요약.
+        status:
+          type: integer
+          description: HTTP 상태 코드.
+        detail:
+          type: string
+          description: 구체적인 에러 설명.
+        instance:
+          type: string
+          description: 문제가 발생한 요청 경로.
+        traceId:
+          type: string
+          description: Request-Id 응답 헤더 값과 일치.
+```
+
+### 6.4 확장 & 검증
+
+⚠️ **권장**: 비공개 엔드포인트는 `x-internal: true` 확장으로 마킹한다.
+
+⚠️ **권장**: CI에서 Spectral, Zally 등 린터를 사용하여 스펙 가이드라인 준수를 자동 검증한다.
+
+---
+
+## 7. 참고 자료
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)

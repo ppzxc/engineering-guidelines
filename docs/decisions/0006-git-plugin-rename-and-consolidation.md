@@ -1,4 +1,4 @@
-# ADR-0001: Git Plugin Rename & Consolidation
+# ADR-0006: Git Plugin Rename & Consolidation
 
 ## Status
 

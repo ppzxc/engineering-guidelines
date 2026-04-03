@@ -5,7 +5,7 @@ user-invocable: true
 
 # docs:adr — Architecture Decision Record
 
-Nygard ADR 포맷으로 아키텍처 결정 사항을 `docs/adr/` 에 기록한다.
+Nygard ADR 포맷으로 아키텍처 결정 사항을 `docs/decisions/` 에 기록한다.
 
 ## ADR 포맷
 
@@ -56,10 +56,10 @@ proposed
 
 ### 3. 번호 채번
 
-`docs/adr/` 디렉토리를 스캔하여 기존 파일의 최대 번호 + 1을 자동 할당한다.
+`docs/decisions/` 디렉토리를 스캔하여 기존 파일의 최대 번호 + 1을 자동 할당한다.
 
 ```bash
-ls docs/adr/ 2>/dev/null | grep -E '^[0-9]{4}-' | sort | tail -1
+ls docs/decisions/ 2>/dev/null | grep -E '^[0-9]{4}-' | sort | tail -1
 ```
 
 - 디렉토리가 없거나 파일이 없으면 `0001`부터 시작
@@ -83,7 +83,7 @@ ls docs/adr/ 2>/dev/null | grep -E '^[0-9]{4}-' | sort | tail -1
 초안을 보여주고 확인을 요청한다:
 
 ```
-저장 경로: docs/adr/0001-use-postgresql-for-primary-database.md
+저장 경로: docs/decisions/0001-use-postgresql-for-primary-database.md
 
 [ADR 초안 내용]
 
@@ -94,7 +94,7 @@ ls docs/adr/ 2>/dev/null | grep -E '^[0-9]{4}-' | sort | tail -1
 
 ### 7. 파일 저장
 
-`docs/adr/` 디렉토리가 없으면 생성 후 저장한다.
+`docs/decisions/` 디렉토리가 없으면 생성 후 저장한다.
 
 ## 사용 예시
 

@@ -9,14 +9,14 @@ A collection of skills for Claude Code to create and track Architecture Decision
 | Skill | Slash Command | Description |
 |-------|---------------|-------------|
 | adr | `/docs:adr` | Create an Architecture Decision Record in Nygard format |
-| madr | `/docs:madr` | Create a Markdown Architectural Decision Record in MADR 3.x format |
+| madr | `/docs:madr` | Create a Markdown Architectural Decision Record in MADR 4.0 format |
 
 ## Storage Paths
 
 | Skill | Path | Format |
 |-------|------|--------|
 | `docs:adr` | `docs/decisions/NNNN-<title>.md` | Nygard ADR |
-| `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 3.x |
+| `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 4.0 |
 
 ## Integration with Other Skills
 

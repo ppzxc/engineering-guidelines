@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.2"
+    "version": "0.0.3"
   },
   "plugins": [
     {
@@ -20,8 +20,8 @@
     {
       "name": "docs",
       "source": "./plugins/docs",
-      "description": "Documentation decision records — ADR (Nygard format) and MADR (MADR 3.x) for architecture decisions",
-      "version": "0.0.2"
+      "description": "Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions",
+      "version": "0.0.3"
     },
     {
       "name": "git",

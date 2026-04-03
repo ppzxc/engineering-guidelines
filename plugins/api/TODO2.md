@@ -153,9 +153,9 @@
 
 | # | 항목 | 보유 업체 수 | 구현 방향 |
 |---|------|-------------|-----------|
-| C-1 | **OpenAPI 스펙 연동 가이드** | 4/6 | SKILL.md에 OpenAPI `example`, `x-internal`, nullable 처리 등 섹션 추가 |
-| C-2 | **Breaking Change 정의 및 호환성 정책** | 5/6 | README에 비호환 변경 목록 명시, `Api-Version` 날짜 기반과 연계 |
-| C-3 | **Request ID / 분산 추적 헤더** | 4/6 | `Request-Id` (UUID v4) 요청 수신 시 생성, 응답 에코, 로그 연계 |
+| C-1 | **OpenAPI 스펙 연동 가이드 ✅** | 4/6 | SKILL.md에 OpenAPI `example`, `x-internal`, nullable 처리 등 섹션 추가 |
+| C-2 | **Breaking Change 정의 및 호환성 정책 ✅** | 5/6 | README에 비호환 변경 목록 명시, `Api-Version` 날짜 기반과 연계 |
+| C-3 | **Request ID / 분산 추적 헤더 ✅** | 4/6 | `Request-Id` (UUID v4) 요청 수신 시 생성, 응답 에코, 로그 연계 |
 
 ### 🟡 High (업계 3~4곳 보유, ppzxc/api 완전 누락)
 

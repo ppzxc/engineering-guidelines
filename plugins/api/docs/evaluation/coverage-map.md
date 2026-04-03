@@ -55,10 +55,17 @@
 | 3.1-2 | ✅필수 | 리소스 스키마는 일관된 구조 유지 (id/createdAt/updatedAt) | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.1-3 | ⚠️권장 | 리소스 식별자는 불투명한 문자열 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 3.1-4 | ❌금지 | 응답에 null 값 필드 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 3.1-5 | ✅필수 | OUTPUT_ONLY 필드는 서버가 설정, 요청 시 무시 | COVERED | COVERED | New |
+| 3.1-6 | ✅필수 | IMMUTABLE 필드는 생성 후 변경 불가, 변경 시도 시 400 | COVERED | COVERED | New |
+| 3.1-7 | ⚠️권장 | 필드 동작은 OpenAPI x-field-behavior로 명시 (readOnly/writeOnly 매핑) | COVERED | COVERED | New |
 | 3.2-1 | ✅필수 | 서버 관리 읽기 전용 필드를 요청 본문에 포함해도 무시 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 3.2-2 | ✅필수 | 낙관적 동시성: ETag + If-Match, 불일치 시 412 | COVERED | COVERED | New |
 | 3.3-1 | ✅필수 | POST 생성 성공 시 201 Created + 생성된 리소스 반환 | COVERED | COVERED | — |
 | 3.3-2 | ✅필수 | PUT은 리소스 전체 대체, 미포함 필드는 기본값/null | COVERED | COVERED | ~~Critical~~ Fixed |
 | 3.3-3 | ✅필수 | DELETE 성공 시 204 No Content 반환 | COVERED | COVERED | — |
+| 3.3-4 | ✅필수 | Soft Delete 리소스는 deleteTime/expireTime 필드 포함 | COVERED | COVERED | New |
+| 3.3-5 | ✅필수 | Soft Delete 복구는 POST /{resource}/{id}:undelete | COVERED | COVERED | New |
+| 3.3-6 | ⚠️권장 | validateOnly=true로 변경 사전 검증 지원 | COVERED | COVERED | New |
 | 3.4-1 | ✅필수 | 모든 에러 응답은 RFC 7807/9457 구조 따름 | COVERED | COVERED | — |
 | 3.4-2 | ✅필수 | 에러 응답 Content-Type은 application/problem+json | COVERED | COVERED | — |
 | 3.4-3 | ⚠️권장 | 유효성 검사 실패 시 모든 오류 필드 한 번에 반환 | COVERED | COVERED | — |
@@ -85,6 +92,8 @@
 | 4.4-1 | ✅필수 | Enum 값은 UPPER_SNAKE_CASE 문자열 | COVERED | COVERED | — |
 | 4.4-2 | ⚠️권장 | 클라이언트가 알 수 없는 Enum 값 수신 가능하도록 설계 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 4.4-3 | ❌금지 | Enum 값으로 숫자나 불명확한 약어 사용 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 4.4-4 | ✅필수 | 상태 필드명은 state, 첫 값은 STATE_UNSPECIFIED | COVERED | COVERED | New |
+| 4.4-5 | ✅필수 | state 필드는 OUTPUT_ONLY, PATCH로 직접 변경 금지 | COVERED | COVERED | New |
 
 ---
 
@@ -157,30 +166,30 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 92 | 97.9% |
+| COVERED | 101 | 98.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 2 | 2.1% |
-| **합계** | **94** | **100%** |
+| MISSING | 2 | 1.9% |
+| **합계** | **103** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 91 | 96.8% |
+| COVERED | 100 | 97.1% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 3.2% |
-| **합계** | **94** | **100%** |
+| MISSING | 3 | 2.9% |
+| **합계** | **103** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 183 | 97.3% |
+| COVERED | 201 | 97.6% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 5 | 2.7% |
-| **합계** | **188** | **100%** |
+| MISSING | 5 | 2.4% |
+| **합계** | **206** | **100%** |
 
-\* 전체는 94개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 103개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 

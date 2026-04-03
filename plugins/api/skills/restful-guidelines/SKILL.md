@@ -78,6 +78,9 @@ GET, HEAD, DELETE must not include request bodies.
 - RFC 8288 `Link` header for pagination
 - **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility
 - `Cache-Control` header specifies caching strategy
+- `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one
+- Propagate `Request-Id` across microservices for distributed tracing
+- Log `Request-Id` in all service logs for debugging correlation
 
 ## JSON Format
 
@@ -104,6 +107,7 @@ GET, HEAD, DELETE must not include request bodies.
 - `Content-Type: application/problem+json`
 - Include **all** validation failures at once, not incrementally
 - Never expose stack traces, internal paths, or DB errors
+- `traceId` value MUST match the `Request-Id` response header for consistent debugging
 
 ## Resource Schema & Field Rules
 
@@ -199,8 +203,29 @@ Api-Version: 2024-01-20   (ISO 8601 date format)
 - Requests without version header receive the latest stable version
 - Responses always include the applied version
 - Maintain previous versions for minimum 6 months before deprecation
-- **Breaking changes** (require version bump): field deletion, type changes, new required fields, enum removal, status code semantics change
-- **Compatible changes**: new optional fields, new endpoints, new enum values
+
+**Breaking changes** (require new `Api-Version` date):
+
+| Category | Examples |
+|----------|----------|
+| Removal | endpoint, field, enum value removal |
+| Rename | field or endpoint name change |
+| Type change | field type or format change (e.g., string → int) |
+| Constraint tightening | optional → required, new required field, stricter validation |
+| Semantic change | status code meaning change, default value change, sort order change |
+
+**Compatible changes** (no version bump):
+
+| Category | Examples |
+|----------|----------|
+| Addition | new endpoint, new optional field, new enum value, new query parameter |
+| Relaxation | required → optional, loosened validation |
+| Metadata | response property order change, description update |
+
+**Compatibility principles:**
+- Clients MUST ignore unknown fields in responses (tolerant reader)
+- Servers MUST ignore unknown fields in requests
+- Enums are open-ended — clients MUST handle unknown values gracefully
 
 ## Deprecation
 
@@ -235,6 +260,21 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Re-request with same key: return stored result without reprocessing
 - Key validity: minimum 24 hours
 - POST endpoints with financial impact MUST support `Idempotency-Key`
+
+## OpenAPI Specification
+
+All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API First).
+
+| Rule | Description |
+|------|-------------|
+| `description` required | Every endpoint, parameter, and schema property MUST have a `description` |
+| `operationId` required | Every operation MUST have a unique `operationId` for code generation and documentation |
+| `example` recommended | Key schemas and parameters SHOULD include `example` or `examples` |
+| `readOnly`/`writeOnly` | Map create-only fields to `writeOnly`, read-only fields to `readOnly` |
+| Minimize `nullable` | Follow field-omission principle; use `nullable` only when explicitly needed |
+| Shared error schema | Define RFC 9457 Problem Details as a `$ref` shared component |
+| Internal-only marking | Mark non-public endpoints with `x-internal: true` extension |
+| Automated validation | SHOULD validate spec compliance in CI using linters (e.g., Spectral, Zally) |
 
 ## Authentication & Security
 

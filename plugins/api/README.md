@@ -35,7 +35,12 @@ RESTful API design guidelines.
 5. [Authentication & Security](#5-authentication--security)
    - [Authentication Methods](#51-authentication-methods)
    - [401 vs 403 Distinction](#52-401-vs-403-distinction)
-6. [References](#6-references)
+6. [OpenAPI Specification](#6-openapi-specification)
+   - [6.1 API First](#61-api-first)
+   - [6.2 Spec Quality](#62-spec-quality)
+   - [6.3 Schema Mapping](#63-schema-mapping)
+   - [6.4 Extensions & Validation](#64-extensions--validation)
+7. [References](#7-references)
 
 ---
 
@@ -285,6 +290,19 @@ Correlation-Id: xyz-789
 
 > **Note**: Headers like `X-Request-Id` and `X-Correlation-Id` that have become de facto standards are allowed for legacy compatibility. Do not use the `X-` prefix for new custom headers.
 
+#### Request Tracing
+
+✅ **Required**: Include a `Request-Id` header (UUID v4) in every response for request tracing.
+
+```
+Request-Id: 550e8400-e29b-41d4-a716-446655440000
+```
+
+- If the client sends a `Request-Id` header, the server SHOULD adopt the value or generate a new one
+- Propagate `Request-Id` across microservices for distributed tracing
+- Include `Request-Id` in all service logs for debugging correlation
+- The `traceId` field in error responses (RFC 9457) MUST match the `Request-Id` header value
+
 ❌ **Prohibited**: Do not redefine the meaning of standard HTTP headers.
 
 ---
@@ -472,7 +490,7 @@ Correlation-Id: xyz-789
 | `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
 | `instance` | ⚠️ Recommended | Request path where the problem occurred |
 | `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
-| `traceId` | ⚠️ Recommended | Extension field — request trace ID (for debugging) |
+| `traceId` | ⚠️ Recommended | Extension field — MUST match `Request-Id` response header value |
 
 > **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
 
@@ -923,17 +941,31 @@ Api-Version: 2024-01-20
 
 ✅ **Required**: Maintain backward compatibility within the same version.
 
-**Backward-compatible changes (allowed):**
-- Adding new optional fields
-- Adding new endpoints
-- Adding new enum values
+**Breaking changes** (require new `Api-Version` date):
 
-**Backward-incompatible changes (requires version bump):**
-- Renaming or removing fields
-- Changing field types
-- Adding required fields
-- Removing enum values
-- Changing status code semantics
+| Category | Examples |
+|----------|----------|
+| Removal | Endpoint, field, or enum value removal |
+| Rename | Field or endpoint name change |
+| Type change | Field type or format change (e.g., `string` → `int`) |
+| Constraint tightening | `optional` → `required`, new required field, stricter validation rules |
+| Semantic change | Status code meaning change, default value change, sort order change |
+
+**Compatible changes** (no version bump required):
+
+| Category | Examples |
+|----------|----------|
+| Addition | New endpoint, new optional field, new enum value, new query parameter |
+| Relaxation | `required` → `optional`, loosened validation rules |
+| Metadata | Response property order change, description update |
+
+#### Compatibility Principles
+
+✅ **Required**: Clients MUST ignore unknown fields in responses (tolerant reader pattern).
+
+✅ **Required**: Servers MUST ignore unknown fields in requests.
+
+✅ **Required**: Treat enums as open-ended — clients MUST handle unknown enum values gracefully rather than failing.
 
 ⚠️ **Recommended**: Maintain the previous version for at least 6 months before a version bump.
 
@@ -1201,7 +1233,90 @@ Content-Type: application/problem+json
 
 ---
 
-## 6. References
+## 6. OpenAPI Specification
+
+### 6.1 API First
+
+✅ **Required**: All APIs MUST maintain an OpenAPI 3.0+ specification as the single source of truth.
+
+⚠️ **Recommended**: Define the OpenAPI spec before implementation (API First approach).
+
+### 6.2 Spec Quality
+
+✅ **Required**: Every endpoint, parameter, and schema property MUST include a `description` field.
+
+✅ **Required**: Every operation MUST have a unique `operationId` — this enables code generation and documentation automation.
+
+⚠️ **Recommended**: Key schemas and parameters SHOULD include `example` or `examples` for documentation clarity.
+
+```yaml
+# Good
+paths:
+  /articles:
+    get:
+      operationId: listArticles
+      description: Retrieve a paginated list of articles.
+      parameters:
+        - name: pageSize
+          in: query
+          description: Number of items per page.
+          schema:
+            type: integer
+            example: 20
+```
+
+### 6.3 Schema Mapping
+
+✅ **Required**: Map field behaviors to OpenAPI properties:
+
+| Field Behavior | OpenAPI Property |
+|----------------|------------------|
+| Read-only (e.g., `id`, `createdAt`) | `readOnly: true` |
+| Create-only (e.g., write-once fields) | `writeOnly: true` |
+| Nullable (explicit need only) | `nullable: true` (OpenAPI 3.0); `type: ["string", "null"]` (OpenAPI 3.1) |
+
+⚠️ **Recommended**: Follow the field-omission principle — minimize use of `nullable`. Omit fields rather than sending `null`.
+
+✅ **Required**: Define RFC 9457 Problem Details as a shared `$ref` component for error responses.
+
+```yaml
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type.
+          example: "https://api.example.com/errors/validation-failed"
+        title:
+          type: string
+          description: Short summary of the error type.
+        status:
+          type: integer
+          description: HTTP status code.
+        detail:
+          type: string
+          description: Specific error description.
+        instance:
+          type: string
+          description: Request path where the problem occurred.
+        traceId:
+          type: string
+          description: Matches Request-Id response header.
+```
+
+### 6.4 Extensions & Validation
+
+⚠️ **Recommended**: Mark non-public endpoints with the `x-internal: true` extension.
+
+⚠️ **Recommended**: Validate spec compliance in CI using linters such as Spectral or Zally.
+
+---
+
+## 7. References
 
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)

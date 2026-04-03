@@ -36,6 +36,10 @@ RESTful API design guidelines.
    - [Authentication Methods](#51-authentication-methods)
    - [401 vs 403 Distinction](#52-401-vs-403-distinction)
 6. [OpenAPI Specification](#6-openapi-specification)
+   - [6.1 API First](#61-api-first)
+   - [6.2 Spec Quality](#62-spec-quality)
+   - [6.3 Schema Mapping](#63-schema-mapping)
+   - [6.4 Extensions & Validation](#64-extensions--validation)
 7. [References](#7-references)
 
 ---
@@ -1269,7 +1273,7 @@ paths:
 |----------------|-----------------|
 | Read-only (e.g., `id`, `createdAt`) | `readOnly: true` |
 | Create-only (e.g., write-once fields) | `writeOnly: true` |
-| Nullable (explicit need only) | `nullable: true` |
+| Nullable (explicit need only) | `nullable: true` (OpenAPI 3.0); `type: ["string", "null"]` (OpenAPI 3.1) |
 
 ⚠️ **Recommended**: Follow the field-omission principle — minimize use of `nullable`. Omit fields rather than sending `null`.
 

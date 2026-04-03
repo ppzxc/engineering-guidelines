@@ -285,6 +285,19 @@ Correlation-Id: xyz-789
 
 > **Note**: Headers like `X-Request-Id` and `X-Correlation-Id` that have become de facto standards are allowed for legacy compatibility. Do not use the `X-` prefix for new custom headers.
 
+#### Request Tracing
+
+✅ **Required**: Include a `Request-Id` header (UUID v4) in every response for request tracing.
+
+```
+Request-Id: 550e8400-e29b-41d4-a716-446655440000
+```
+
+- If the client sends a `Request-Id` header, the server SHOULD adopt the value or generate a new one
+- Propagate `Request-Id` across microservices for distributed tracing
+- Include `Request-Id` in all service logs for debugging correlation
+- The `traceId` field in error responses (RFC 9457) MUST match the `Request-Id` header value
+
 ❌ **Prohibited**: Do not redefine the meaning of standard HTTP headers.
 
 ---
@@ -472,7 +485,7 @@ Correlation-Id: xyz-789
 | `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
 | `instance` | ⚠️ Recommended | Request path where the problem occurred |
 | `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
-| `traceId` | ⚠️ Recommended | Extension field — request trace ID (for debugging) |
+| `traceId` | ⚠️ Recommended | Extension field — MUST match `Request-Id` response header value |
 
 > **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
 

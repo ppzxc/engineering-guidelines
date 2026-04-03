@@ -153,7 +153,7 @@ OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly:
 - Response MUST return the updated full resource.
 - Optionally support `updateMask` query parameter to explicitly specify fields to update.
 
-**낙관적 동시성 제어 (AIP-154):** 리소스는 `etag` 필드를 포함한다 (opaque string, 변경마다 갱신).
+**낙관적 동시성 제어 (AIP-154):** 리소스 JSON 스키마에 `etag` 필드를 포함한다 (opaque string, OUTPUT_ONLY, 변경마다 갱신); 서버는 `ETag` 응답 헤더에도 동일 값을 포함한다.
 
 - Update/Delete 요청 시 `If-Match: {etag}` 헤더로 etag 전달
 - etag 불일치 시 `412 Precondition Failed` 반환 (현재 리소스를 응답 본문에 포함)

@@ -936,17 +936,31 @@ Api-Version: 2024-01-20
 
 ✅ **Required**: Maintain backward compatibility within the same version.
 
-**Backward-compatible changes (allowed):**
-- Adding new optional fields
-- Adding new endpoints
-- Adding new enum values
+**Breaking changes** (require new `Api-Version` date):
 
-**Backward-incompatible changes (requires version bump):**
-- Renaming or removing fields
-- Changing field types
-- Adding required fields
-- Removing enum values
-- Changing status code semantics
+| Category | Examples |
+|----------|----------|
+| Removal | Endpoint, field, or enum value removal |
+| Rename | Field or endpoint name change |
+| Type change | Field type or format change (e.g., `string` → `int`) |
+| Constraint tightening | `optional` → `required`, new required field, stricter validation rules |
+| Semantic change | Status code meaning change, default value change, sort order change |
+
+**Compatible changes** (no version bump required):
+
+| Category | Examples |
+|----------|----------|
+| Addition | New endpoint, new optional field, new enum value, new query parameter |
+| Relaxation | `required` → `optional`, loosened validation rules |
+| Metadata | Response property order change, description update |
+
+#### Compatibility Principles
+
+✅ **Required**: Clients MUST ignore unknown fields in responses (tolerant reader pattern).
+
+✅ **Required**: Servers MUST ignore unknown fields in requests.
+
+✅ **Required**: Treat enums as open-ended — clients MUST handle unknown enum values gracefully rather than failing.
 
 ⚠️ **Recommended**: Maintain the previous version for at least 6 months before a version bump.
 

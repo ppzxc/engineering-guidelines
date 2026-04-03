@@ -78,6 +78,9 @@ GET, HEAD, DELETE must not include request bodies.
 - RFC 8288 `Link` header for pagination
 - **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility
 - `Cache-Control` header specifies caching strategy
+- `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one
+- Propagate `Request-Id` across microservices for distributed tracing
+- Log `Request-Id` in all service logs for debugging correlation
 
 ## JSON Format
 
@@ -104,6 +107,7 @@ GET, HEAD, DELETE must not include request bodies.
 - `Content-Type: application/problem+json`
 - Include **all** validation failures at once, not incrementally
 - Never expose stack traces, internal paths, or DB errors
+- `traceId` value MUST match the `Request-Id` response header for consistent debugging
 
 ## Resource Schema & Field Rules
 

@@ -1,14 +1,12 @@
-# ADR-0006: Git Plugin Rename & Consolidation
+---
+status: accepted
+date: 2026-03-26
+decision-makers: ppzxc
+---
 
-## Status
+# Git Plugin Rename and Consolidation
 
-Accepted
-
-## Date
-
-2026-03-26
-
-## Context
+## Context and Problem Statement
 
 현재 git 플러그인은 6개 스킬로 구성되어 있다:
 `git-commit`, `git-pr`, `git-review`, `git-merge-pr`, `git-pr-done`, `git-cleanup`.
@@ -18,9 +16,11 @@ Accepted
 - 오케스트레이터(`git-pr-done`)와 cleanup(`git-cleanup`)이 분리되어 있어 스킬 수가 많다
 - PR 리뷰 후 발견된 마이너/권고 항목을 추적할 방법이 없다
 
-## Decision
+## Decision Outcome
 
-### 스킬 리네이밍 및 통합
+Chosen option: "스킬 리네이밍 및 통합", because 이름 축약과 오케스트레이터-정리 통합으로 인지 부하를 줄이고, 리뷰 항목 자동 이슈화로 추적성을 확보할 수 있기 때문이다.
+
+### 스킬 변경 내역
 
 | 현재 | 변경 후 | 비고 |
 |------|---------|------|
@@ -74,15 +74,16 @@ git-clean
 5. `git fetch origin --prune`
 6. default branch checkout + `pull --ff-only`
 
-## Consequences
+### Consequences
 
-### 긍정적
-- 스킬 수 감소 (6→5)로 사용자 인지 부하 감소
-- 이름이 짧아져 슬래시 커맨드 입력이 편해짐
-- PR 리뷰 항목이 GitHub Issue로 자동 추적됨
-- `/git-clean` 하나로 전체 PR 마무리 가능
+* Good, because 스킬 수 감소 (6→5)로 사용자 인지 부하 감소
+* Good, because 이름이 짧아져 슬래시 커맨드 입력이 편해짐
+* Good, because PR 리뷰 항목이 GitHub Issue로 자동 추적됨
+* Good, because `/git:clean` 하나로 전체 PR 마무리 가능
+* Bad, because `git-clean`이 오케스트레이션 + 정리 두 가지 책임을 가짐
+* Bad, because `git-cleanup` 단독 실행 (worktree 정리만) 불가 — 사용 케이스 없음 확인 완료
+* Bad, because 기존 `/git-pr-done`, `/git-merge-pr`, `/git-cleanup` 사용자는 새 커맨드에 적응 필요
 
-### 부정적
-- `git-clean`이 오케스트레이션 + 정리 두 가지 책임을 가짐
-- `git-cleanup` 단독 실행 (worktree 정리만) 불가 — 사용 케이스 없음 확인 완료
-- 기존 `/git-pr-done`, `/git-merge-pr`, `/git-cleanup` 사용자는 새 커맨드에 적응 필요
+### Confirmation
+
+`plugins/git/` 하위에 `commit`, `pull-request`, `review`, `merge`, `clean` 5개 스킬 디렉토리가 존재하고, `git-merge-pr`, `git-pr-done`, `git-cleanup` 스킬이 제거되었는지 확인한다.

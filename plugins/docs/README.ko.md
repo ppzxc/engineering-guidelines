@@ -9,14 +9,14 @@
 | 스킬 | 슬래시 커맨드 | 설명 |
 |------|--------------|------|
 | adr | `/docs:adr` | Nygard ADR 포맷으로 아키텍처 결정 기록 |
-| madr | `/docs:madr` | MADR 3.x 포맷으로 아키텍처 결정 기록 |
+| madr | `/docs:madr` | MADR 4.0 포맷으로 아키텍처 결정 기록 |
 
 ## 저장 경로
 
 | 스킬 | 경로 | 포맷 |
 |------|------|------|
 | `docs:adr` | `docs/decisions/NNNN-<title>.md` | Nygard ADR |
-| `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 3.x |
+| `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 4.0 |
 
 ## 다른 스킬과의 연계
 

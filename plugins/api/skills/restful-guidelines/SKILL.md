@@ -268,3 +268,18 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - `401 Unauthorized`: missing/expired authentication — include `WWW-Authenticate` header
 - `403 Forbidden`: authenticated but not authorized
 - Avoid storing sensitive data in query strings (they get logged)
+
+## OpenAPI Specification
+
+All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API First).
+
+| Rule | Description |
+|------|-------------|
+| `description` required | Every endpoint, parameter, and schema property MUST have a `description` |
+| `operationId` required | Every operation MUST have a unique `operationId` for code generation and documentation |
+| `example` recommended | Key schemas and parameters SHOULD include `example` or `examples` |
+| `readOnly`/`writeOnly` | Map create-only fields to `writeOnly`, read-only fields to `readOnly` |
+| Minimize `nullable` | Follow field-omission principle; use `nullable` only when explicitly needed |
+| Shared error schema | Define RFC 9457 Problem Details as a `$ref` shared component |
+| Internal-only marking | Mark non-public endpoints with `x-internal: true` extension |
+| Automated validation | SHOULD validate spec compliance in CI using linters (e.g., Spectral, Zally) |

@@ -203,8 +203,28 @@ Api-Version: 2024-01-20   (ISO 8601 date format)
 - Requests without version header receive the latest stable version
 - Responses always include the applied version
 - Maintain previous versions for minimum 6 months before deprecation
-- **Breaking changes** (require version bump): field deletion, type changes, new required fields, enum removal, status code semantics change
-- **Compatible changes**: new optional fields, new endpoints, new enum values
+**Breaking changes** (require new `Api-Version` date):
+
+| Category | Examples |
+|----------|----------|
+| Removal | endpoint, field, enum value removal |
+| Rename | field or endpoint name change |
+| Type change | field type or format change (e.g., string → int) |
+| Constraint tightening | optional → required, new required field, stricter validation |
+| Semantic change | status code meaning change, default value change, sort order change |
+
+**Compatible changes** (no version bump):
+
+| Category | Examples |
+|----------|----------|
+| Addition | new endpoint, new optional field, new enum value, new query parameter |
+| Relaxation | required → optional, loosened validation |
+| Metadata | response property order change, description update |
+
+**Compatibility principles:**
+- Clients MUST ignore unknown fields in responses (tolerant reader)
+- Servers MUST ignore unknown fields in requests
+- Enums are open-ended — clients MUST handle unknown values gracefully
 
 ## Deprecation
 

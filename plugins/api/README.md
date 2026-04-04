@@ -1097,13 +1097,55 @@ Content-Type: application/json
 
 ### 3.7 Expand/Embed
 
-> 🚧 Coming soon
+Support the `expand` query parameter to allow clients to request related resources to be included in the response instead of just their identifiers.
+
+⚠️ **Recommended**: Replace the resource ID with the full resource object when expanded.
+
+```
+GET /articles/123?expand=author,comments
+```
+
+⚠️ **Recommended**: Use dot notation for nested expansion: `?expand=author,comments.author`.
+
+⚠️ **Recommended**: Limit expansion depth (e.g., max 2 or 3 levels) to prevent performance degradation.
 
 ---
 
 ### 3.8 Bulk Operations
 
-> 🚧 Coming soon
+For processing multiple resources in a single request to reduce network overhead.
+
+#### Bulk Create/Update (AIP-136 pattern)
+
+⚠️ **Recommended**: Use `POST /{resource}:batchCreate` or `POST /{resource}:batchUpdate`.
+
+**Request Body Example:**
+```json
+{
+  "requests": [
+    { "id": "1", "body": { "title": "First" } },
+    { "id": "2", "body": { "title": "Second" } }
+  ]
+}
+```
+
+✅ **Required**: Return `207 Multi-Status` if some operations in the batch fail.
+
+#### Bulk Get
+
+⚠️ **Recommended**: Use `GET /{resource}:batchGet?ids=id1,id2,id3`.
+
+#### Criteria-based Delete (AIP-165)
+
+⚠️ **Recommended**: Use `POST /{resource}:purge` with a `filter` for large-scale deletions.
+
+```json
+POST /articles:purge
+{
+  "filter": "status = 'DELETED'",
+  "force": true
+}
+```
 
 ---
 

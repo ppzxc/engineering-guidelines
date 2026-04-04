@@ -1099,13 +1099,55 @@ Content-Type: application/json
 
 ### 3.7 Expand/Embed
 
-> 🚧 Coming soon
+`expand` 쿼리 파라미터를 지원하여 클라이언트가 리소스 ID 대신 연관된 실제 리소스 데이터를 함께 응답받을 수 있도록 한다.
+
+⚠️ **권장**: 확장 시 리소스 ID가 전체 리소스 객체로 대체된다.
+
+```
+GET /articles/123?expand=author,comments
+```
+
+⚠️ **권장**: 중첩된 확장은 dot notation을 사용한다: `?expand=author,comments.author`.
+
+⚠️ **권장**: 성능 저하를 방지하기 위해 확장 깊이를 제한(예: 최대 2~3단계)해야 한다.
 
 ---
 
 ### 3.8 Bulk Operations
 
-> 🚧 Coming soon
+네트워크 오버헤드를 줄이기 위해 여러 리소스를 하나의 요청으로 처리하는 기능을 제공한다.
+
+#### Bulk Create/Update (AIP-136 패턴)
+
+⚠️ **권장**: `POST /{resource}:batchCreate` 또는 `POST /{resource}:batchUpdate` 엔드포인트를 사용한다.
+
+**요청 본문 예시:**
+```json
+{
+  "requests": [
+    { "id": "1", "body": { "title": "첫 번째" } },
+    { "id": "2", "body": { "title": "두 번째" } }
+  ]
+}
+```
+
+✅ **필수**: 배치 내 일부 작업이 실패할 경우 `207 Multi-Status`를 반환한다.
+
+#### Bulk Get
+
+⚠️ **권장**: `GET /{resource}:batchGet?ids=id1,id2,id3` 형식을 사용한다.
+
+#### Criteria-based Delete (AIP-165)
+
+⚠️ **권장**: 대규모 삭제 시 `filter`를 사용하는 `POST /{resource}:purge`를 지원한다.
+
+```json
+POST /articles:purge
+{
+  "filter": "status = 'DELETED'",
+  "force": true
+}
+```
 
 ---
 

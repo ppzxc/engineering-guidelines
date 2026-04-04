@@ -254,6 +254,39 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - ETag reflects the full resource, not the partial view
 - Unknown field name in `fields` → `400 Bad Request`
 
+## Expand/Embed
+
+Support the `expand` query parameter to allow clients to request related resources to be included in the response instead of just their identifiers.
+
+- **Syntax**: `?expand=author,comments`
+- **Nested expansion**: `?expand=author,comments.author`
+- **Behavior**: Replaces the resource ID with the full resource object in the response.
+- **Default**: Related resources are represented by IDs only.
+- **Partial Response integration**: When both `expand` and `fields` are used, `fields` also applies to the expanded resources.
+- **Limitation**: Servers SHOULD limit expansion depth (e.g., max 2 or 3 levels) to prevent performance degradation.
+
+## Bulk Operations
+
+For processing multiple resources in a single request to reduce network overhead.
+
+### Bulk Create/Update (AIP-136 pattern)
+- **Endpoint**: `POST /{resource}:batchCreate` or `POST /{resource}:batchUpdate`
+- **Request Body**: `{ "requests": [{ "id": "...", "body": { ... } }, ...] }`
+- **Response**: `{ "responses": [{ "id": "...", "status": 201, "body": { ... } }, ...] }`
+- **Status Code**: `200 OK` (if all succeeded) or `207 Multi-Status` (if some failed).
+
+### Bulk Get
+- **Endpoint**: `GET /{resource}:batchGet?ids=id1,id2,id3`
+- **Response**: `{ "resources": [{ ... }, { ... }] }`
+- **Behavior**: If an ID is not found, it is excluded from the results or returned as an error object in a more complex response structure.
+
+### Criteria-based Delete (AIP-165)
+Use `purge` for deleting a large number of resources based on a filter.
+- **Endpoint**: `POST /{resource}:purge`
+- **Request Body**: `{ "filter": "status = 'DELETED'", "force": true }`
+- **Response**: Returns a **Long-Running Operation** (see [Long-Running Operations](#long-running-operations)) or a summary of deleted items.
+- If `force=false` (default): Return a sample of resources that would be deleted (dry run).
+
 ## API Versioning
 
 **URL path versioning is PROHIBITED** — `/v1/articles` violates REST principles (same resource must have one URL)

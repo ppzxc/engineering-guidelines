@@ -13,10 +13,10 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 ## URL Design
 
-**Resource-oriented design** — API는 리소스(명사) 중심으로 설계한다. URL 경로는 리소스의 계층 구조를 표현하며, 행위는 HTTP 메서드와 커스텀 메서드로 표현한다.
-- 모든 리소스는 최소한 GET(조회)을 지원해야 한다
-- **표준 메서드**(GET, POST, PATCH, DELETE)를 우선 사용하고, 표현 불가능한 경우에만 커스텀 메서드를 사용한다
-- API 스키마를 데이터베이스 구조와 동일하게 설계하지 않는다
+**Resource-oriented design** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
+- Every resource MUST support at least GET (retrieval)
+- Prefer **standard methods** (GET, POST, PATCH, DELETE); use custom methods only when standard methods cannot express the operation
+- Do not mirror database structure in API schema
 
 - **kebab-case** for path segments: `/user-profiles`, `/product-categories/123`
 - **Plural nouns** for collections: `/articles` not `/article`
@@ -82,8 +82,8 @@ GET, HEAD, DELETE must not include request bodies.
 - `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one
 - Propagate `Request-Id` across microservices for distributed tracing
 - Log `Request-Id` in all service logs for debugging correlation
-- `ETag` — 리소스 버전을 나타내는 불투명 문자열; 서버가 응답에 포함
-- `If-Match` — 클라이언트가 Update/Delete 시 etag 값을 전달; 낙관적 동시성 제어에 사용
+- `ETag` — opaque string representing the resource version; server includes in responses
+- `If-Match` — client sends etag value on Update/Delete requests for optimistic concurrency control
 
 ## JSON Format
 
@@ -94,11 +94,11 @@ GET, HEAD, DELETE must not include request bodies.
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only)
 - Servers must ignore read-only fields in request bodies
 
-**State Enum 패턴 (AIP-216):** 리소스 상태 표현 시:
-- 상태 필드명은 `state` (not `status` — HTTP 상태 코드와 혼동 방지)
-- 첫 번째 Enum 값은 항상 `STATE_UNSPECIFIED` (초기/알 수 없는 상태)
-- `state`는 OUTPUT_ONLY — PATCH로 직접 변경 금지, 상태 전이는 커스텀 메서드로만
-- 일반 패턴 예시: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
+**State Enum Pattern (AIP-216):** For representing resource lifecycle state:
+- State field name MUST be `state` (not `status` — avoid confusion with HTTP status codes)
+- First enum value MUST always be `STATE_UNSPECIFIED` (initial/unknown state)
+- `state` is OUTPUT_ONLY — direct PATCH updates are prohibited; state transitions via custom methods only
+- Common patterns: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
 
 ## Error Response (RFC 7807/9457 Problem Details)
 
@@ -125,18 +125,18 @@ GET, HEAD, DELETE must not include request bodies.
 - Omit null/missing fields entirely (do not send `"field": null`)
 - Servers must ignore read-only fields in request bodies
 
-**Field Behavior Annotations** (AIP-203) — 필드 동작을 OpenAPI 스키마에서 `x-field-behavior` 확장 필드로 명시한다.
+**Field Behavior Annotations** (AIP-203) — Declare field behavior in OpenAPI schema using the `x-field-behavior` extension field.
 
-| Annotation | 의미 | Create 시 서버 동작 | Update 시 서버 동작 |
-|-----------|------|-------------------|-------------------|
-| `REQUIRED` | 클라이언트가 반드시 제공 | 누락 시 `400 Bad Request` | 누락 시 `400 Bad Request` |
-| `OUTPUT_ONLY` | 서버가 설정, 클라이언트 제공 불가 | 요청 값 무시 | 요청 값 무시 |
-| `INPUT_ONLY` | 클라이언트가 제공, 응답에 미포함 | 처리 후 응답에서 제외 | 처리 후 응답에서 제외 |
-| `IMMUTABLE` | 생성 후 변경 불가 | 클라이언트 제공 허용 | 변경 시도 시 `400 Bad Request` |
-| `OPTIONAL` | 선택적으로 제공 | 기본값 적용 | 미포함 시 기존 값 유지 |
-| `IDENTIFIER` | 리소스 식별자, 변경 불가 | 클라이언트 제공 허용 (선택) | 변경 시도 시 `400 Bad Request` |
+| Annotation | Meaning | Server behavior on Create | Server behavior on Update |
+|-----------|---------|--------------------------|--------------------------|
+| `REQUIRED` | Client must provide | Missing → `400 Bad Request` | Missing → `400 Bad Request` |
+| `OUTPUT_ONLY` | Set by server; client must not provide | Request value ignored | Request value ignored |
+| `INPUT_ONLY` | Client-provided; excluded from response | Excluded from response after processing | Excluded from response after processing |
+| `IMMUTABLE` | Cannot change after creation | Client may provide | Value change attempt → `400 Bad Request` |
+| `OPTIONAL` | Optionally provided | Default applied | Omitted → existing value preserved |
+| `IDENTIFIER` | Resource identifier; cannot change | Client may provide (optional) | Value change attempt → `400 Bad Request` |
 
-OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly: true`, 기타 annotation → `x-field-behavior` 확장.
+OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly: true`, other annotations → `x-field-behavior` extension.
 
 ## CRUD Behavior
 
@@ -149,33 +149,40 @@ OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly:
 - Clients SHOULD be able to specify resource ID (optional).
 - Duplicate creation MUST return `409 Conflict`.
 
-**PATCH (Update — default):** Only modify fields present in body; others unchanged.
+**PATCH (Update — default):** Only modify fields specified by `updateMask`; unlisted fields are unchanged.
+- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content`
 - Response MUST return the updated full resource.
-- Optionally support `updateMask` query parameter to explicitly specify fields to update.
+- `updateMask=*`: update all mutable fields present in the request body.
+- Empty mask → `400 Bad Request`; unknown field path → `400 Bad Request`
+- Nested fields use dot notation: `?updateMask=address.city`
+- Field Behavior interactions with mask:
+  - `OUTPUT_ONLY` in mask → silently ignored (not an error)
+  - `IMMUTABLE` in mask + value changed → `400 Bad Request`
+  - `REQUIRED` in mask → field must be present in body
 
-**낙관적 동시성 제어 (AIP-154):** 리소스 JSON 스키마에 `etag` 필드를 포함한다 (opaque string, OUTPUT_ONLY, 변경마다 갱신); 서버는 `ETag` 응답 헤더에도 동일 값을 포함한다.
+**Optimistic Concurrency Control (AIP-154):** Include an `etag` field in the resource JSON schema (opaque string, OUTPUT_ONLY, updated on every change); the server also includes the same value in the `ETag` response header.
 
-- Update/Delete 요청 시 `If-Match: {etag}` 헤더로 etag 전달
-- etag 불일치 시 `412 Precondition Failed` 반환 (현재 리소스를 응답 본문에 포함)
-- `If-Match` 헤더 미전달 시 무조건 실행 (opt-in 방식)
+- Pass etag via `If-Match: {etag}` header on Update/Delete requests
+- Etag mismatch → return `412 Precondition Failed` (include current resource in response body)
+- If `If-Match` header is omitted → execute unconditionally (opt-in behavior)
 
 **PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead.
 
 **DELETE:** Return `204`; re-deletion policy is per-service (404 or 204).
 - Optionally support `force` query parameter for cascading child resource deletion (`DELETE /resources/{id}?force=true`).
 
-**Soft Delete (AIP-164):** 즉시 영구 삭제 대신 삭제 표시 후 복구 가능한 패턴이 필요한 경우:
-- 리소스에 `deleteTime` (삭제 시각), `expireTime` (영구 삭제 예정 시각) 필드 추가 (OUTPUT_ONLY)
-- 복구: `POST /{resource}/{id}:undelete` 커스텀 메서드
-- List: 기본적으로 soft-deleted 리소스 제외, `?showDeleted=true`로 포함
-- Get: soft-deleted 리소스 정상 반환 (`deleteTime` 포함)
-- 보존 기간 경과(기본 30일) 후 자동 영구 삭제
+**Soft Delete (AIP-164):** When a recoverable deletion pattern is needed instead of immediate permanent deletion:
+- Add `deleteTime` (deletion timestamp) and `expireTime` (scheduled permanent deletion time) fields to the resource (OUTPUT_ONLY)
+- Restore: `POST /{resource}/{id}:undelete` custom method
+- List: exclude soft-deleted resources by default; include with `?showDeleted=true`
+- Get: return soft-deleted resources normally (include `deleteTime`)
+- Automatically permanently deleted after retention period (default 30 days)
 
-**Change Validation / Dry Run (AIP-163):** Create/Update 요청의 사전 검증:
-- `?validateOnly=true` 쿼리 파라미터
-- `true`이면 검증만 수행 — 리소스 변경 없음, 부수 효과 없음
-- 검증 성공 시 실제 실행과 유사한 응답 반환 (서버 생성 필드 제외 가능)
-- 검증 실패 시 동일한 RFC 9457 에러 형식
+**Change Validation / Dry Run (AIP-163):** Pre-validation for Create/Update requests:
+- `?validateOnly=true` query parameter
+- When `true`: validation only — no resource changes, no side effects
+- On validation success: return a response similar to actual execution (server-generated fields may be excluded)
+- On validation failure: same RFC 9457 error format
 
 ## Actions
 
@@ -195,7 +202,7 @@ This applies equally to collection-level operations where no specific resource i
 
 Adopted pattern: Google AIP-136 (`/orders/{id}:cancel`), Google Cloud API (`/projects/{project}:setIamPolicy`).
 
-> **콜론 구문 호환성 주의**: Express.js, Rails 등 `:`를 path parameter 구문으로 사용하는 프레임워크에서는 라우팅 설정 시 정규식 라우트 등 추가 처리가 필요하다. OpenAPI 명세에서 콜론 경로 지원 여부를 확인할 것.
+> **Colon syntax compatibility note**: Frameworks such as Express.js and Rails that use `:` for path parameter syntax require additional routing configuration (e.g., regex routes). Verify colon path support in your OpenAPI specification.
 
 **Action response status codes:**
 
@@ -222,13 +229,28 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 
 ## Filtering & Sorting
 
-- Equality: `?status=PUBLISHED&authorId=123`
-- Date range: `After`/`Before` suffix — `?createdAfter=2024-01-01T00:00:00Z`
-- Numeric range: `Min`/`Max` suffix — `?priceMin=100&priceMax=500`
-- Multi-value (IN): repeat param = OR — `?status=a&status=b`
-- Cross-param = AND: `?status=PUBLISHED&authorId=123`
-- Contains: `?q=keyword` (full-text) or `?titleContains=keyword` (field)
+**Filter expression (AIP-160):** Use the `filter` query parameter with a structured expression string.
+- Syntax: `?filter=status = "ACTIVE" AND price >= 1000`
+- Comparison operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
+- Logical operators: `AND`, `OR`, `NOT`; grouping with parentheses
+- String and timestamp values: double-quoted — `?filter=createdAt > "2024-01-01T00:00:00Z"`
+- Number values: unquoted — `?filter=price >= 100`
+- Boolean values: `true` / `false` — `?filter=isPublished = true`
+- Nested field access: dot notation — `?filter=author.name = "Kim"`
+- Repeated field membership: `has()` — `?filter=has(tags, "golang")`
+- Invalid filter expression → `400 Bad Request` with RFC 9457 error body
 - Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
+
+## Partial Response
+
+**Partial Response (AIP-157):** Use the `fields` query parameter to request specific fields only.
+- Syntax: `?fields=id,title,author.name` (comma-separated field paths)
+- Nested fields use dot notation: `?fields=id,author.name,author.email`
+- `id` is always included regardless of the `fields` value
+- Applied to each item in List responses
+- `INPUT_ONLY` fields excluded from responses regardless of `fields`
+- ETag reflects the full resource, not the partial view
+- Unknown field name in `fields` → `400 Bad Request`
 
 ## API Versioning
 

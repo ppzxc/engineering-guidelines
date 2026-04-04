@@ -80,13 +80,18 @@ RESTful API 설계 가이드라인이다.
 #### 기본 구조
 
 ```
-https://{host}/{service-root}/{resource-collection}/{resource-id}
+https://{host}/{service-root}/{resource}/{id}
+https://{host}/{service-root}/{resource}/{id}/{sub-resource}/{sub-id}
 ```
 
 예시:
 
 ```
-https://api.example.com/users/articles/123
+# 단일 리소스
+GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000
+
+# 중첩 서브리소스 (최대 깊이)
+GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000/items/6ba7b810-9dad-11d1-80b4-00c04fd430c8
 ```
 
 #### URL 케이싱
@@ -150,6 +155,8 @@ DELETE /comments/123
 |------|-------|---------|
 | 주문 내 항목 | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
 | 주문 항목의 리뷰 | `/order-items/{itemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
+
+---
 
 #### 허용 문자
 
@@ -599,6 +606,36 @@ Request-Id: 550e8400-e29b-41d4-a716-446655440000
 
 ⚠️ **권장**: API 문서에서 각 필드의 변경 가능성을 명시한다.
 
+#### 상태 Enum 패턴 (AIP-216)
+
+리소스의 수명주기 상태를 표현할 때는 전용 `state` 필드를 사용한다 (`status` 아님).
+
+✅ **필수**: 상태 필드 이름은 `state`로 한다 (`status`는 HTTP 상태 코드와 혼동됨).
+
+✅ **필수**: 첫 번째 Enum 값은 반드시 `STATE_UNSPECIFIED`여야 한다 (알 수 없는/기본 상태).
+
+✅ **필수**: `state` 필드는 `OUTPUT_ONLY` — 클라이언트가 PATCH로 직접 변경 금지.
+
+✅ **필수**: 상태 전이는 커스텀 메서드(예: `:activate`, `:deactivate`)로만 수행한다. `state` 필드를 직접 PATCH하는 것은 금지.
+
+⚠️ **권장**: 일반 패턴: `ACTIVE` / `INACTIVE`, `PENDING` / `RUNNING` / `SUCCEEDED` / `FAILED`.
+
+```json
+{
+  "id": "job-123",
+  "state": "RUNNING"
+}
+```
+
+```
+# 올바른 방법: 커스텀 메서드로 상태 전이
+POST /jobs/123:cancel
+
+# 금지: state 필드 직접 PATCH
+PATCH /jobs/123?updateMask=state
+{ "state": "CANCELLED" }   ← 금지
+```
+
 ---
 
 ### 3.2 CRUD 처리
@@ -637,18 +674,38 @@ Content-Type: application/json
 
 ✅ **필수**: PUT 요청은 멱등적으로 동작해야 한다.
 
-#### PATCH — 부분 수정
+#### PATCH — 부분 수정 (AIP-161)
 
-⚠️ **권장**: PATCH 요청은 요청 본문에 포함된 필드만 수정한다.
+✅ **필수**: 모든 PATCH 요청은 수정할 필드를 지정하는 `updateMask` 쿼리 파라미터를 포함해야 한다.
 
 ```
-PATCH /articles/456
+PATCH /articles/456?updateMask=title,content
 Content-Type: application/json
 
 {
-  "title": "수정된 제목"
+  "title": "수정된 제목",
+  "content": "새 본문"
 }
 ```
+
+✅ **필수**: `updateMask`에 명시된 필드만 수정한다. mask에 없는 필드는 변경하지 않는다.
+
+✅ **필수**: 200 OK와 수정된 전체 리소스를 반환한다.
+
+⚠️ **권장**: `updateMask=*`는 요청 본문에 포함된 모든 mutable 필드를 업데이트한다.
+
+✅ **필수**: 빈 `updateMask` → 400 Bad Request. 잘못된 필드 경로 → 400 Bad Request.
+
+⚠️ **권장**: 중첩 필드 경로에는 dot notation을 사용한다: `?updateMask=address.city`.
+
+**Field Behavior와 `updateMask` 상호작용:**
+
+| 필드 어노테이션 | mask에 포함 시 동작 |
+|---|---|
+| `OUTPUT_ONLY` | 무시 (에러 아님) |
+| `IMMUTABLE` | 값 변경 시 `400 Bad Request` |
+| `REQUIRED` | 요청 본문에 반드시 포함 |
+| `OPTIONAL` | 본문 생략 가능 (기존 값 유지) |
 
 #### DELETE — 리소스 삭제
 
@@ -656,9 +713,65 @@ Content-Type: application/json
 
 ⚠️ **권장**: 이미 삭제된 리소스에 대한 재삭제 요청은 404 Not Found 또는 204 No Content를 반환한다. 서비스 특성에 따라 결정한다.
 
+⚠️ **권장**: 하위 리소스의 연쇄 삭제를 위해 `force` 쿼리 파라미터를 지원한다.
+
+```
+DELETE /projects/123?force=true
+```
+
+#### Soft Delete (AIP-164)
+
+즉시 영구 삭제 대신 복구 가능한 삭제가 필요한 리소스에 적용한다.
+
+✅ **필수**: `deleteTime` (삭제 시각)과 `expireTime` (영구 삭제 예정 시각) 필드를 추가한다 (둘 다 `OUTPUT_ONLY`).
+
+✅ **필수**: 복구 엔드포인트: `POST /{resource}/{id}:undelete`.
+
+✅ **필수**: List 응답은 기본적으로 soft-deleted 리소스를 제외한다. `?showDeleted=true`로 포함.
+
+⚠️ **권장**: Get은 soft-deleted 리소스를 정상 반환한다 (`deleteTime` 포함).
+
+⚠️ **권장**: 보존 기간(기본 30일) 이후 자동 영구 삭제.
+
+```
+# Soft delete
+DELETE /articles/123
+
+# 복구
+POST /articles/123:undelete
+
+# 삭제된 항목 포함 목록 조회
+GET /articles?showDeleted=true
+```
+
+#### Change Validation / Dry Run (AIP-163)
+
+실제 변경 없이 Create 또는 Update 요청을 사전 검증한다.
+
+⚠️ **권장**: `?validateOnly=true` 쿼리 파라미터를 지원한다.
+
+✅ **필수**: `validateOnly=true`이면 검증만 수행 — 리소스 변경 없음, 부수 효과 없음.
+
+✅ **필수**: 검증 성공 시 실제 실행과 유사한 응답 반환 (서버 생성 필드 제외 가능).
+
+✅ **필수**: 검증 실패 시 동일한 RFC 9457 에러 형식 반환.
+
+```
+# 생성 없이 검증만 수행
+POST /articles?validateOnly=true
+Content-Type: application/json
+
+{ "title": "새 글" }
+
 ---
 
-### 3.3 액션
+HTTP/1.1 200 OK
+{ "id": null, "title": "새 글" }   # id 미포함 (아직 생성 안 됨)
+```
+
+---
+
+### 3.3 액션 (AIP-136)
 
 CRUD로 표현하기 어려운 동작(예: 승인, 전송, 잠금)에는 액션 패턴을 사용한다.
 
@@ -673,6 +786,15 @@ POST /orders/789:cancel
 ✅ **필수**: 액션 엔드포인트에는 POST 메서드를 사용한다.
 
 ⚠️ **권장**: 액션 이름은 동사 원형을 사용한다 (publish, cancel, approve).
+
+**액션 응답 상태 코드:**
+
+| 시나리오 | 상태 코드 | 응답 본문 |
+|----------|-----------|-----------|
+| 동기 액션 — 리소스 변경 | `200 OK` | 변경된 리소스 |
+| 동기 액션 — 응답 본문 없음 | `204 No Content` | 없음 |
+| 비동기 액션 — fire-and-forget | `202 Accepted` | 없음 또는 최소 응답 |
+| 비동기 액션 — 폴링 가능 작업 생성 | `201 Created` + `Location` 헤더 | 생성된 작업 리소스 |
 
 **요청 예시:**
 
@@ -855,54 +977,64 @@ Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after
 
 #### 필터링
 
-⚠️ **권장**: 필터는 쿼리 파라미터로 표현한다.
+✅ **필수**: `filter` 쿼리 파라미터에 구조화된 표현식 문자열을 사용한다 (AIP-160).
 
-**일치 필터 (equality):**
-
-```
-GET /articles?status=PUBLISHED&authorId=123
-```
-
-**범위 필터 (range):** `After`/`Before` 접미사를 사용한다.
+**filter 표현식 문법:**
 
 ```
-GET /articles?createdAfter=2024-01-01T00:00:00Z
-GET /articles?createdBefore=2024-02-01T00:00:00Z
-GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
+GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
 ```
 
-**숫자 범위 필터 (range):** `Min`/`Max` 접미사를 사용한다.
+**연산자:**
+
+| 유형 | 연산자 | 예시 |
+|---|---|---|
+| 비교 | `=`, `!=`, `<`, `>`, `<=`, `>=` | `?filter=price >= 100` |
+| 논리 | `AND`, `OR`, `NOT` | `?filter=status = "ACTIVE" AND NOT archived = true` |
+| 그룹핑 | `( )` | `?filter=(status = "ACTIVE" OR status = "PENDING") AND price < 1000` |
+
+**값 타입:**
+
+- 문자열 및 타임스탬프: 큰따옴표 — `?filter=createdAt > "2024-01-01T00:00:00Z"`
+- 숫자: 따옴표 없이 — `?filter=price >= 100`
+- 불리언: `true` / `false` — `?filter=isPublished = true`
+- 중첩 필드: dot notation — `?filter=author.name = "Kim"`
+- 반복 필드 포함 여부: `has()` — `?filter=has(tags, "golang")`
+
+**예시:**
 
 ```
-GET /products?priceMin=100
-GET /products?priceMax=500
-GET /products?priceMin=100&priceMax=500
+# 단일 조건
+GET /articles?filter=status = "PUBLISHED"
+
+# 복수 조건 (AND)
+GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
+
+# OR 조건
+GET /articles?filter=status = "PUBLISHED" OR status = "DRAFT"
+
+# 그룹 복합 조건
+GET /articles?filter=(status = "PUBLISHED" OR status = "DRAFT") AND createdAt > "2024-01-01T00:00:00Z"
+
+# 부정
+GET /articles?filter=NOT status = "DELETED"
+
+# 날짜 범위
+GET /articles?filter=createdAt >= "2024-01-01T00:00:00Z" AND createdAt < "2024-02-01T00:00:00Z"
+
+# 숫자 범위
+GET /products?filter=price >= 100 AND price <= 500
+
+# 중첩 필드
+GET /articles?filter=author.name = "Kim"
+
+# 반복 필드 포함 여부
+GET /articles?filter=has(tags, "golang")
 ```
 
-⚠️ **권장**: 날짜/시간 범위는 `After`/`Before`, 숫자 범위는 `Min`/`Max` 접미사를 사용한다.
+❌ **금지**: 개별 쿼리 파라미터로 필터링하지 않는다 (예: `?status=PUBLISHED`, `?createdAfter=...`).
 
-**다중 값 필터 (IN):** 동일 파라미터를 반복하여 OR 조건으로 표현한다.
-
-```
-GET /articles?status=PUBLISHED&status=DRAFT
-GET /articles?authorId=123&authorId=456
-```
-
-✅ **필수**: 동일 파라미터 반복은 OR 조건으로 처리한다. 서로 다른 파라미터 간 조합은 AND 조건이다.
-
-```
-# status=PUBLISHED OR status=DRAFT, AND authorId=123
-GET /articles?status=PUBLISHED&status=DRAFT&authorId=123
-```
-
-**부분 일치 (contains):** `q` 파라미터를 사용하거나 필드명에 `Contains` 접미사를 붙인다.
-
-```
-GET /articles?q=REST            # 전체 텍스트 검색
-GET /articles?titleContains=REST  # 특정 필드 부분 일치
-```
-
-❌ **금지**: 동일 파라미터의 반복을 AND 조건으로 처리하지 않는다.
+✅ **필수**: 유효하지 않은 filter 표현식 → 400 Bad Request (RFC 9457 에러 본문 포함).
 
 #### 정렬
 
@@ -920,7 +1052,48 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 ### 3.6 Partial Response
 
-> 🚧 Coming soon
+✅ **필수**: `fields` 쿼리 파라미터로 클라이언트가 응답에 포함할 필드를 선택할 수 있도록 지원한다 (AIP-157).
+
+```
+GET /articles/123?fields=id,title,author.name
+```
+
+✅ **필수**: `fields` 값과 무관하게 `id`는 항상 응답에 포함한다.
+
+⚠️ **권장**: 중첩 필드는 dot notation으로 선택한다.
+
+```
+GET /articles/123?fields=id,author.name,author.email
+```
+
+✅ **필수**: List 응답에서도 각 항목에 `fields` 필터를 적용한다.
+
+✅ **필수**: `INPUT_ONLY` 필드는 `fields` 파라미터와 무관하게 항상 응답에서 제외한다.
+
+⚠️ **권장**: ETag는 전체 리소스를 기준으로 한다 (partial view와 무관).
+
+✅ **필수**: `fields`에 존재하지 않는 필드명 → 400 Bad Request.
+
+**예시:**
+
+```
+GET /articles?fields=id,title,author.name
+
+---
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": "123",
+    "title": "REST API 설계",
+    "author": {
+      "name": "Kim"
+    }
+  }
+]
+```
 
 ---
 
@@ -1101,7 +1274,7 @@ RateLimit-Policy: 100;w=3600
 ⚠️ **권장**: `Retry-After` 헤더가 없거나 기타 일시적 오류(503 등) 발생 시, 지수 백오프(exponential backoff) + 지터(jitter) 전략을 사용한다. `attempt`는 1부터 시작하는 재시도 횟수(1 = 첫 번째 재시도).
 
 ```
-대기 시간 = min(maxDelay, baseDelay × 2^(attempt - 1)) + random(0, jitterRange)
+wait_time = min(maxDelay, baseDelay × 2^(attempt - 1)) + random(0, jitterRange)
 ```
 
 예시: attempt=1 → `min(60, 1 × 2^0) + random(0,1)` = 1~2초
@@ -1340,16 +1513,34 @@ components:
 
 ## 7. 참고 자료
 
-- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+**Google API Improvement Proposals (AIP):**
+
+- [AIP-121: Resource-oriented design](https://google.aip.dev/121)
+- [AIP-136: Custom methods](https://google.aip.dev/136)
+- [AIP-154: Resource freshness validation (ETags)](https://google.aip.dev/154)
+- [AIP-157: Partial responses](https://google.aip.dev/157)
+- [AIP-160: Filtering](https://google.aip.dev/160)
+- [AIP-161: Field masks](https://google.aip.dev/161)
+- [AIP-163: Change validation](https://google.aip.dev/163)
+- [AIP-164: Soft delete](https://google.aip.dev/164)
+- [AIP-203: Field behavior documentation](https://google.aip.dev/203)
+- [AIP-216: States](https://google.aip.dev/216)
+
+**RFCs & 표준:**
+
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
 - [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
 - [RFC 9110: HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
-- [JSON:API Specification](https://jsonapi.org/)
-- [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)
-- [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
 - [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
-- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
 - [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
 - [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)
+- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+
+**업계 가이드라인 & 기타:**
+
+- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+- [JSON:API Specification](https://jsonapi.org/)
+- [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
+- [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)

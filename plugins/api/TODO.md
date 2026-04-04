@@ -1,7 +1,7 @@
 # API Guidelines — Google AIP 기반 개선 로드맵
 
 > **작성일:** 2026-04-03
-> **현재 버전:** v0.0.9 (103개 규칙, Writing 98.1% / Review 97.1% 커버리지)
+> **현재 버전:** v0.0.10 (111개 규칙, Writing 98.2% / Review 97.3% 커버리지)
 > **목표:** 리소스 수명주기 전체를 커버하는 실용적 API 가이드라인 완성
 
 ---
@@ -89,25 +89,22 @@
 
 ---
 
-## 도입 예정 — 추가 3개 (목표: 95%+ 완성도)
+## ✅ 완료 — 추가 3개 (v0.0.10, ADR-0008)
 
-### 6. Filter 문법 표준화 (AIP-160)
+### 6. Filter 문법 표준화 (AIP-160) — 완료
 
-**현재:** 개별 쿼리 파라미터 (`?status=ACTIVE&authorId=123`)
-**추가:** 복합 조건을 위한 `filter` 파라미터 (`?filter=status=ACTIVE AND createdAt>'2024-01-01'`)
-**판단:** 현재 방식이 단순 필터에 충분하므로, `filter` 파라미터는 복잡한 조건이 필요한 API에만 선택적 도입
+**결정:** 개별 쿼리 파라미터 방식을 `filter` 표현식으로 **전면 교체**
+**구현:** `?filter=status = "ACTIVE" AND price >= 1000` 표현식 문법, 비교/논리/괄호/dot notation 지원
 
-### 7. Field Mask 심화 (AIP-161)
+### 7. Field Mask 필수화 (AIP-161) — 완료
 
-**현재:** `updateMask` 선택 지원만 언급
-**추가:** mask 포함/미포함 시 상세 동작, `*` 와일드카드, OUTPUT_ONLY 필드 처리 규칙
-**판단:** updateMask 선택 지원 유지하되, 사용 시 동작 규칙을 명확히 정의
+**결정:** updateMask **필수화** (ADR-0005 번복)
+**구현:** 모든 PATCH에 `updateMask` 필수, Field Behavior 상호작용 규칙 전면 정의
 
-### 8. Partial Response (AIP-157)
+### 8. Partial Response (AIP-157) — 완료
 
-**현재:** README에 `?fields=id,title,author.name` 언급, SKILL.md에 없음
-**추가:** `fields` 파라미터 상세 규칙, 중첩 필드 표현, List에서의 적용
-**판단:** SKILL.md에 기본 규칙 추가
+**결정:** `fields` 파라미터 기본 규칙 추가
+**구현:** `?fields=id,title,author.name`, dot notation, List 적용, id 항상 포함, ETag 전체 리소스 기준
 
 ---
 
@@ -138,8 +135,4 @@
 
 ## 다음 단계
 
-1. 핵심 5개(Field Behavior, ETag, State, Soft Delete, Dry Run)에 대한 상세 설계
-2. ADR 작성: "Google AIP 2차 도입 — 리소스 수명주기 패턴"
-3. README.md 및 SKILL.md 규칙 추가
-4. 커버리지 맵 업데이트
-5. 추가 3개(Filter, FieldMask, Partial Response) 후속 도입
+모든 TODO 항목 완료. 추가 개선이 필요한 경우 새 TODO 작성.

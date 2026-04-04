@@ -80,13 +80,18 @@ The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document
 #### Basic Structure
 
 ```
-https://{host}/{service-root}/{resource-collection}/{resource-id}
+https://{host}/{service-root}/{resource}/{id}
+https://{host}/{service-root}/{resource}/{id}/{sub-resource}/{sub-id}
 ```
 
 Example:
 
 ```
-https://api.example.com/users/articles/123
+# Single resource
+GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000
+
+# Nested sub-resource (maximum depth)
+GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000/items/6ba7b810-9dad-11d1-80b4-00c04fd430c8
 ```
 
 #### URL Casing
@@ -132,6 +137,25 @@ DELETE /comments/123
 
 ❌ **Prohibited**: Do not include file extensions (`.json`, `.xml`) in URLs. Use the `Accept` header for content negotiation.
 
+#### URL Nesting Depth
+
+✅ **Required**: Limit URL nesting to a maximum of 2 levels (`/{resource}/{id}/{sub-resource}/{subId}`).
+
+| Depth | Pattern | Example | Allowed |
+|-------|---------|---------|---------|
+| 0 | `/{resource}` | `/articles` | ✅ |
+| 1 | `/{resource}/{id}` | `/articles/123` | ✅ |
+| 2 | `/{resource}/{id}/{sub}` | `/articles/123/comments` | ✅ |
+| 2 | `/{resource}/{id}/{sub}/{subId}` | `/articles/123/comments/456` | ✅ |
+| 3+ | `/{a}/{id}/{b}/{id}/{c}` | — | ❌ |
+
+❌ **Prohibited**: Do not nest more than 2 levels deep. Promote deeply nested resources to top-level routes instead.
+
+| Situation | ✅ Do | ❌ Don't |
+|-----------|-------|---------|
+| Items under an order | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
+| Reviews on an order item | `/order-items/{itemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
+
 #### Allowed Characters
 
 ✅ **Required**: Use only lowercase ASCII letters, digits, and hyphens (`-`) in URL path segments.
@@ -145,6 +169,8 @@ GET /articles?pageSize=20&sortOrder=desc
 # Bad
 GET /articles?page_size=20&sort_order=desc
 ```
+
+---
 
 #### URL Length
 
@@ -578,6 +604,36 @@ Fields are classified by whether they can be changed after creation.
 
 ⚠️ **Recommended**: Document the mutability of each field in the API documentation.
 
+#### State Enum Pattern (AIP-216)
+
+Use a dedicated `state` field (not `status`) to represent the lifecycle state of a resource.
+
+✅ **Required**: Name the state field `state`, not `status`. (`status` conflicts with HTTP status codes.)
+
+✅ **Required**: The first enum value MUST be `STATE_UNSPECIFIED` (represents unknown or default state).
+
+✅ **Required**: The `state` field is `OUTPUT_ONLY` — clients MUST NOT set it directly via PATCH.
+
+✅ **Required**: State transitions MUST be performed via custom methods (e.g., `:activate`, `:deactivate`), not by patching the `state` field directly.
+
+⚠️ **Recommended**: Common patterns: `ACTIVE` / `INACTIVE`, `PENDING` / `RUNNING` / `SUCCEEDED` / `FAILED`.
+
+```json
+{
+  "id": "job-123",
+  "state": "RUNNING"
+}
+```
+
+```
+# Correct: state transition via custom method
+POST /jobs/123:cancel
+
+# Incorrect: directly patching state
+PATCH /jobs/123?updateMask=state
+{ "state": "CANCELLED" }   ← Prohibited
+```
+
 ---
 
 ### 3.2 CRUD Operations
@@ -616,18 +672,38 @@ Content-Type: application/json
 
 ✅ **Required**: PUT requests must be idempotent.
 
-#### PATCH — Partial Update
+#### PATCH — Partial Update (AIP-161)
 
-⚠️ **Recommended**: PATCH requests modify only the fields included in the request body.
+✅ **Required**: All PATCH requests MUST include the `updateMask` query parameter specifying which fields to update.
 
 ```
-PATCH /articles/456
+PATCH /articles/456?updateMask=title,content
 Content-Type: application/json
 
 {
-  "title": "Updated Title"
+  "title": "Updated Title",
+  "content": "New content"
 }
 ```
+
+✅ **Required**: Only the fields listed in `updateMask` are modified. Fields not in the mask remain unchanged.
+
+✅ **Required**: Return 200 OK with the updated full resource.
+
+⚠️ **Recommended**: Use `updateMask=*` to update all mutable fields present in the request body.
+
+✅ **Required**: Empty `updateMask` → 400 Bad Request. Unknown field path in `updateMask` → 400 Bad Request.
+
+⚠️ **Recommended**: Use dot notation for nested field paths: `?updateMask=address.city`.
+
+**Field Behavior interactions with `updateMask`:**
+
+| Field Annotation | Behavior when included in mask |
+|---|---|
+| `OUTPUT_ONLY` | Silently ignored — not an error |
+| `IMMUTABLE` | `400 Bad Request` if value is changed |
+| `REQUIRED` | Field must be present in request body |
+| `OPTIONAL` | May be omitted from body (retains current value) |
 
 #### DELETE — Delete Resource
 
@@ -635,9 +711,65 @@ Content-Type: application/json
 
 ⚠️ **Recommended**: Return either 404 Not Found or 204 No Content for re-deletion of already-deleted resources. Decide based on service characteristics.
 
+⚠️ **Recommended**: Support the `force` query parameter for cascading deletion of child resources.
+
+```
+DELETE /projects/123?force=true
+```
+
+#### Soft Delete (AIP-164)
+
+For resources that require recovery capability instead of immediate permanent deletion:
+
+✅ **Required**: Add `deleteTime` (deletion timestamp) and `expireTime` (scheduled permanent deletion) fields, both `OUTPUT_ONLY`.
+
+✅ **Required**: Provide a restore endpoint: `POST /{resource}/{id}:undelete`.
+
+✅ **Required**: List responses exclude soft-deleted resources by default. Use `?showDeleted=true` to include them.
+
+⚠️ **Recommended**: Get returns soft-deleted resources normally (with `deleteTime` included).
+
+⚠️ **Recommended**: Permanently delete after a retention period (default 30 days).
+
+```
+# Soft delete
+DELETE /articles/123
+
+# Restore
+POST /articles/123:undelete
+
+# List including deleted
+GET /articles?showDeleted=true
+```
+
+#### Change Validation / Dry Run (AIP-163)
+
+Pre-validate Create or Update requests without applying changes:
+
+⚠️ **Recommended**: Support the `?validateOnly=true` query parameter.
+
+✅ **Required**: When `validateOnly=true`, perform validation only — no resource changes, no side effects.
+
+✅ **Required**: On validation success, return a response similar to actual execution (server-generated fields may be omitted).
+
+✅ **Required**: On validation failure, return the same RFC 9457 error format as a real request.
+
+```
+# Validate without creating
+POST /articles?validateOnly=true
+Content-Type: application/json
+
+{ "title": "New Article" }
+
 ---
 
-### 3.3 Actions
+HTTP/1.1 200 OK
+{ "id": null, "title": "New Article" }   # id omitted (not yet created)
+```
+
+---
+
+### 3.3 Actions (AIP-136)
 
 Use the action pattern for operations that are difficult to express as CRUD (e.g., approve, send, lock).
 
@@ -652,6 +784,15 @@ POST /orders/789:cancel
 ✅ **Required**: Use the POST method for action endpoints.
 
 ⚠️ **Recommended**: Use verb infinitives for action names (publish, cancel, approve).
+
+**Action Response Status Codes:**
+
+| Scenario | Status Code | Response Body |
+|----------|-------------|---------------|
+| Sync action — resource updated | `200 OK` | Updated resource |
+| Sync action — no response body | `204 No Content` | None |
+| Async action — fire-and-forget | `202 Accepted` | None or minimal acknowledgement |
+| Async action — pollable job created | `201 Created` + `Location` header | Created job resource |
 
 **Request Example:**
 
@@ -834,53 +975,64 @@ Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after
 
 #### Filtering
 
-⚠️ **Recommended**: Express filters as query parameters.
+✅ **Required**: Use the `filter` query parameter with a structured expression string (AIP-160).
 
-**Equality filter:**
-
-```
-GET /articles?status=PUBLISHED&authorId=123
-```
-
-**Range filter:** Use `After`/`Before` suffixes.
+**Filter expression syntax:**
 
 ```
-GET /articles?createdAfter=2024-01-01T00:00:00Z
-GET /articles?createdBefore=2024-02-01T00:00:00Z
-GET /articles?createdAfter=2024-01-01T00:00:00Z&createdBefore=2024-02-01T00:00:00Z
+GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
 ```
 
-**Numeric range filter:** Use `Min`/`Max` suffixes.
+**Operators:**
+
+| Type | Operators | Example |
+|---|---|---|
+| Comparison | `=`, `!=`, `<`, `>`, `<=`, `>=` | `?filter=price >= 100` |
+| Logical | `AND`, `OR`, `NOT` | `?filter=status = "ACTIVE" AND NOT archived = true` |
+| Grouping | `( )` | `?filter=(status = "ACTIVE" OR status = "PENDING") AND price < 1000` |
+
+**Value types:**
+
+- Strings and timestamps: double-quoted — `?filter=createdAt > "2024-01-01T00:00:00Z"`
+- Numbers: unquoted — `?filter=price >= 100`
+- Booleans: `true` / `false` — `?filter=isPublished = true`
+- Nested fields: dot notation — `?filter=author.name = "Kim"`
+- Repeated field membership: `has()` — `?filter=has(tags, "golang")`
+
+**Examples:**
 
 ```
-GET /products?priceMin=100&priceMax=500
-GET /articles?viewCountMin=1000
+# Single condition
+GET /articles?filter=status = "PUBLISHED"
+
+# Multiple conditions (AND)
+GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
+
+# OR condition
+GET /articles?filter=status = "PUBLISHED" OR status = "DRAFT"
+
+# Grouped complex condition
+GET /articles?filter=(status = "PUBLISHED" OR status = "DRAFT") AND createdAt > "2024-01-01T00:00:00Z"
+
+# Negation
+GET /articles?filter=NOT status = "DELETED"
+
+# Date range
+GET /articles?filter=createdAt >= "2024-01-01T00:00:00Z" AND createdAt < "2024-02-01T00:00:00Z"
+
+# Numeric range
+GET /products?filter=price >= 100 AND price <= 500
+
+# Nested field
+GET /articles?filter=author.name = "Kim"
+
+# Repeated field membership
+GET /articles?filter=has(tags, "golang")
 ```
 
-⚠️ **Recommended**: Use `After`/`Before` suffixes for date/time ranges and `Min`/`Max` suffixes for numeric ranges.
+❌ **Prohibited**: Do not use individual query parameters for filtering (e.g., `?status=PUBLISHED`, `?createdAfter=...`).
 
-**Multi-value filter (IN):** Repeat the same parameter for OR conditions.
-
-```
-GET /articles?status=PUBLISHED&status=DRAFT
-GET /articles?authorId=123&authorId=456
-```
-
-✅ **Required**: Treat repeated same parameters as OR conditions. Combinations of different parameters are AND conditions.
-
-```
-# status=PUBLISHED OR status=DRAFT, AND authorId=123
-GET /articles?status=PUBLISHED&status=DRAFT&authorId=123
-```
-
-**Partial match (contains):** Use the `q` parameter or append `Contains` to the field name.
-
-```
-GET /articles?q=REST              # full-text search
-GET /articles?titleContains=REST  # partial match on specific field
-```
-
-❌ **Prohibited**: Do not treat repeated same parameters as AND conditions.
+✅ **Required**: Invalid filter expression → 400 Bad Request with RFC 9457 error body.
 
 #### Sorting
 
@@ -898,7 +1050,48 @@ GET /articles?orderBy=createdAt:desc,title:asc
 
 ### 3.6 Partial Response
 
-> 🚧 Coming soon
+✅ **Required**: Support the `fields` query parameter for clients to request specific response fields (AIP-157).
+
+```
+GET /articles/123?fields=id,title,author.name
+```
+
+✅ **Required**: `id` is always included in the response regardless of the `fields` value.
+
+⚠️ **Recommended**: Use dot notation to select nested fields.
+
+```
+GET /articles/123?fields=id,author.name,author.email
+```
+
+✅ **Required**: Apply `fields` filtering to each item in List responses.
+
+✅ **Required**: `INPUT_ONLY` fields are always excluded from responses regardless of `fields`.
+
+⚠️ **Recommended**: ETag reflects the full resource, not the partial view.
+
+✅ **Required**: Unknown field name in `fields` → 400 Bad Request.
+
+**Example:**
+
+```
+GET /articles?fields=id,title,author.name
+
+---
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "id": "123",
+    "title": "REST API Design",
+    "author": {
+      "name": "Kim"
+    }
+  }
+]
+```
 
 ---
 
@@ -1318,16 +1511,34 @@ components:
 
 ## 7. References
 
-- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+**Google API Improvement Proposals (AIP):**
+
+- [AIP-121: Resource-oriented design](https://google.aip.dev/121)
+- [AIP-136: Custom methods](https://google.aip.dev/136)
+- [AIP-154: Resource freshness validation (ETags)](https://google.aip.dev/154)
+- [AIP-157: Partial responses](https://google.aip.dev/157)
+- [AIP-160: Filtering](https://google.aip.dev/160)
+- [AIP-161: Field masks](https://google.aip.dev/161)
+- [AIP-163: Change validation](https://google.aip.dev/163)
+- [AIP-164: Soft delete](https://google.aip.dev/164)
+- [AIP-203: Field behavior documentation](https://google.aip.dev/203)
+- [AIP-216: States](https://google.aip.dev/216)
+
+**RFCs & Standards:**
+
 - [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
 - [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
 - [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
 - [RFC 9110: HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
-- [JSON:API Specification](https://jsonapi.org/)
-- [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)
-- [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
 - [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
 - [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
-- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP (Internet-Draft, Standards Track)](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
 - [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
 - [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)
+- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+
+**Industry Guidelines & Other:**
+
+- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+- [JSON:API Specification](https://jsonapi.org/)
+- [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
+- [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)

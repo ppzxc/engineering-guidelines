@@ -1,6 +1,6 @@
 # Coverage Map — RESTful API Guidelines Skill
 
-**평가 날짜:** 2026-04-04
+**평가 날짜:** 2026-04-04 (v0.0.10 업데이트)
 **README:** README.md
 **스킬:** skills/restful-guidelines/SKILL.md
 
@@ -66,6 +66,9 @@
 | 3.3-4 | ✅필수 | Soft Delete 리소스는 deleteTime/expireTime 필드 포함 | COVERED | COVERED | New |
 | 3.3-5 | ✅필수 | Soft Delete 복구는 POST /{resource}/{id}:undelete | COVERED | COVERED | New |
 | 3.3-6 | ⚠️권장 | validateOnly=true로 변경 사전 검증 지원 | COVERED | COVERED | New |
+| 3.3-7 | ✅필수 | PATCH 요청에 updateMask 쿼리 파라미터 필수 (AIP-161) | COVERED | COVERED | New |
+| 3.3-8 | ✅필수 | updateMask 미포함 필드는 변경 없음, 빈/잘못된 mask → 400 | COVERED | COVERED | New |
+| 3.3-9 | ✅필수 | OUTPUT_ONLY in mask → 무시, IMMUTABLE 변경 시 → 400 | COVERED | COVERED | New |
 | 3.4-1 | ✅필수 | 모든 에러 응답은 RFC 7807/9457 구조 따름 | COVERED | COVERED | — |
 | 3.4-2 | ✅필수 | 에러 응답 Content-Type은 application/problem+json | COVERED | COVERED | — |
 | 3.4-3 | ⚠️권장 | 유효성 검사 실패 시 모든 오류 필드 한 번에 반환 | COVERED | COVERED | — |
@@ -109,8 +112,10 @@
 | 5.2-4 | ✅필수 | pageSize < 1이면 400 Bad Request | COVERED | COVERED | New |
 | 5.2-5 | ✅필수 | pageToken은 불투명 값, 클라이언트 파싱/조합 금지 | COVERED | COVERED | New |
 | 5.2-6 | ⚠️권장 | 대규모 데이터셋에 Keyset Pagination 사용 | COVERED | COVERED | New |
-| 5.3-0 | ⚠️권장 | 숫자 범위 필터에 Min/Max 접미사 사용 | COVERED | COVERED | New |
-| 5.3-1 | ✅필수 | 동일 파라미터 반복은 OR 조건 | COVERED | COVERED | ~~Critical~~ Fixed |
+| 5.3-0 | ✅필수 | filter 쿼리 파라미터로 AIP-160 표현식 사용 | COVERED | COVERED | New |
+| 5.3-1 | ✅필수 | filter 비교 연산자 (=, !=, <, >, <=, >=) 지원 | COVERED | COVERED | New |
+| 5.3-2 | ⚠️권장 | filter 논리 연산자 (AND, OR, NOT) 및 괄호 그룹핑 지원 | COVERED | COVERED | New |
+| 5.3-3 | ✅필수 | 유효하지 않은 filter 표현식 → 400 Bad Request | COVERED | COVERED | New |
 | 5.4-1 | ❌금지 | API 버전을 URL 경로에 포함 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
 | 5.4-2 | ✅필수 | Api-Version 헤더에 ISO 8601 날짜 형식으로 버전 지정 | COVERED | COVERED | — |
 | 5.4-3 | ✅필수 | 동일 버전 내 하위 호환성 유지 | COVERED | COVERED | ~~Critical~~ Fixed |
@@ -122,6 +127,9 @@
 | 5.7-1 | ✅필수 | 장기 실행 작업 시 도메인 리소스 즉시 생성 + 201 Created + Location 헤더 | COVERED | COVERED | — |
 | 5.7-2 | ✅필수 | 도메인 리소스에 status 필드 포함 | COVERED | COVERED | — |
 | 5.7-3 | ❌금지 | 범용 /operations 리소스 사용 금지 | COVERED | COVERED | ~~Minor~~ Fixed |
+| 5.8-1 | ⚠️권장 | fields 파라미터로 응답 필드 선택 지원 (AIP-157) | COVERED | COVERED | New |
+| 5.8-2 | ✅필수 | id 필드는 fields 파라미터와 무관하게 항상 반환 | COVERED | COVERED | New |
+| 5.8-3 | ✅필수 | 잘못된 fields 필드명 → 400 Bad Request | COVERED | COVERED | New |
 
 ---
 
@@ -166,30 +174,30 @@
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 101 | 98.1% |
+| COVERED | 109 | 98.2% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 2 | 1.9% |
-| **합계** | **103** | **100%** |
+| MISSING | 2 | 1.8% |
+| **합계** | **111** | **100%** |
 
 ### Review 모드
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 100 | 97.1% |
+| COVERED | 108 | 97.3% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 3 | 2.9% |
-| **합계** | **103** | **100%** |
+| MISSING | 3 | 2.7% |
+| **합계** | **111** | **100%** |
 
 ### 전체 커버리지 (Writing + Review 통합)
 
 | 상태 | 개수 | 비율 |
 |------|------|------|
-| COVERED | 201 | 97.6% |
+| COVERED | 217 | 97.7% |
 | PARTIAL | 0 | 0.0% |
-| MISSING | 5 | 2.4% |
-| **합계** | **206** | **100%** |
+| MISSING | 5 | 2.3% |
+| **합계** | **222** | **100%** |
 
-\* 전체는 103개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
+\* 전체는 111개 규칙 × 2개 모드(Writing/Review)의 합산 수치입니다.
 
 ---
 

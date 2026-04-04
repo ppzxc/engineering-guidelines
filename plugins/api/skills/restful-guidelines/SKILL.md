@@ -229,6 +229,8 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 
 ## Filtering & Sorting
 
+❌ Do not use individual query parameters for filtering (e.g., `?status=PUBLISHED&createdAfter=...`). Use `filter` expression instead.
+
 **Filter expression (AIP-160):** Use the `filter` query parameter with a structured expression string.
 - Syntax: `?filter=status = "ACTIVE" AND price >= 1000`
 - Comparison operators: `=`, `!=`, `<`, `>`, `<=`, `>=`

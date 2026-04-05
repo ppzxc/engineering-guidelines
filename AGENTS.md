@@ -2,6 +2,8 @@
 
 Claude Code, Cursor, GitHub Copilot 등 모든 AI 도구에 공통으로 적용되는 프로젝트 규칙이다.
 
+설계, 아키텍처, 프로젝트 컨벤션에 대한 새로운 결정이 발생하면, 반드시 `docs/decisions/0000-template.md` (또는 minimal)를 참고하여 ADR 문서를 작성하고, 강제할 규칙은 `.claude/rules/`의 관련 파일에 `[ADR-NNNN]` 태그와 함께 추가하여 동기화할 것.
+
 ## 프로젝트 정체성
 
 Claude Code 마켓플레이스 플러그인 저장소. 소프트웨어 개발 엔지니어링 가이드라인 모음.

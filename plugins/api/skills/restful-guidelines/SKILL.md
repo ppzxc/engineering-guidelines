@@ -47,8 +47,12 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 | PUT | Full content replacement (file/binary upload) | Yes | No |
 | PATCH | Partial update (default update method) | No | No |
 | DELETE | Remove | Yes | No |
+| HEAD | Retrieve metadata only (no body) | Yes | Yes |
+| OPTIONS | Retrieve allowed methods/CORS info | Yes | Yes |
 
-GET, HEAD, DELETE must not include request bodies.
+- **HEAD (M-8):** Clients SHOULD use HEAD to check resource existence or last-modified time without downloading the full body.
+- **OPTIONS (M-8):** Servers MUST support OPTIONS for CORS preflight and SHOULD use it to describe supported methods via the `Allow` header.
+- GET, HEAD, DELETE must not include request bodies.
 
 **2xx Success:**
 - `200 OK` — standard success
@@ -100,23 +104,44 @@ GET, HEAD, DELETE must not include request bodies.
 - `state` is OUTPUT_ONLY — direct PATCH updates are prohibited; state transitions via custom methods only
 - Common patterns: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
 
-## Error Response (RFC 7807/9457 Problem Details)
+## Error Response (RFC 7807/9457 + AIP-193 Hybrid)
 
 ```json
 {
-  "type": "https://api.example.com/errors/resource-not-found",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "User-friendly explanation",
-  "instance": "/articles/999",
-  "traceId": "abc-123-xyz"
+  "type": "https://api.example.com/errors/validation-failed",
+  "title": "Validation Failed",
+  "status": 400,
+  "code": "VALIDATION_ERROR",
+  "detail": "The request contains invalid fields.",
+  "instance": "/users",
+  "traceId": "abc-123-xyz",
+  "details": [
+    {
+      "@type": "type.googleapis.com/google.rpc.BadRequest",
+      "fieldViolations": [
+        {
+          "field": "user.email",
+          "description": "Must be a valid email address."
+        }
+      ]
+    },
+    {
+      "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+      "reason": "INVALID_FIELD_VALUE",
+      "domain": "api.example.com"
+    }
+  ]
 }
 ```
 
 - `Content-Type: application/problem+json`
-- Include **all** validation failures at once, not incrementally
-- Never expose stack traces, internal paths, or DB errors
-- `traceId` value MUST match the `Request-Id` response header for consistent debugging
+- **Machine-readable code:** Include a `code` string field (UPPER_SNAKE_CASE) for client logic branching.
+- **Field-level errors (AIP-193 style):** For 400/422 errors, include a `details` array with `@type` polymorphic objects.
+  - `google.rpc.BadRequest`: contains `fieldViolations` (`field` path and `description`).
+  - `google.rpc.ErrorInfo`: contains stable `reason` and `domain`.
+- Include **all** validation failures at once, not incrementally.
+- Never expose stack traces, internal paths, or DB errors.
+- `traceId` value MUST match the `Request-Id` response header for consistent debugging.
 
 ## Resource Schema & Field Rules
 
@@ -242,8 +267,9 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - Repeated field membership: `has()` — `?filter=has(tags, "golang")`
 - Invalid filter expression → `400 Bad Request` with RFC 9457 error body
 - Sort: `?orderBy=createdAt:desc` / multi: `?orderBy=createdAt:desc,title:asc`
+- **Full-text search (M-7):** Use the `q` query parameter for keyword-based search across multiple fields (e.g., `?q=searchterm`).
 
-## Partial Response
+## Partial Response & Resource Expansion
 
 **Partial Response (AIP-157):** Use the `fields` query parameter to request specific fields only.
 - Syntax: `?fields=id,title,author.name` (comma-separated field paths)
@@ -251,8 +277,15 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - `id` is always included regardless of the `fields` value
 - Applied to each item in List responses
 - `INPUT_ONLY` fields excluded from responses regardless of `fields`
-- ETag reflects the full resource, not the partial view
+- **ETag interaction:** Use Weak ETags (`W/"..."`) or omit ETags for partial responses, rather than computing Strong ETags which negates performance benefits.
 - Unknown field name in `fields` → `400 Bad Request`
+
+**Resource Expansion (Expand/Embed) (M-4):** Use the `expand` query parameter to include related resources in the response.
+- Syntax: `?expand=author,comments.author`
+- **Total Entity Limit REQUIRED:** Servers MUST enforce a hard limit on the *total number* of expanded entities returned per request (e.g., max 100) to prevent N+1/DoS attacks. Exceeding the limit → `400 Bad Request`.
+- Depth limit: Servers SHOULD limit expansion depth (default max 3).
+- Selective expansion: Clients MUST only expand what is needed.
+- Expansion failure: If a requested resource cannot be expanded (e.g., permissions), the server SHOULD omit it or return a placeholder without failing the main request.
 
 ## API Versioning
 
@@ -304,11 +337,21 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 
 - Deprecation notice must be given at least 6 months before the sunset date
 
-## Rate Limiting
+## Rate Limiting & Retries (M-5)
 
-- Response headers (always): `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
-- 429 Too Many Requests: include `Retry-After` (delta-seconds) + RFC 9457 Problem Details body
-- Client retry: honor `Retry-After`; otherwise exponential backoff + jitter
+- **Response headers (always):** `RateLimit: limit=N, remaining=N, reset=N` + `RateLimit-Policy: N;w=N`
+- **429 Too Many Requests:** Include `Retry-After` (delta-seconds) + RFC 9457 Problem Details body.
+- **Client retry strategy:**
+  - Honor `Retry-After` if present.
+  - For other transient errors (502, 503, 504), use **Exponential Backoff with Jitter**.
+  - Max retries SHOULD be limited (e.g., 3-5 times).
+
+## Caching (M-2)
+
+- **`Cache-Control` header:** Specify caching directives (`public`, `private`, `no-cache`, `max-age`).
+- **`ETag` usage:** All mutable resources MUST provide an `ETag` (see [Optimistic Concurrency Control](#optimistic-concurrency-control)).
+- **`Last-Modified`:** SHOULD be used alongside ETag for legacy client compatibility.
+- **Vary:** Use `Vary: Accept, Api-Version` if responses change based on content negotiation or versioning.
 
 ## Long-Running Operations
 
@@ -343,9 +386,36 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 
 ## Authentication & Security
 
+- **HTTPS Required (H-5):** All APIs MUST use HTTPS (TLS 1.2+) to ensure data in transit is encrypted.
+- **Security Headers REQUIRED:** Responses MUST include `X-Content-Type-Options: nosniff` and `Strict-Transport-Security`.
 - `Authorization: Bearer {token}` for JWT authentication
 - `Authorization: ApiKey {key}` for API Key authentication
 - Never pass credentials in query parameters (logged by servers)
 - `401 Unauthorized`: missing/expired authentication — include `WWW-Authenticate` header
 - `403 Forbidden`: authenticated but not authorized
 - Avoid storing sensitive data in query strings (they get logged)
+
+**Authorization (BOLA Prevention):**
+- Servers MUST verify ownership/permissions for *every* specific resource access (`/{resource}/{id}`).
+
+**Mass Assignment Prevention (BOPA):**
+- Servers MUST use an Allowlist in DTOs. Clients MUST NOT be able to modify protected fields (`role`, `isVerified`) via `PATCH` body/`updateMask`.
+
+**CORS (Cross-Origin Resource Sharing) (H-4):**
+- Servers MUST explicitly define `Access-Control-Allow-Origin` (do not use wildcard `*` if authentication is required).
+- Use `Access-Control-Allow-Methods` to list permitted HTTP methods.
+- Use `Access-Control-Max-Age` (e.g., 86400 seconds) to cache preflight requests and reduce overhead.
+- Explicitly list custom headers in `Access-Control-Expose-Headers` if clients need to read them (e.g., `Total-Count`, `Request-Id`).
+
+**Webhooks (M-6):**
+- **Payload Structure:** Use a consistent wrapper: `{"id": "evt_...", "type": "resource.event", "created": 123456789, "data": { ... }}`.
+- **Signing:** Servers MUST sign payloads using HMAC-SHA256 with a shared secret, included in the `X-Hub-Signature-256` header.
+- **Idempotency:** Webhook handlers SHOULD be idempotent to handle duplicate events safely.
+- **Retries:** Servers SHOULD use exponential backoff for failed webhook deliveries (e.g., 5-10 retries over 24 hours).
+
+**Health Check (L-1):**
+- **Endpoint:** `GET /health` SHOULD be used to monitor service availability.
+- **Response:** Return `200 OK` with `{"status": "UP"}` if the service is healthy.
+- **Deep vs Shallow:**
+  - Shallow: Just returns 200 (service is running).
+  - Deep: Checks dependencies (DB, cache, downstream services) — use cautiously to avoid cascading failures in load balancer health checks.

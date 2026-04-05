@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.3"
+    "version": "0.0.4"
   },
   "plugins": [
     {
@@ -27,7 +27,7 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, PR creation, PR review, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.0.4"
+      "version": "0.0.5"
     }
   ]
 }

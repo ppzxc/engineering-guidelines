@@ -419,4 +419,3 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 - **Deep vs Shallow:**
   - Shallow: Just returns 200 (service is running).
   - Deep: Checks dependencies (DB, cache, downstream services) — use cautiously to avoid cascading failures in load balancer health checks.
-ly to avoid cascading failures in load balancer health checks.

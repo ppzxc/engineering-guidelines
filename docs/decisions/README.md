@@ -15,6 +15,7 @@
 | [ADR-0006](0006-git-plugin-rename-and-consolidation.md) | accepted | Git 플러그인 리네이밍 및 통합 |
 | [ADR-0007](0007-adopt-aip-resource-lifecycle-patterns.md) | accepted | AIP 리소스 수명주기 패턴 2차 도입 |
 | [ADR-0008](0008-adopt-aip-filter-fieldmask-partial-response.md) | accepted | AIP filter 표현식, updateMask 필수화, Partial Response 도입 |
+| [ADR-0009](0009-adopt-strict-api-security-and-versioning-rules.md) | accepted | 엄격한 API 보안 및 버저닝 규칙 도입 (OWASP Top 10, 하위 호환성) |
 
 ## 새 ADR 추가
 

@@ -1097,7 +1097,15 @@ Content-Type: application/json
 
 ### 3.7 Expand/Embed
 
-> 🚧 Coming soon
+✅ **Required**: Support the `expand` query parameter to include related resources in the response.
+
+```
+GET /articles/123?expand=author,comments.author
+```
+
+✅ **Required**: To prevent N+1 query explosions and DoS attacks (Unrestricted Resource Consumption), the server MUST enforce a strict upper limit on the **total number of expanded entities** returned in a single response (e.g., maximum 100 entities).
+✅ **Required**: If an expansion request would exceed the maximum entity limit, return `400 Bad Request`.
+⚠️ **Recommended**: Limit the maximum expansion depth to 3 levels.
 
 ---
 
@@ -1123,12 +1131,8 @@ Content-Type: application/json
 Api-Version: 2024-01-20
 ```
 
-⚠️ **Recommended**: Apply the latest stable version to requests without a version header, and include the applied version in the response.
-
-```
-HTTP/1.1 200 OK
-Api-Version: 2024-01-20
-```
+❌ **Prohibited**: Do not apply a default or latest version when the version header is missing.
+✅ **Required**: If the `Api-Version` header is missing, the server MUST return `400 Bad Request` to enforce explicit versioning and prevent accidental backward compatibility breaks.
 
 #### Backward Compatibility
 
@@ -1388,7 +1392,27 @@ GET /articles?apiKey=secret-key
 
 ---
 
-### 5.2 401 vs 403 Distinction
+### 5.2 Authorization & Access Control
+
+✅ **Required**: **Prevent BOLA (Broken Object Level Authorization):** Every endpoint accessing a specific resource (`/{resource}/{id}`) MUST verify that the authenticated user (or tenant) is the owner of the resource or holds explicit permission to access it. Never rely solely on the unpredictability of the ID.
+
+---
+
+### 5.3 Input Validation & Mass Assignment
+
+✅ **Required**: **Prevent Mass Assignment (BOPA):** When processing `PATCH` or `POST` requests, the server MUST implement a strict **Allowlist** in the DTO (Data Transfer Object) layer. Clients MUST NOT be able to arbitrarily update protected fields (e.g., `role`, `isVerified`, `balance`) by including them in the request body or `updateMask`.
+
+---
+
+### 5.4 Security Headers
+
+✅ **Required**: All API responses MUST include the following security headers:
+- `X-Content-Type-Options: nosniff` (Prevents MIME-sniffing attacks)
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (Enforces HTTPS)
+
+---
+
+### 5.5 401 vs 403 Distinction
 
 | Status Code | Meaning | When to Use |
 |-------------|---------|-------------|
@@ -1542,3 +1566,4 @@ components:
 - [JSON:API Specification](https://jsonapi.org/)
 - [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
 - [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)
+ 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)

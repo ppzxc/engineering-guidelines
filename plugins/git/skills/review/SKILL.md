@@ -1,11 +1,11 @@
 ---
-description: Use when the user wants to review a GitHub PR — /git:review, "PR 리뷰", "코드 리뷰", or any request to review and submit feedback on a pull request
+description: Use when the user wants to review and automatically fix a GitHub PR — /git:review, "PR 리뷰", "코드 리뷰", or any request to review, fix, and approve a pull request
 user-invocable: true
 ---
 
-# review — PR Code Review
+# review — PR Code Review & Auto-Fix
 
-Analyze PR diff → detect languages → load language-specific reviewer skills → display review results → submit via `gh pr review` after user confirmation.
+Analyze PR diff → detect languages → load language-specific reviewer skills → display review results → apply fixes → submit approval via `gh pr review` after user confirmation (or automatically if --fix is provided).
 
 ## Execution Steps
 
@@ -58,64 +58,40 @@ For each matched reviewer skill, invoke it using the `Skill` tool to load its re
 
 If no reviewer skill matches a detected language, fall back to the general review criteria for that language's files.
 
-### 5. Code Review
+### 5. Code Review & Generate Fixes
 
 ```bash
 gh pr diff <PR_NUMBER>
 ```
 
-Analyze the diff using a two-tier approach:
+Analyze the diff using a two-tier approach (Language-specific reviewer skills or General criteria).
+Instead of just listing the issues, **generate the exact code modifications required to fix all identified issues.**
 
-**For files in languages with a loaded reviewer skill:**
-Apply that skill's specific CHECK/FLAG criteria or checklist. Prioritize language-specific rules over general ones.
+### 6. Apply Fixes & Push (Auto-Fix)
 
-**For files in languages without a loaded reviewer skill:**
-Apply the general review criteria below:
-
-- **Bugs / Logic Errors** — Boundary conditions, nil/null handling, missing error handling
-- **Security** — Missing auth/authorization, SQL injection, sensitive data exposure, input validation
-- **Code Quality** — Duplicate code, unnecessary complexity, naming consistency
-- **Project Conventions** — If the project has a `CLAUDE.md`, `.claude/CLAUDE.md`, or similar project-rules file, read it and apply its coding standards; otherwise review against general best practices
-
-Combine all findings into a single unified review.
-
-### 6. Display Review Results
-
+If the `--fix` argument is provided (or if running in auto-fix mode):
+1. **Apply Changes:** Directly modify the source files with the generated fixes.
+2. **Commit:**
+```bash
+git add .
+git commit -m "fix: address review comments"
 ```
-PR #<NUMBER>: <TITLE>
-Branch: <HEAD> → <BASE>
-Changes: +<ADD> -<DEL> (<FILES> files)
-CI: <PASS/FAIL/PENDING>
-Reviewers loaded: <list of loaded reviewer skills, or "none — using general criteria">
-
---- Code Review ---
-
-[APPROVE / REQUEST_CHANGES / COMMENT]
-
-<review content>
-  - <filename>:<line> — <issue description>
-  - ...
+3. **Push:**
+```bash
+git push origin <HEAD_REF_NAME>
 ```
 
-### 7. User Confirmation (mandatory)
+If no issues were found, skip this step.
 
-```
-Select review type:
-  1) approve          — Approve
-  2) request-changes  — Request changes
-  3) comment          — Comment only
-  4) cancel
+### 7. Approve PR
 
-Choice (1-4):
-```
-
-### 8. Submit gh pr review
+Once fixes are pushed (or if no fixes were needed), automatically approve the PR.
 
 ```bash
-gh pr review <PR_NUMBER> \
-  --approve          # or --request-changes or --comment
-  --body "<review content>"
+gh pr review <PR_NUMBER> --approve --body "Auto-reviewed. Fixes applied (if any) and approved."
 ```
+
+*Note: The manual user confirmation for review type (approve/request-changes/comment) is bypassed in this automated workflow.*
 
 ## Error Handling
 

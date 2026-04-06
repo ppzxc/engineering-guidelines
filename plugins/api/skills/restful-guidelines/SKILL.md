@@ -17,9 +17,9 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 | 프로필 | 포함 Tier | 대상 | 규칙 수 |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | 모든 API — 첫날부터 | ~80 |
-| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~125 |
-| **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~156 |
+| **Essential** | T1 only | 모든 API — 첫날부터 | ~87 |
+| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~121 |
+| **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~146 |
 
 **사용 예시:** "Essential 프로필로 이 API를 리뷰해줘" → T1 규칙만 체크한다.
 

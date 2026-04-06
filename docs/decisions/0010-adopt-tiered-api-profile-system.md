@@ -40,7 +40,7 @@ Chosen option: "Option A: Tiered + Profile 시스템", because 기존 규칙을 
 ### Confirmation
 
 * SKILL.md 내 모든 규칙에 `[T1]`, `[T2]`, `[T3]` 태그가 존재하는지 확인한다.
-* Tier별 카운트 T1 ~80 / T2 ~45 / T3 ~31이 목표 범위 내인지 확인한다.
+* Tier별 카운트 T1 ~87 / T2 ~34 / T3 ~25이 목표 범위 내인지 확인한다.
 * `api-rules.md`의 모든 규칙에 `[T1]`과 `[ADR-0010]` 태그가 추가되었는지 확인한다.
 
 ## Pros and Cons of the Options

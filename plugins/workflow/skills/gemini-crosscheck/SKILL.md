@@ -111,9 +111,9 @@ Apply Pre-mortem results to the Plan's Assumption section.
 ```bash
 gemini -m gemini-3-flash-preview -p "<identical prompt from Step 3 bash block above>"
 ```
-3. If Flash also fails: notify user "⚠️ Gemini unavailable, Claude 자체 생성", Claude generates test scenarios + pre-mortem independently.
+3. If Flash also fails: notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.
 
-> **Flash fallback 품질 주의:** Flash 크로스체크 결과는 Pro보다 덜 상세할 수 있습니다. Plan Finalization 시 Flash 결과를 보수적으로 해석하고, 고위험 변경에 대해서는 실제 소스 파일을 직접 추가 검토하세요.
+> **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, perform additional direct source file review.
 
 ### 4. Plan Finalization
 
@@ -130,9 +130,9 @@ For high-risk changes, pre-read 2-3 actual source files to validate the plan.
 
 ### 5. Execute
 
-**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes exempt). **구조적 정리 단계에서는 `dev:tidy` 스킬을 활성화하여 `[PHASE: STRUCTURAL]` 가이드라인을 엄격히 따를 것을 권장합니다.**
+**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes exempt). **For the structural cleanup phase, activate the `dev:tidy` skill and strictly follow the `[PHASE: STRUCTURAL]` guidelines.**
 
-**5-1. Tidying** - Structural cleanup only. `refactor:` commit. No behavioral changes. `dev:tidy`의 `[PHASE: STRUCTURAL]` 및 `PRE-BEHAVIORAL GATE`를 통과해야 합니다.
+**5-1. Tidying** - Structural cleanup only. `refactor:` commit. No behavioral changes. Must pass `dev:tidy`'s `[PHASE: STRUCTURAL]` and `PRE-BEHAVIORAL GATE`.
 
 **5-2. Pre-read + Impact Scan** - Read latest content of target files. Verify signatures/types/imports. For high-risk changes, report classes that reference the changed files and Breaking Change status.
 

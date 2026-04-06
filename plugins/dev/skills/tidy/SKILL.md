@@ -1,5 +1,5 @@
 ---
-description: Follow Kent Beck's Tidy First principles by strictly separating structural changes from behavioral changes. Use when refactoring code, restructuring code, making structural changes without changing behavior, renaming variables/functions, extracting methods, separating concerns, preparing code for new features, or need to ensure structural and behavioral changes are in separate commits.
+description: Use when refactoring code or preparing structural changes — /dev:tidy, "tidy first", "구조 정리", "리팩토링", or any request to separate structural changes from behavioral changes following Kent Beck's Tidy First principles.
 user-invocable: true
 ---
 

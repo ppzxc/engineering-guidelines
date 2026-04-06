@@ -1,5 +1,5 @@
 ---
-description: Use when starting brainstorm, planning architecture changes, or when the user mentions Gemini review — /workflow:gemini-crosscheck, "Gemini 크로스체크", "Gemini 리뷰"
+description: Use when starting brainstorm, planning architecture changes, or when the user mentions Gemini review — /workflow:gemini-crosscheck, "Gemini crosscheck", "Gemini review"
 user-invocable: true
 ---
 
@@ -35,14 +35,14 @@ These are the **only** permitted model identifiers. Copy verbatim. **Do NOT infe
 
 Run **before** brainstorm. Regenerate `.context-map.md` if: file missing / 1 hour elapsed / `git rev-parse HEAD` mismatch.
 
-<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
+**Step 1-1. Collect project structure data into a temp file:**
+
 ```bash
-gemini -m gemini-3-flash-preview -p "
+PROMPT_FILE=$(mktemp /tmp/gemini-context-XXXXXX.txt)
+
+cat > "$PROMPT_FILE" <<'PROMPT_HEADER'
 You are a senior software architect with 10 years of experience.
 Create a compressed Context Map of this project so that another high-performance AI coding agent (Claude) can immediately understand and begin work. Maximum 4000 tokens.
-
-[Recent Git Changes (last 2 weeks)]
-$(git log --since='2 weeks ago' --grep='^\(feat\|fix\|refactor\|perf\)' --pretty=format:'%h - %s' --no-merges | head -n 20)
 
 Must include:
 - Full module structure and dependency graph (hierarchical)
@@ -52,7 +52,68 @@ Must include:
 - Recent development direction and intent based on the provided Git changes
 
 Output format: Markdown. Focus on structure and relationships. Do not include method-level implementation code blocks.
-" > .context-map.md
+
+---
+
+PROMPT_HEADER
+
+{
+  echo "=== [Project Tree (depth 3)] ==="
+  tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null || find . -maxdepth 3 -type f | head -100
+
+  echo ""
+  echo "=== [Build Configuration] ==="
+  for f in pom.xml build.gradle build.gradle.kts go.mod go.sum Cargo.toml package.json composer.json requirements.txt pyproject.toml; do
+    if [ -f "$f" ]; then
+      echo "--- $f ---"
+      head -80 "$f"
+      echo ""
+    fi
+  done
+
+  echo ""
+  echo "=== [Core Entity/Model Signatures] ==="
+  # Java/Kotlin: public class/interface/record declarations + fields
+  find . -type f \( -name '*.java' -o -name '*.kt' \) \
+    \( -path '*/domain/*' -o -path '*/entity/*' -o -path '*/model/*' \) \
+    2>/dev/null | head -20 | while read -r src; do
+    echo "--- $src ---"
+    grep -n '^\(public \)\?\(class\|interface\|record\|enum\|data class\) ' "$src" | head -5
+    grep -n '^\s*private \|^\s*val \|^\s*var ' "$src" | head -10
+    echo ""
+  done
+  # Go: type declarations
+  find . -type f -name '*.go' -not -path '*/vendor/*' 2>/dev/null | head -20 | while read -r src; do
+    if grep -q '^type .*struct' "$src"; then
+      echo "--- $src ---"
+      grep -n '^type \|^\s\+[A-Z]' "$src" | head -15
+      echo ""
+    fi
+  done
+
+  echo ""
+  echo "=== [Recent Git Changes (last 2 weeks)] ==="
+  git log --since='2 weeks ago' --grep='^\(feat\|fix\|refactor\|perf\)' \
+    --pretty=format:'%h - %s' --no-merges 2>/dev/null | head -n 20
+
+  echo ""
+  echo "=== [Key Config Files] ==="
+  for f in application.yml application.yaml application.properties .env.example docker-compose.yml docker-compose.yaml; do
+    if [ -f "$f" ]; then
+      echo "--- $f ---"
+      head -50 "$f"
+      echo ""
+    fi
+  done
+} >> "$PROMPT_FILE"
+```
+
+**Step 1-2. Run Gemini with the temp file:**
+
+<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
+```bash
+gemini -m gemini-3-flash-preview -p "$(cat "$PROMPT_FILE")" > .context-map.md
+rm -f "$PROMPT_FILE"
 ```
 
 Append `<!-- git:$(git rev-parse HEAD) -->` to the bottom after generation.
@@ -73,12 +134,12 @@ Each approach: tradeoffs, risk level (H/M/L), complexity (1-10), rejection reaso
 
 ### 3. Gemini Cross-check
 
-<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
-```bash
-gemini -m gemini-3.1-pro-preview -p "
-Project context:
-$(cat .context-map.md)
+**Step 3-1. Build the cross-check prompt file:**
 
+```bash
+REVIEW_FILE=$(mktemp /tmp/gemini-review-XXXXXX.txt)
+
+cat > "$REVIEW_FILE" <<'REVIEW_HEADER'
 Cross-check the following draft execution plan as a senior architect.
 
 Review criteria:
@@ -96,24 +157,41 @@ Additional output:
 If no issues: LGTM + test scenarios + failure scenarios.
 If issues found: tag each as [consistency|omission|ordering|risk|feasibility|version-compat], one line per item, max 5 + test scenarios + failure scenarios.
 
-Draft plan:
-<insert full draft plan here>
-"
+---
+
+REVIEW_HEADER
+
+{
+  echo "=== [Project Context] ==="
+  cat .context-map.md
+
+  echo ""
+  echo "=== [Draft Execution Plan] ==="
+  echo "<INSERT DRAFT PLAN HERE>"
+} >> "$REVIEW_FILE"
+```
+
+**Step 3-2. Run Gemini cross-check:**
+
+<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
+```bash
+gemini -m gemini-3.1-pro-preview -p "$(cat "$REVIEW_FILE")"
+rm -f "$REVIEW_FILE"
 ```
 
 Show accept/reject reasoning to the user.
 Apply Pre-mortem results to the Plan's Assumption section.
 
 **Fallback chain (Step 3 only):**
-1. Run cross-check with `gemini-3.1-pro-preview` (copy the command above verbatim).
-2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** command below:
-<!-- COPY THE COMMAND BELOW VERBATIM — Flash fallback for Step 3 -->
+1. Run cross-check with `gemini-3.1-pro-preview` (command above).
+2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
 ```bash
-gemini -m gemini-3-flash-preview -p "<identical prompt from Step 3 bash block above>"
+gemini -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")"
 ```
-3. If Flash also fails: notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.
+   (Do NOT delete `$REVIEW_FILE` until the fallback also completes or fails.)
+3. If Flash also fails: `rm -f "$REVIEW_FILE"`, notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.
 
-> **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, perform additional direct source file review.
+> **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, review the actual source files directly.
 
 ### 4. Plan Finalization
 
@@ -130,7 +208,7 @@ For high-risk changes, pre-read 2-3 actual source files to validate the plan.
 
 ### 5. Execute
 
-**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes exempt). **For the structural cleanup phase, activate the `dev:tidy` skill and strictly follow the `[PHASE: STRUCTURAL]` guidelines.**
+**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes such as field additions propagating across Entity/DTO/Mapper/Repository/Service/Controller/Tests are exempt). **For the structural cleanup phase, activate the `dev:tidy` skill and strictly follow the `[PHASE: STRUCTURAL]` guidelines.**
 
 **5-1. Tidying** - Structural cleanup only. `refactor:` commit. No behavioral changes. Must pass `dev:tidy`'s `[PHASE: STRUCTURAL]` and `PRE-BEHAVIORAL GATE`.
 
@@ -151,6 +229,7 @@ Include rollback-capable migration for DB changes.
 - `.context-map.md` is generated by Gemini. Do not edit manually. Add to `.gitignore`.
 - During execute, verify against actual source, not the context map.
 - **Model names are immutable.** Use only the exact strings defined in the Model Names table. On `ModelNotFoundError`, follow the fallback chain — never guess alternative names.
+- **Shell safety:** Always construct Gemini prompts via temp files (`mktemp`). Never embed dynamic data (git log, file contents) directly inside shell quote strings.
 - On Gemini Pro failure in Step 3, retry with `gemini-3-flash-preview` (verbatim) before falling back to Claude. On any Gemini failure, do not halt the workflow. Notify user and proceed with strengthened direct source verification.
 - Commits follow Tidy First: `refactor:` (structural) / `feat:`/`fix:` (behavioral). Every commit must be independently rollback-capable.
 

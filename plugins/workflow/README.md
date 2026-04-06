@@ -77,7 +77,7 @@ Source code ──>  .context-map.md ──> Draft plan ──> Feedback ──>
 
 | Step | Model | Role | Input | Output | Fallback |
 |------|-------|------|-------|--------|----------|
-| 1. Compress | `gemini-3-flash-preview` | Context compressor | Full codebase + git log | `.context-map.md` (~4000 tok) | — |
+| 1. Compress | `gemini-3-flash-preview` | Context compressor | Full codebase + git log | `.context-map.md` (~4000 tok) | Claude reads source directly (skip Steps 1 & 3) |
 | 2. Brainstorm | Claude (Opus/Sonnet) | Planner | Context map + task | Draft plan with options | — |
 | 3. Cross-check | `gemini-3.1-pro-preview` | Reviewer/Critic | Context map + draft plan | Feedback + tests + pre-mortem | Flash → Claude |
 | 4. Plan | Claude (Opus/Sonnet) | Decision maker | Feedback + draft plan | Final plan with Tidy/Behavioral split (user approval) | — |

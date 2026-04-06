@@ -77,7 +77,7 @@ Gemini Flash          Claude              Gemini Pro/Flash          Claude      
 
 | 단계 | 모델 | 역할 | 입력 | 출력 | Fallback |
 |------|------|------|------|------|----------|
-| 1. 압축 | `gemini-3-flash-preview` | 컨텍스트 압축기 | 전체 코드베이스 + git log | `.context-map.md` (~4000 tok) | — |
+| 1. 압축 | `gemini-3-flash-preview` | 컨텍스트 압축기 | 전체 코드베이스 + git log | `.context-map.md` (~4000 tok) | Claude가 소스 직접 읽기 (Step 1, 3 스킵) |
 | 2. 브레인스토밍 | Claude (Opus/Sonnet) | 계획자 | 컨텍스트 맵 + 작업 | 옵션 포함 계획 초안 | — |
 | 3. 크로스체크 | `gemini-3.1-pro-preview` | 검토자/비평가 | 컨텍스트 맵 + 계획 초안 | 피드백 + 테스트 + Pre-mortem | Flash → Claude |
 | 4. 계획 | Claude (Opus/Sonnet) | 의사결정자 | 피드백 + 계획 초안 | Tidy/Behavioral 분리된 최종 계획 (사용자 승인) | — |

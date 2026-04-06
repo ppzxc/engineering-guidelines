@@ -14,7 +14,7 @@ Claude (plan/execute) + Gemini (context/review).
 
 | Step | Model | Fallback |
 |------|-------|----------|
-| Context compression | `gemini-3-flash-preview` | — |
+| Context compression | `gemini-3-flash-preview` | Claude reads source directly (skip Steps 1 & 3) |
 | Cross-check | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` → Claude |
 
 ## Workflow
@@ -44,9 +44,14 @@ Output format: Markdown. Focus on structure and relationships. Do not include me
 
 Append `<!-- git:$(git rev-parse HEAD) -->` to the bottom after generation.
 
+**If Step 1 fails (Gemini CLI unavailable, auth error, or any error):** notify user "⚠️ Conservative mode — Gemini unavailable", skip Steps 1 and 3, and proceed as follows:
+- Claude reads `CLAUDE.md`, `AGENTS.md`, and key source files directly to build project context
+- Claude generates test scenarios + pre-mortem independently in Step 3's place
+- Strengthen source verification in Step 5 (pre-read all target files before any change)
+
 ### 2. Brainstorm
 
-Read `.context-map.md` and proceed as follows.
+If `.context-map.md` exists, read it. If not (Step 1 skipped/failed), use the directly gathered context from `CLAUDE.md` + source files instead.
 
 **2-1.** Present 2-3 approaches.
 Each approach: tradeoffs, risk level (H/M/L), complexity (1-10), rejection reason (Why NOT).

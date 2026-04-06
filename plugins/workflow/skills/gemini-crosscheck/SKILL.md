@@ -112,9 +112,9 @@ For high-risk changes, pre-read 2-3 actual source files to validate the plan.
 
 ### 5. Execute
 
-**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes exempt).
+**Tidy First** principle. Keep changes to 10 files or fewer per execution (mechanical bulk changes exempt). **구조적 정리 단계에서는 `dev:tidy` 스킬을 활성화하여 `[PHASE: STRUCTURAL]` 가이드라인을 엄격히 따를 것을 권장합니다.**
 
-**5-1. Tidying** - Structural cleanup only. `refactor:` commit. No behavioral changes.
+**5-1. Tidying** - Structural cleanup only. `refactor:` commit. No behavioral changes. `dev:tidy`의 `[PHASE: STRUCTURAL]` 및 `PRE-BEHAVIORAL GATE`를 통과해야 합니다.
 
 **5-2. Pre-read + Impact Scan** - Read latest content of target files. Verify signatures/types/imports. For high-risk changes, report classes that reference the changed files and Breaking Change status.
 

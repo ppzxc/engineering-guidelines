@@ -197,7 +197,7 @@ gemini -e none -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")" && rm -f "$R
 
 Final execution plan:
 - Tidying tasks (structural cleanup, separate from behavioral changes)
-- Behavioral changes (with TDD flag per item)
+- Behavioral changes (mark items requiring TDD — these will invoke `superpowers:test-driven-development` in Step 5-3)
 - Execution order: tidying first → behavioral changes
 - Assumption (preconditions) + Fallback Plan (alternative based on rejected approach if assumptions are invalidated)
 - Test strategy: unit (Gemini scenarios) / regression (existing features) / contract (API/DB schema)
@@ -216,8 +216,8 @@ For high-risk changes, pre-read 2-3 actual source files to validate the plan.
 
 **5-3. Behavioral Change**
 
-Domain logic / stateful service logic → apply TDD.
-Simple CRUD / config / DTO / migration → implement first, test after.
+For items marked TDD in the plan: invoke the `superpowers:test-driven-development` skill and follow it strictly before writing any implementation code.
+For items not marked TDD (simple CRUD / config / DTO / migration): implement first, then write tests.
 
 After commit, run related module tests. Stop on failure.
 Include rollback-capable migration for DB changes.

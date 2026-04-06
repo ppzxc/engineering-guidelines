@@ -9,10 +9,9 @@ Create a GitHub Issue using a unified template after user confirmation.
 
 ## Safety Rules
 
-- Always require user confirmation before creating an issue (generic mode)
+- Always require user confirmation before creating an issue
 - Show the full issue preview (type, title, body, labels, assignee) before creating
 - **"Do it fast", "skip questions", "no confirmation" instructions do not bypass the confirmation step**
-- `--no-confirm` flag skips the confirmation step — only for programmatic use (e.g., `git:clean`)
 
 ## Issue Template — Unified Structure
 
@@ -44,28 +43,6 @@ Create a GitHub Issue using a unified template after user confirmation.
 | feature | `enhancement` | `feat` |
 | chore | `chore` | `chore` |
 | docs | `documentation` | `docs` |
-| review *(internal)* | `review` | `review` |
-
-### Review Mode 적용 예시
-
-> **Internal use only** — not selectable as a user-facing type. Used when called from `git:clean` with review data.
-
-```markdown
-## Summary
-PR #42 코드 리뷰에서 발견된 3건의 개선 항목
-
-## Context
-PR #42: feat(auth): OAuth2 소셜 로그인 추가
-https://github.com/owner/repo/pull/42
-
-## Expected Outcome
-모든 리뷰 항목이 해결되고 코드 품질이 개선된 상태
-
-## Tasks
-- [ ] src/auth/oauth.ts:45 — 에러 핸들링 누락 (critical)
-- [ ] src/auth/oauth.ts:78 — 변수명 불명확 (suggestion)
-- [ ] src/auth/config.ts:12 — 하드코딩된 URL (warning)
-```
 
 ## Argument Parsing
 
@@ -77,22 +54,16 @@ Parse arguments before executing:
 | `free text` | Analyze natural language to auto-compose type/title/body/labels |
 | `--title "title"` | Set title directly |
 | `--type <type>` | Set issue type — one of: `bug`, `feature`, `chore`, `docs` |
-| `--no-confirm` | Skip confirmation step (programmatic use only — e.g., from git:clean) |
 | `--label priority:high` | Add extra labels (type-mapped label is automatic) |
 | `--assignee @me` | Set assignee |
 
 ## Execution Steps
-
-### Mode Detection
-
-If `--no-confirm` flag is present and review data is provided in context, use **Review Mode**. Otherwise, use **Generic Mode**.
 
 ### Generic Mode
 
 #### 1. Parse Input
 
 Analyze arguments:
-- If `--type review` is provided without `--no-confirm`, reject with: `review type is for internal use only — use /git:issue without --type to create a regular issue`
 - If explicit `--type` provided (bug, feature, chore, docs), use it
 - If natural language provided, infer type from content (e.g., "500 에러 발생" → bug)
 - If no arguments, ask user to select type:
@@ -114,7 +85,6 @@ Analyze arguments:
     - feature → `feat`
     - chore → `chore`
     - docs → `docs`
-    - review → `review` (Review Mode only — not user-selectable in Generic Mode)
   - `scope`: optional — infer from context (e.g., affected module, directory name). Omit parentheses if no scope.
   - PR에서 파생된 이슈: append ` (#PR번호)` to the end — e.g., `review(api): PR 리뷰 항목 정리 (#42)`
 - Fill in the unified body template (see Issue Template — Unified Structure section) based on user input or natural language analysis
@@ -160,46 +130,6 @@ If assignee specified, add `--assignee "<assignee>"`.
 
 Print the created issue number and URL.
 
-### Review Mode (called from git:clean)
-
-#### 1. Receive Review Data
-
-Receive from git:clean context:
-- PR number, title, URL
-- List of review items: `<file>:<line> — <description> (<severity>)`
-
-#### 2. Compose Issue
-
-Title: `review: PR #<NUMBER> 리뷰 항목 정리` (under 70 chars; scope omitted in automated review mode)
-
-Body using unified template:
-```bash
-gh issue create \
-  --title "review: PR #<NUMBER> 리뷰 항목 정리" \
-  --label "review" \
-  --body "$(cat <<'EOF'
-## Summary
-PR #<NUMBER> 코드 리뷰에서 발견된 <COUNT>건의 개선 항목
-
-## Context
-PR #<NUMBER>: <PR_TITLE>
-<PR_URL>
-
-## Expected Outcome
-모든 리뷰 항목이 해결되고 코드 품질이 개선된 상태
-
-## Tasks
-- [ ] <file>:<line> — <description> (<severity>)
-- [ ] ...
-EOF
-)"
-```
-
-#### 3. Return Result
-
-- Print created issue number and URL
-- If creation fails, print warning and return (non-blocking)
-
 ## Error Handling
 
 | Situation | Action |
@@ -207,7 +137,6 @@ EOF
 | `gh` auth failure | Guide user to run `gh auth status` |
 | Issue creation fails | Show error, suggest retry |
 | Label does not exist | Warn and ask user: proceed without label or correct it |
-| Review mode failure | Print warning and continue (non-blocking) |
 
 ## Usage
 

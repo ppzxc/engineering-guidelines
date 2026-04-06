@@ -5,7 +5,7 @@ user-invocable: true
 
 # clean — Full PR Lifecycle + Cleanup
 
-commit → PR → review → issue creation → merge → worktree cleanup을 순차 실행한다.
+commit → PR → review+fix → merge → worktree cleanup을 순차 실행한다.
 
 ## Safety Rules
 
@@ -87,8 +87,6 @@ Execute the **git:review** skill with the `--fix` argument (internal use).
   [3/5] Auto-running code review and fix...
   ```
 
-*Note: Issue creation (previously Step 3.5) is skipped because the review step now automatically applies fixes.*
-
 ### Step 4. Merge PR
 
 Execute the **git:merge** skill.
@@ -133,7 +131,7 @@ PR workflow complete
 
   Commit:  <COMMIT_HASH> (<message>)
   PR:      #<NUMBER> — <TITLE>
-  Review:  <ISSUE_URL> (or "no issues found")
+  Review:  <N> issues found and fixed (or "no issues found")
   Merged:  squash merge at <TIMESTAMP>
   Cleanup: worktree <PATH> removed, branch <BRANCH> deleted
 ```
@@ -150,7 +148,6 @@ PR workflow complete
 | Error in any step | Display error and ask user whether to continue |
 | CI failing | Handled by merge warning behavior |
 | No worktree | Skip worktree removal in Step 5, perform branch cleanup only |
-| Issue creation failure | Print warning and continue (non-blocking) |
 
 ## Usage
 

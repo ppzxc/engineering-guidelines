@@ -86,11 +86,11 @@ Gemini Flash          Claude              Gemini Pro/Flash          Claude      
 ## 비용 추정 (1회 사이클)
 
 ```
-Gemini Flash (압축)              : ~100K input  = $0.05
-Gemini Pro  (크로스체크)          : ~6K input    = $0.012
-Gemini Flash (크로스체크 fallback): ~6K input    = $0.003  ← Pro 실패 시
-Claude 컨텍스트 맵 읽기           : ~4K input    = $0.06
-                                             합계: ~$0.12
+Gemini Flash (압축)               : ~100K input  = $0.05
+Gemini Pro  (크로스체크)           : ~6K input    = $0.012
+Gemini Flash (크로스체크 fallback) : ~6K input    = $0.003  ← Pro 실패 시
+Claude 컨텍스트 맵 읽기            : ~4K input    = $0.06
+                                              합계: ~$0.12
 
 vs. Opus가 소스 직접 읽을 때 : ~100K input = $1.50
                                   절감: ~93%

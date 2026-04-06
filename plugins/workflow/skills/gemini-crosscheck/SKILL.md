@@ -10,7 +10,7 @@ Claude (plan/execute) + Gemini (context/review).
 
 ## Gemini CLI
 
-`gemini -m <model> -p "<prompt>"` (v0.36.0+)
+`gemini -m <model> -p "<prompt>"` (v0.36.0+ required; if `-m` flag is unsupported, update via `npm install -g @google/gemini-cli` or fall back to Claude self-generate)
 
 | Step | Model | Fallback |
 |------|-------|----------|

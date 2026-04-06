@@ -28,9 +28,10 @@ Claude(plan/execute) + Gemini(context/review).
 │        │ + git log                               ▼              │
 │  ┌─────┴───────┐                     ┌───────────────────────┐ │
 │  │  프로젝트    │                     │ Gemini Pro            │ │
-│  │  코드베이스  │                     │ 크로스체크             │ │
-│  │             │                     │ + Pre-mortem          │ │
-│  └─────────────┘                     │ + 테스트 시나리오      │ │
+│  │  코드베이스  │                     │ (Flash fallback 가능)  │ │
+│  │             │                     │ 크로스체크             │ │
+│  └─────────────┘                     │ + Pre-mortem          │ │
+│                                      │ + 테스트 시나리오      │ │
 │                                      └───────────┬───────────┘ │
 │                                                   │              │
 │                                          피드백    │              │
@@ -54,9 +55,9 @@ Claude(plan/execute) + Gemini(context/review).
 ## 데이터 흐름
 
 ```
-Step 1                Step 2              Step 3              Step 4           Step 5
-Gemini Flash          Claude              Gemini Pro          Claude           Claude
-────────────          ──────              ──────────          ──────           ──────
+Step 1                Step 2              Step 3                    Step 4                Step 5
+Gemini Flash          Claude              Gemini Pro/Flash          Claude                Claude
+────────────          ──────              ─────────────────          ──────                ──────
 
 소스 코드 ──>  .context-map.md ──> 계획 초안 ──> 피드백 ──> 최종 계획 ──> 코드
 + git log         (4000 tok)       (2-3 옵션)    + 테스트    + Tidy/Behav  + 테스트

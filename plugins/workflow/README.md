@@ -28,9 +28,10 @@ Claude (plan/execute) + Gemini (context/review).
 │        │ + git log                               ▼              │
 │  ┌─────┴───────┐                     ┌───────────────────────┐ │
 │  │  Project    │                     │ Gemini Pro            │ │
-│  │  Codebase   │                     │ Cross-check           │ │
-│  │             │                     │ + Pre-mortem          │ │
-│  └─────────────┘                     │ + Test scenarios      │ │
+│  │  Codebase   │                     │ (Flash fallback avail)│ │
+│  │             │                     │ Cross-check           │ │
+│  └─────────────┘                     │ + Pre-mortem          │ │
+│                                      │ + Test scenarios      │ │
 │                                      └───────────┬───────────┘ │
 │                                                   │              │
 │                                         feedback  │              │
@@ -54,9 +55,9 @@ Claude (plan/execute) + Gemini (context/review).
 ## Data Flow
 
 ```
-Step 1                Step 2              Step 3              Step 4           Step 5
-Gemini Flash          Claude              Gemini Pro          Claude           Claude
-────────────          ──────              ──────────          ──────           ──────
+Step 1                Step 2              Step 3 (Pro/Flash)      Step 4           Step 5
+Gemini Flash          Claude              Gemini Pro/Flash      Claude           Claude
+────────────          ──────              ─────────────────      ──────           ──────
 
 Source code ──>  .context-map.md ──> Draft plan ──> Feedback ──> Final plan ──> Code
 + git log           (4000 tok)       (2-3 options)   + Tests     + Tidy/Behav   + Tests

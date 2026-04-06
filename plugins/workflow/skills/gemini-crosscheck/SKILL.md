@@ -87,8 +87,10 @@ Apply Pre-mortem results to the Plan's Assumption section.
 
 **Fallback chain (Step 3 only):**
 1. Run cross-check with `gemini-3.1-pro-preview`.
-2. If Pro fails (rate limit, timeout, error): notify user "⚠️ Gemini Pro → Flash fallback", retry with `gemini -m gemini-3-flash-preview -p "<same prompt>"`.
+2. If Pro fails (rate limit, timeout, error): notify user "⚠️ Gemini Pro → Flash fallback", retry using the identical prompt from the bash block above with `gemini -m gemini-3-flash-preview -p "<prompt from Step 3 bash block above>"`.
 3. If Flash also fails: notify user "⚠️ Gemini unavailable, Claude 자체 생성", Claude generates test scenarios + pre-mortem independently.
+
+> **Flash fallback 품질 주의:** Flash 크로스체크 결과는 Pro보다 덜 상세할 수 있습니다. Plan Finalization 시 Flash 결과를 보수적으로 해석하고, 고위험 변경에 대해서는 실제 소스 파일을 직접 추가 검토하세요.
 
 ### 4. Plan Finalization
 

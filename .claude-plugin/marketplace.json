@@ -15,7 +15,7 @@
       "name": "api",
       "source": "./plugins/api",
       "description": "RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, headers, and non-CRUD action endpoints",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "name": "docs",

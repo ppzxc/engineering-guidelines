@@ -33,14 +33,19 @@ RESTful API design guidelines.
    - [Long-Running Operations](#44-long-running-operations)
    - [Idempotency-Key](#45-idempotency-key)
 5. [Authentication & Security](#5-authentication--security)
-   - [Authentication Methods](#51-authentication-methods)
-   - [401 vs 403 Distinction](#52-401-vs-403-distinction)
-6. [OpenAPI Specification](#6-openapi-specification)
-   - [6.1 API First](#61-api-first)
-   - [6.2 Spec Quality](#62-spec-quality)
-   - [6.3 Schema Mapping](#63-schema-mapping)
-   - [6.4 Extensions & Validation](#64-extensions--validation)
-7. [References](#7-references)
+   - [5.1 Authentication Methods](#51-authentication-methods)
+   - [5.2 Authorization & Access Control](#52-authorization--access-control)
+   - [5.3 Input Validation & Mass Assignment](#53-input-validation--mass-assignment)
+   - [5.4 Security Headers](#54-security-headers)
+   - [5.5 401 vs 403 Distinction](#55-401-vs-403-distinction)
+   - [5.6 Webhooks](#56-webhooks)
+6. [Health Check](#6-health-check)
+7. [OpenAPI Specification](#7-openapi-specification)
+   - [7.1 API First](#71-api-first)
+   - [7.2 Spec Quality](#72-spec-quality)
+   - [7.3 Schema Mapping](#73-schema-mapping)
+   - [7.4 Extensions & Validation](#74-extensions--validation)
+8. [References](#8-references)
 
 ---
 
@@ -1104,14 +1109,31 @@ GET /articles/123?expand=author,comments.author
 ```
 
 ✅ **Required**: To prevent N+1 query explosions and DoS attacks (Unrestricted Resource Consumption), the server MUST enforce a strict upper limit on the **total number of expanded entities** returned in a single response (e.g., maximum 100 entities).
+
 ✅ **Required**: If an expansion request would exceed the maximum entity limit, return `400 Bad Request`.
+
 ⚠️ **Recommended**: Limit the maximum expansion depth to 3 levels.
 
 ---
 
 ### 3.8 Bulk Operations
 
-> 🚧 Coming soon
+Bulk operations allow processing multiple resources in a single request to reduce network overhead.
+
+✅ **Required**: Express bulk operations as custom methods on the collection URL using colon syntax.
+
+| Method | Goal | Endpoint |
+|--------|------|----------|
+| `batchCreate` | Create multiple resources | `POST /{resources}:batchCreate` |
+| `batchGet` | Retrieve multiple resources by ID | `POST /{resources}:batchGet` |
+| `batchUpdate` | Update multiple resources | `POST /{resources}:batchUpdate` |
+| `batchDelete` | Delete multiple resources | `POST /{resources}:batchDelete` |
+
+✅ **Required**: The request body MUST contain an array of items or IDs to process.
+
+✅ **Required**: Specify whether the bulk operation is atomic (all-or-nothing) or non-atomic (partial success allowed).
+
+✅ **Required**: For non-atomic operations, the response MUST use a structure that can express per-item success or failure (including RFC 9457 error objects for failed items).
 
 ---
 
@@ -1450,15 +1472,44 @@ Content-Type: application/problem+json
 
 ---
 
-## 6. OpenAPI Specification
+### 5.6 Webhooks
 
-### 6.1 API First
+✅ **Required**: Use a consistent payload wrapper for webhook events.
+
+```json
+{
+  "id": "evt_123",
+  "type": "article.published",
+  "created": "2024-01-20T10:00:00Z",
+  "data": { ... }
+}
+```
+
+✅ **Required**: Sign payloads using HMAC-SHA256 with a shared secret. Include the signature in the `X-Hub-Signature-256` header.
+
+⚠️ **Recommended**: Webhook handlers should be idempotent to handle duplicate events safely.
+
+---
+
+## 6. Health Check
+
+✅ **Required**: Provide a `GET /health` endpoint to monitor service availability.
+
+✅ **Required**: Return `200 OK` with `{"status": "UP"}` if the service is healthy.
+
+⚠️ **Recommended**: Distinguish between shallow (liveness) and deep (readiness) checks. Deep checks should verify dependencies like databases and caches.
+
+---
+
+## 7. OpenAPI Specification
+
+### 7.1 API First
 
 ✅ **Required**: All APIs MUST maintain an OpenAPI 3.0+ specification as the single source of truth.
 
 ⚠️ **Recommended**: Define the OpenAPI spec before implementation (API First approach).
 
-### 6.2 Spec Quality
+### 7.2 Spec Quality
 
 ✅ **Required**: Every endpoint, parameter, and schema property MUST include a `description` field.
 
@@ -1482,7 +1533,7 @@ paths:
             example: 20
 ```
 
-### 6.3 Schema Mapping
+### 7.3 Schema Mapping
 
 ✅ **Required**: Map field behaviors to OpenAPI properties:
 
@@ -1525,7 +1576,7 @@ components:
           description: Matches Request-Id response header.
 ```
 
-### 6.4 Extensions & Validation
+### 7.4 Extensions & Validation
 
 ⚠️ **Recommended**: Mark non-public endpoints with the `x-internal: true` extension.
 
@@ -1533,7 +1584,7 @@ components:
 
 ---
 
-## 7. References
+## 8. References
 
 **Google API Improvement Proposals (AIP):**
 

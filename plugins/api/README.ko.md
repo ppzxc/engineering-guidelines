@@ -27,20 +27,22 @@ RESTful API 설계 가이드라인이다.
    - [Expand/Embed](#37-expandembed)
    - [Bulk Operations](#38-bulk-operations)
 4. [API 운영](#4-api-운영)
-   - [API 버전 관리](#41-api-버전-관리)
-   - [Deprecation](#42-deprecation)
-   - [속도 제한](#43-속도-제한)
-   - [장기 실행 작업](#44-장기-실행-작업)
-   - [Idempotency-Key](#45-idempotency-key)
+   - [4.1 API 버전 관리](#41-api-버전-관리)
+   - [4.2 Deprecation](#42-deprecation)
+   - [4.3 속도 제한](#43-속도-제한)
+   - [4.4 장기 실행 작업](#44-장기-실행-작업)
+   - [4.5 Idempotency-Key](#45-idempotency-key)
 5. [인증 & 보안](#5-인증--보안)
-   - [인증 방식](#51-인증-방식)
-   - [401 vs 403 구분](#52-401-vs-403-구분)
-6. [OpenAPI Specification](#6-openapi-specification)
-   - [6.1 API First](#61-api-first)
-   - [6.2 스펙 품질](#62-스펙-품질)
-   - [6.3 스키마 매핑](#63-스키마-매핑)
-   - [6.4 확장 & 검증](#64-확장--검증)
-7. [참고 자료](#7-참고-자료)
+   - [5.1 인증 방식](#51-인증-방식)
+   - [5.2 401 vs 403 구분](#52-401-vs-403-구분)
+   - [5.3 Webhooks](#53-webhooks)
+6. [Health Check](#6-health-check)
+7. [OpenAPI Specification](#7-openapi-specification)
+   - [7.1 API First](#71-api-first)
+   - [7.2 스펙 품질](#72-스펙-품질)
+   - [7.3 스키마 매핑](#73-스키마-매핑)
+   - [7.4 확장 & 검증](#74-확장--검증)
+8. [참고 자료](#7-참고-자료)
 
 ---
 
@@ -1099,13 +1101,38 @@ Content-Type: application/json
 
 ### 3.7 Expand/Embed
 
-> 🚧 Coming soon
+✅ **필수**: 연관된 리소스를 응답에 포함하기 위해 `expand` 쿼리 파라미터를 지원한다.
+
+```
+GET /articles/123?expand=author,comments.author
+```
+
+✅ **필수**: N+1 쿼리 폭발 및 DoS 공격(Unrestricted Resource Consumption)을 방지하기 위해, 서버는 단일 응답에서 반환되는 **전체 확장 엔티티 수**에 대해 엄격한 상한선(예: 최대 100개)을 강제해야 한다.
+
+✅ **필수**: 확장 요청이 최대 엔티티 제한을 초과하는 경우 `400 Bad Request`를 반환한다.
+
+⚠️ **권장**: 최대 확장 깊이는 3단계로 제한한다.
 
 ---
 
 ### 3.8 Bulk Operations
 
-> 🚧 Coming soon
+일괄 작업은 네트워크 오버헤드를 줄이기 위해 단일 요청으로 여러 리소스를 처리할 수 있게 한다.
+
+✅ **필수**: 리소스 컬렉션 URL 뒤에 콜론 기호를 사용한 커스텀 메서드로 일괄 작업을 표현한다.
+
+| 메서드 | 목표 | 엔드포인트 |
+|--------|------|------------|
+| `batchCreate` | 여러 리소스 생성 | `POST /{resources}:batchCreate` |
+| `batchGet` | ID로 여러 리소스 조회 | `POST /{resources}:batchGet` |
+| `batchUpdate` | 여러 리소스 수정 | `POST /{resources}:batchUpdate` |
+| `batchDelete` | 여러 리소스 삭제 | `POST /{resources}:batchDelete` |
+
+✅ **필수**: 요청 본문에는 처리할 항목 또는 ID 배열이 포함되어야 한다.
+
+✅ **필수**: 일괄 작업이 원자적(atomic, all-or-nothing)인지 또는 비원자적(부분 성공 허용)인지 명시해야 한다.
+
+✅ **필수**: 비원자적 작업의 경우, 응답은 항목별 성공 또는 실패를 표현할 수 있는 구조를 사용해야 한다(실패한 항목에 대해 RFC 9457 에러 객체 포함).
 
 ---
 
@@ -1428,15 +1455,44 @@ Content-Type: application/problem+json
 
 ---
 
-## 6. OpenAPI Specification
+### 5.3 Webhooks
 
-### 6.1 API First
+✅ **필수**: 웹훅 이벤트에 대해 일관된 페이로드 래퍼를 사용한다.
+
+```json
+{
+  "id": "evt_123",
+  "type": "article.published",
+  "created": "2024-01-20T10:00:00Z",
+  "data": { ... }
+}
+```
+
+✅ **필수**: 공유 비밀 키(Shared Secret)를 사용한 HMAC-SHA256으로 페이로드를 서명한다. 서명은 `X-Hub-Signature-256` 헤더에 포함한다.
+
+⚠️ **권장**: 웹훅 핸들러는 중복 이벤트를 안전하게 처리할 수 있도록 멱등성을 가져야 한다.
+
+---
+
+## 6. Health Check
+
+✅ **필수**: 서비스 가용성을 모니터링하기 위해 `GET /health` 엔드포인트를 제공한다.
+
+✅ **필수**: 서비스가 정상이면 `200 OK`와 `{"status": "UP"}`을 반환한다.
+
+⚠️ **권장**: 단순 생존 확인(liveness)과 준비 완료 확인(readiness)을 구분한다. 준비 완료 확인은 DB, 캐시 등 의존성 상태를 점검해야 한다.
+
+---
+
+## 7. OpenAPI Specification
+
+### 7.1 API First
 
 ✅ **필수**: 모든 API는 OpenAPI 3.0+ 스펙을 단일 진실 원천(SSOT)으로 유지한다.
 
 ⚠️ **권장**: 구현 전 OpenAPI 스펙을 먼저 정의한다 (API First 접근법).
 
-### 6.2 스펙 품질
+### 7.2 스펙 품질
 
 ✅ **필수**: 모든 엔드포인트, 파라미터, 스키마 속성에 `description` 필드를 포함한다.
 
@@ -1460,7 +1516,7 @@ paths:
             example: 20
 ```
 
-### 6.3 스키마 매핑
+### 7.3 스키마 매핑
 
 ✅ **필수**: 필드 동작을 OpenAPI 속성으로 매핑한다:
 
@@ -1503,7 +1559,7 @@ components:
           description: Request-Id 응답 헤더 값과 일치.
 ```
 
-### 6.4 확장 & 검증
+### 7.4 확장 & 검증
 
 ⚠️ **권장**: 비공개 엔드포인트는 `x-internal: true` 확장으로 마킹한다.
 
@@ -1511,7 +1567,7 @@ components:
 
 ---
 
-## 7. 참고 자료
+## 8. 참고 자료
 
 **Google API Improvement Proposals (AIP):**
 

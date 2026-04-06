@@ -287,6 +287,49 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - Selective expansion: Clients MUST only expand what is needed.
 - Expansion failure: If a requested resource cannot be expanded (e.g., permissions), the server SHOULD omit it or return a placeholder without failing the main request.
 
+## Bulk Operations
+
+Bulk operations allow processing multiple resources in a single request to reduce network overhead.
+
+✅ **Required**: Express bulk operations as custom methods on the collection URL using colon syntax.
+
+| Method | Goal | Endpoint |
+|--------|------|----------|
+| `batchCreate` | Create multiple resources | `POST /{resources}:batchCreate` |
+| `batchGet` | Retrieve multiple resources by ID | `POST /{resources}:batchGet` |
+| `batchUpdate` | Update multiple resources | `POST /{resources}:batchUpdate` |
+| `batchDelete` | Delete multiple resources | `POST /{resources}:batchDelete` |
+
+✅ **Required**: The request body MUST contain an array of items or IDs to process.
+✅ **Required**: The response SHOULD contain an array of results matching the order of the request.
+⚠️ **Recommended**: Limit the maximum number of items in a single bulk request (e.g., max 100) to prevent long-running requests.
+⚠️ **Recommended**: Return `400 Bad Request` if the request exceeds the maximum item limit.
+✅ **Required**: **Atomic vs. Non-atomic:** Specify whether the bulk operation is atomic (all-or-nothing) or non-atomic (partial success allowed). Use the `atomic` query parameter if the behavior is configurable.
+✅ **Required**: For non-atomic operations, the response MUST use a structure that can express per-item success or failure (including RFC 9457 error objects for failed items).
+
+**Request Example (batchCreate):**
+
+```json
+POST /articles:batchCreate
+{
+  "requests": [
+    { "title": "Article 1", "content": "..." },
+    { "title": "Article 2", "content": "..." }
+  ]
+}
+```
+
+**Response Example (non-atomic batchCreate):**
+
+```json
+{
+  "results": [
+    { "status": 201, "resource": { "id": "1", "title": "Article 1", ... } },
+    { "status": 400, "error": { "title": "Validation Failed", "detail": "Title is required", ... } }
+  ]
+}
+```
+
 ## API Versioning
 
 **URL path versioning is PROHIBITED** — `/v1/articles` violates REST principles (same resource must have one URL)

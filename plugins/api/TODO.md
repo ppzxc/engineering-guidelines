@@ -1,8 +1,8 @@
 # API 플러그인 — 업계 표준 갭 분석 로드맵
 
-> 작성일: 2026-04-03
-> 기준 버전: ppzxc/api v0.1.0 (111개 규칙, Writing 98.2% / Review 97.3% 커버리지)
-> 목적: 업계 6대 리더 대비 누락 항목 식별 및 구현 우선순위 정리
+> 작성일: 2026-04-06
+> 기준 버전: ppzxc/api v0.1.1 (115개 규칙, Writing 100% / Review 100% 커버리지)
+> 목적: 업계 6대 리더 대비 누락 항목 식별 및 구현 완료 보고
 
 ---
 
@@ -10,7 +10,7 @@
 
 | 약칭 | 출처 | 특징 |
 |------|------|------|
-| **ppzxc/api** | 현재 플러그인 v0.1.0 | Google AIP 부분 도입, RFC 중심 |
+| **ppzxc/api** | 현재 플러그인 v0.1.1 | Google AIP 완전 도입, RFC 중심 |
 | **AIP** | Google API Improvement Proposals | gRPC-first, 가장 체계적 |
 | **MS** | Microsoft REST API Guidelines | 엔터프라이즈, Azure 생태계 |
 | **Stripe** | Stripe API Reference | 개발자 경험 최고 평가 |

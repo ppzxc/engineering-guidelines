@@ -8,7 +8,7 @@
 
 | 플러그인 | 버전 | 설명 |
 |--------|------|------|
-| [api](./plugins/api) | v0.1.0 | RESTful API 설계 가이드라인 — URL 구조, HTTP 메서드, 상태 코드, JSON 형식, 에러 응답, 버전 관리, 헤더, 비-CRUD action endpoint |
+| [api](./plugins/api) | v0.1.1 | RESTful API 설계 가이드라인 — URL 구조, HTTP 메서드, 상태 코드, JSON 형식, 에러 응답, 버전 관리, 헤더, 비-CRUD action endpoint |
 | [docs](./plugins/docs) | v0.0.4 | 문서 결정 기록 — ADR (Nygard 포맷) 및 MADR (MADR 4.0) 아키텍처 결정 기록 |
 | [git](./plugins/git) | v0.0.6 | Git 워크플로우 스킬 — 안전한 커밋, PR 생성, PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
 | [workflow](./plugins/workflow) | v0.0.3 | 워크플로우 스킬 — Gemini를 활용한 멀티 LLM 크로스체크 기반 계획 및 실행 |

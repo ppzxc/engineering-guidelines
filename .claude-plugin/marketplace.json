@@ -34,6 +34,12 @@
       "source": "./plugins/workflow",
       "description": "Workflow skills — multi-LLM cross-check with Gemini for planning and execution",
       "version": "0.0.2"
+    },
+    {
+      "name": "dev",
+      "source": "./plugins/dev",
+      "description": "Development methodology skills — Tidy First, TDD, and language-agnostic development practices",
+      "version": "0.0.1"
     }
   ]
 }

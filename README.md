@@ -12,6 +12,7 @@ A collection of engineering guidelines for software development, as a Claude Cod
 | [docs](./plugins/docs) | v0.0.3 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
 | [git](./plugins/git) | v0.0.5 | Git workflow skills — safe commit, PR creation, PR review, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
 | [workflow](./plugins/workflow) | v0.0.2 | Workflow skills — multi-LLM cross-check with Gemini for planning and execution |
+| [dev](./plugins/dev) | v0.0.1 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
 
 ## Marketplace Registration
 

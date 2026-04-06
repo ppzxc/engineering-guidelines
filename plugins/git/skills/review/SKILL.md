@@ -101,6 +101,8 @@ $(gh pr diff <PR_NUMBER>)
 
 ### 5b. Synthesize Findings
 
+**Skip this step if Step 5a was skipped (Gemini unavailable).** In that case, proceed directly with Step 5 findings.
+
 Merge Step 5 (Claude) and Step 5a (Gemini) results into a single unified review:
 
 | Case | Action |

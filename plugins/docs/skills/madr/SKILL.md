@@ -1,11 +1,11 @@
 ---
-description: "Use when creating a Markdown Architectural Decision Record — /docs:madr, \"MADR 작성\", \"결정 사항 기록\", or any request to document an architecture decision in MADR 3.x format"
+description: "Use when creating a Markdown Architectural Decision Record — /docs:madr, \"MADR 작성\", \"결정 사항 기록\", or any request to document an architecture decision in MADR 4.0 format"
 user-invocable: true
 ---
 
 # docs:madr — Markdown Architectural Decision Record
 
-MADR 3.x 포맷으로 아키텍처 결정 사항을 `docs/decisions/` 에 기록한다.
+MADR 4.0.0 포맷으로 아키텍처 결정 사항을 `docs/decisions/` 에 기록한다.
 
 ## MADR Variant
 
@@ -22,9 +22,9 @@ MADR 3.x 포맷으로 아키텍처 결정 사항을 `docs/decisions/` 에 기록
 ```markdown
 # Title
 
-## Status
-
-accepted
+* Status: "accepted"
+* Date: YYYY-MM-DD
+* Decision Makers: (의사결정자)
 
 ## Context and Problem Statement
 
@@ -32,7 +32,7 @@ accepted
 
 ## Decision Outcome
 
-(무엇을 선택했는가, 이유는?)
+Chosen option: "Option A", because (이유)
 ```
 
 ## 포맷 — Standard (기본값)
@@ -40,9 +40,9 @@ accepted
 ```markdown
 # Title
 
-## Status
-
-accepted
+* Status: "accepted"
+* Date: YYYY-MM-DD
+* Decision Makers: (의사결정자)
 
 ## Context and Problem Statement
 
@@ -64,8 +64,12 @@ Chosen option: "Option A", because ...
 
 ### Consequences
 
-* Good: ...
-* Bad: ...
+* Good, because ...
+* Bad, because ...
+
+### Confirmation
+
+(결정이 제대로 구현되었는지 검증할 방법)
 ```
 
 ## 포맷 — Full
@@ -73,9 +77,11 @@ Chosen option: "Option A", because ...
 ```markdown
 # Title
 
-## Status
-
-accepted
+* Status: "accepted"
+* Date: YYYY-MM-DD
+* Decision Makers: (의사결정자)
+* Consulted: (협의 대상)
+* Informed: (정보 공유 대상)
 
 ## Context and Problem Statement
 
@@ -96,20 +102,24 @@ Chosen option: "Option A", because ...
 
 ### Consequences
 
-* Good: ...
-* Bad: ...
+* Good, because ...
+* Bad, because ...
+
+### Confirmation
+
+(결정이 제대로 구현되었는지 검증할 방법)
 
 ## Pros and Cons of the Options
 
 ### Option A
 
-* Good: ...
-* Bad: ...
+* Good, because ...
+* Bad, because ...
 
 ### Option B
 
-* Good: ...
-* Bad: ...
+* Good, because ...
+* Bad, because ...
 ```
 
 ## 워크플로우
@@ -157,6 +167,7 @@ ls docs/decisions/ 2>/dev/null | grep -E '^[0-9]{4}-' | sort | tail -1
 
 - `path=` 소스 문서가 있으면 → 해당 문서에서 컨텍스트 추출
 - 없으면 → 현재 대화 컨텍스트에서 추론
+- 작성 시 오늘 날짜를 `Date` 필드에 `YYYY-MM-DD` 형식으로 기록한다.
 
 ### 7. 사용자 확인
 

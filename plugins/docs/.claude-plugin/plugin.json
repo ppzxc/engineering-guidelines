@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Documentation decision records skills — ADR (Nygard format) and MADR (Markdown Architectural Decision Records 4.0) for capturing and tracking architecture decisions",
   "author": {
     "name": "ppzxc",

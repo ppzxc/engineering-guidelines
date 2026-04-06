@@ -1,10 +1,8 @@
----
-status: {accepted | deprecated | superseded by ADR-NNNN}
-date: YYYY-MM-DD
-decision-makers:
----
-
 # {짧은 제목, 해결한 문제와 선택한 해결책을 대표}
+
+* Status: "accepted"
+* Date: YYYY-MM-DD
+* Decision Makers: (의사결정자)
 
 ## Context and Problem Statement
 

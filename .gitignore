@@ -4,3 +4,4 @@
 docs/*
 !docs/decisions/
 plugins/api/docs/superpowers/
+.context-map.md

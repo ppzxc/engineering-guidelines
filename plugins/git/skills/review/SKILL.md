@@ -1,11 +1,11 @@
 ---
-description: Use when the user wants to review and automatically fix a GitHub PR — /git:review, "PR 리뷰", "코드 리뷰", or any request to review, fix, and approve a pull request
+description: Use when the user wants to review and automatically fix a GitHub PR — /git:review, "PR 리뷰", "코드 리뷰", or any request to review, fix, and comment on a pull request
 user-invocable: true
 ---
 
 # review — PR Code Review & Auto-Fix
 
-Analyze PR diff → detect languages → load language-specific reviewer skills → display review results → apply fixes → submit approval via `gh pr review` after user confirmation (or automatically if --fix is provided).
+Analyze PR diff → detect languages → load language-specific reviewer skills → display review results → apply fixes → submit review comment via `gh pr review` after user confirmation (or automatically if --fix is provided).
 
 ## Execution Steps
 
@@ -83,15 +83,21 @@ git push origin <HEAD_REF_NAME>
 
 If no issues were found, skip this step.
 
-### 7. Approve PR
+### 7. Submit Review Comment
 
-Once fixes are pushed (or if no fixes were needed), automatically approve the PR.
+Once fixes are pushed (or if no fixes were needed), submit a review comment on the PR.
 
+If fixes were applied:
 ```bash
-gh pr review <PR_NUMBER> --approve --body "Auto-reviewed. Fixes applied (if any) and approved."
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. <N> issue(s) found and fixed."
 ```
 
-*Note: The manual user confirmation for review type (approve/request-changes/comment) is bypassed in this automated workflow.*
+If no issues were found:
+```bash
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
+```
+
+*Note: Comment is used instead of approve, as GitHub does not allow PR authors to approve their own PRs.*
 
 ## Error Handling
 

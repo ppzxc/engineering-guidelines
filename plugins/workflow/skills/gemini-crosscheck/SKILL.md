@@ -59,7 +59,7 @@ PROMPT_HEADER
 
 {
   echo "=== [Project Tree (depth 3)] ==="
-  tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null || find . -maxdepth 3 -type f | head -100
+  tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null || find . -maxdepth 3 -not \( -path './.git' -prune -o -path './node_modules' -prune -o -path './target' -prune -o -path './build' -prune -o -path './dist' -prune -o -path './vendor' -prune \) -type f | head -100
 
   echo ""
   echo "=== [Build Configuration] ==="
@@ -74,7 +74,8 @@ PROMPT_HEADER
   echo ""
   echo "=== [Core Entity/Model Signatures] ==="
   # Java/Kotlin: public class/interface/record declarations + fields
-  find . -type f \( -name '*.java' -o -name '*.kt' \) \
+  find . -not \( -path './.git' -prune -o -path './target' -prune -o -path './build' -prune \) \
+    -type f \( -name '*.java' -o -name '*.kt' \) \
     \( -path '*/domain/*' -o -path '*/entity/*' -o -path '*/model/*' \) \
     2>/dev/null | head -20 | while read -r src; do
     echo "--- $src ---"
@@ -83,7 +84,8 @@ PROMPT_HEADER
     echo ""
   done
   # Go: type declarations
-  find . -type f -name '*.go' -not -path '*/vendor/*' 2>/dev/null | head -20 | while read -r src; do
+  find . -not \( -path './.git' -prune -o -path './vendor' -prune -o -path './build' -prune \) \
+    -type f -name '*.go' 2>/dev/null | head -20 | while read -r src; do
     if grep -q '^type .*struct' "$src"; then
       echo "--- $src ---"
       grep -n '^type \|^\s\+[A-Z]' "$src" | head -15
@@ -175,20 +177,18 @@ REVIEW_HEADER
 
 <!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
 ```bash
-gemini -e none -m gemini-3.1-pro-preview -p "$(cat "$REVIEW_FILE")"
-rm -f "$REVIEW_FILE"
+gemini -e none -m gemini-3.1-pro-preview -p "$(cat "$REVIEW_FILE")" && rm -f "$REVIEW_FILE"
 ```
 
 Show accept/reject reasoning to the user.
 Apply Pre-mortem results to the Plan's Assumption section.
 
 **Fallback chain (Step 3 only):**
-1. Run cross-check with `gemini-3.1-pro-preview` (command above).
+1. Run cross-check with `gemini-3.1-pro-preview` (command above). On success, `$REVIEW_FILE` is auto-deleted.
 2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
 ```bash
-gemini -e none -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")"
+gemini -e none -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")" && rm -f "$REVIEW_FILE"
 ```
-   (Do NOT delete `$REVIEW_FILE` until the fallback also completes or fails.)
 3. If Flash also fails: `rm -f "$REVIEW_FILE"`, notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.
 
 > **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, review the actual source files directly.

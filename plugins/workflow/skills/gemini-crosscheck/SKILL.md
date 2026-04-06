@@ -112,7 +112,7 @@ PROMPT_HEADER
 
 <!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
 ```bash
-gemini -m gemini-3-flash-preview -p "$(cat "$PROMPT_FILE")" > .context-map.md
+gemini -e none -m gemini-3-flash-preview -p "$(cat "$PROMPT_FILE")" > .context-map.md
 rm -f "$PROMPT_FILE"
 ```
 
@@ -175,7 +175,7 @@ REVIEW_HEADER
 
 <!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
 ```bash
-gemini -m gemini-3.1-pro-preview -p "$(cat "$REVIEW_FILE")"
+gemini -e none -m gemini-3.1-pro-preview -p "$(cat "$REVIEW_FILE")"
 rm -f "$REVIEW_FILE"
 ```
 
@@ -186,7 +186,7 @@ Apply Pre-mortem results to the Plan's Assumption section.
 1. Run cross-check with `gemini-3.1-pro-preview` (command above).
 2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
 ```bash
-gemini -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")"
+gemini -e none -m gemini-3-flash-preview -p "$(cat "$REVIEW_FILE")"
 ```
    (Do NOT delete `$REVIEW_FILE` until the fallback also completes or fails.)
 3. If Flash also fails: `rm -f "$REVIEW_FILE"`, notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.

@@ -95,9 +95,11 @@ $(gh pr diff <PR_NUMBER>)
 ```
 
 **Fallback chain:**
-1. Run with `gemini-3.1-pro-preview`.
-2. If Pro fails: notify user "⚠️ Gemini Pro → Flash fallback", retry with identical prompt using `gemini-3-flash-preview`. Flash results are less detailed — interpret conservatively; for critical/major findings, verify against source before including.
-3. If Flash also fails: notify user "⚠️ Gemini unavailable, Claude 단독 리뷰로 진행", skip Step 5b, and proceed with Step 5 findings only.
+1. Run with `gemini-3.1-pro-preview` **synchronously** (foreground, timeout 3 minutes).
+2. If Pro fails: notify user "⚠️ Gemini Pro → Flash fallback", retry **synchronously** (foreground, timeout 3 minutes) with identical prompt using `gemini-3-flash-preview`. Flash results are less detailed — interpret conservatively; for critical/major findings, verify against source before including.
+3. If Flash times out or fails: notify user "⚠️ Gemini unavailable, Claude 단독 리뷰로 진행", skip Step 5b, and proceed with Step 5 findings only.
+
+**중요:** Gemini 호출은 절대 background로 실행하지 않는다. 결과를 받은 후 Step 5b로 진행해야 머지 전에 반영된다.
 
 ### 5b. Synthesize Findings
 

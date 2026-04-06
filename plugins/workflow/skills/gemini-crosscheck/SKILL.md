@@ -95,8 +95,27 @@ PROMPT_HEADER
 
   echo ""
   echo "=== [Recent Git Changes (last 2 weeks)] ==="
-  git log --since='2 weeks ago' --grep='^\(feat\|fix\|refactor\|perf\)' \
+  git log --since='2 weeks ago' --grep='^\(feat\|fix\|refactor\|perf\|chore\)' \
     --pretty=format:'%h - %s' --no-merges 2>/dev/null | head -n 20
+
+  echo ""
+  echo "=== [Plugin / Skill Inventory] ==="
+  for plugin_dir in plugins/*/; do
+    plugin_name=$(basename "$plugin_dir")
+    echo "--- plugin: $plugin_name ---"
+    if [ -d "${plugin_dir}skills" ]; then
+      ls "${plugin_dir}skills/" 2>/dev/null | while read -r skill; do echo "  skill: $skill"; done
+    fi
+    if [ -f "${plugin_dir}.claude-plugin/plugin.json" ]; then
+      grep '"version"' "${plugin_dir}.claude-plugin/plugin.json" | head -1
+    fi
+    echo ""
+  done
+  if [ -f ".claude-plugin/marketplace.json" ]; then
+    echo "--- marketplace.json (versions) ---"
+    grep -E '"name"|"version"' .claude-plugin/marketplace.json | head -30
+    echo ""
+  fi
 
   echo ""
   echo "=== [Key Config Files] ==="

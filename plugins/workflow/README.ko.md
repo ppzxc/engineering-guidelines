@@ -74,21 +74,22 @@ Gemini Flash          Claude              Gemini Pro          Claude           C
 
 ## 모델 라우팅
 
-| 단계 | 모델 | 역할 | 입력 | 출력 |
-|------|------|------|------|------|
-| 1. 압축 | `gemini-3-flash-preview` | 컨텍스트 압축기 | 전체 코드베이스 + git log | `.context-map.md` (~4000 tok) |
-| 2. 브레인스토밍 | Claude (Opus/Sonnet) | 계획자 | 컨텍스트 맵 + 작업 | 옵션 포함 계획 초안 |
-| 3. 크로스체크 | `gemini-3.1-pro-preview` | 검토자/비평가 | 컨텍스트 맵 + 계획 초안 | 피드백 + 테스트 + Pre-mortem |
-| 4. 계획 | Claude (Opus/Sonnet) | 의사결정자 | 피드백 + 계획 초안 | Tidy/Behavioral 분리된 최종 계획 (사용자 승인) |
-| 5. 실행 | Claude (Sonnet) | 실행자 | 승인된 계획 + 소스 | 코드 + 테스트 + 커밋 |
+| 단계 | 모델 | 역할 | 입력 | 출력 | Fallback |
+|------|------|------|------|------|----------|
+| 1. 압축 | `gemini-3-flash-preview` | 컨텍스트 압축기 | 전체 코드베이스 + git log | `.context-map.md` (~4000 tok) | — |
+| 2. 브레인스토밍 | Claude (Opus/Sonnet) | 계획자 | 컨텍스트 맵 + 작업 | 옵션 포함 계획 초안 | — |
+| 3. 크로스체크 | `gemini-3.1-pro-preview` | 검토자/비평가 | 컨텍스트 맵 + 계획 초안 | 피드백 + 테스트 + Pre-mortem | Flash → Claude |
+| 4. 계획 | Claude (Opus/Sonnet) | 의사결정자 | 피드백 + 계획 초안 | Tidy/Behavioral 분리된 최종 계획 (사용자 승인) | — |
+| 5. 실행 | Claude (Sonnet) | 실행자 | 승인된 계획 + 소스 | 코드 + 테스트 + 커밋 | — |
 
 ## 비용 추정 (1회 사이클)
 
 ```
-Gemini Flash (압축)     : ~100K input  = $0.05
-Gemini Pro  (크로스체크) : ~6K input    = $0.012
-Claude 컨텍스트 맵 읽기  : ~4K input    = $0.06
-                                  합계: ~$0.12
+Gemini Flash (압축)              : ~100K input  = $0.05
+Gemini Pro  (크로스체크)          : ~6K input    = $0.012
+Gemini Flash (크로스체크 fallback): ~6K input    = $0.003  ← Pro 실패 시
+Claude 컨텍스트 맵 읽기           : ~4K input    = $0.06
+                                             합계: ~$0.12
 
 vs. Opus가 소스 직접 읽을 때 : ~100K input = $1.50
                                   절감: ~93%
@@ -97,15 +98,24 @@ vs. Opus가 소스 직접 읽을 때 : ~100K input = $1.50
 ## Fallback 전략
 
 ```
-Gemini 사용 가능?
-     │
-     ├── yes ──> 전체 워크플로우 (Step 1-5)
-     │
-     └── no  ──> 사용자에게 알림 "⚠️ 보수적 모드"
-              ──> Step 1, 3 스킵
-              ──> Claude가 CLAUDE.md + 소스 직접 파악
-              ──> Claude가 테스트 시나리오 자체 생성
-              ──> Execute에서 소스 직접 확인 강화
+전체 워크플로우 (Step 1-5) 정상 진행
+         │
+         │ Step 3 Cross-check
+         ▼
+gemini-3.1-pro-preview ──> 성공 ──> 계속
+         │
+      실패 (할당량/타임아웃)
+         ▼
+gemini-3-flash-preview ──> 성공 ──> "⚠️ Gemini Pro → Flash fallback" 알림 후 계속
+         │
+      실패
+         ▼
+Claude 자체 생성 ──> "⚠️ Gemini unavailable" 알림 + 테스트 시나리오 + Pre-mortem 자체 생성 후 계속
+
+Gemini 전체 사용 불가 시:
+     └── Step 1, 3 스킵
+     └── Claude가 CLAUDE.md + 소스 직접 파악
+     └── Execute에서 소스 직접 확인 강화
 ```
 
 ## 설치

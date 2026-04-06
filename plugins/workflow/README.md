@@ -74,21 +74,22 @@ Source code ──>  .context-map.md ──> Draft plan ──> Feedback ──>
 
 ## Model Routing
 
-| Step | Model | Role | Input | Output |
-|------|-------|------|-------|--------|
-| 1. Compress | `gemini-3-flash-preview` | Context compressor | Full codebase + git log | `.context-map.md` (~4000 tok) |
-| 2. Brainstorm | Claude (Opus/Sonnet) | Planner | Context map + task | Draft plan with options |
-| 3. Cross-check | `gemini-3.1-pro-preview` | Reviewer/Critic | Context map + draft plan | Feedback + tests + pre-mortem |
-| 4. Plan | Claude (Opus/Sonnet) | Decision maker | Feedback + draft plan | Final plan with Tidy/Behavioral split (user approval) |
-| 5. Execute | Claude (Sonnet) | Executor | Approved plan + source | Code + tests + commits |
+| Step | Model | Role | Input | Output | Fallback |
+|------|-------|------|-------|--------|----------|
+| 1. Compress | `gemini-3-flash-preview` | Context compressor | Full codebase + git log | `.context-map.md` (~4000 tok) | — |
+| 2. Brainstorm | Claude (Opus/Sonnet) | Planner | Context map + task | Draft plan with options | — |
+| 3. Cross-check | `gemini-3.1-pro-preview` | Reviewer/Critic | Context map + draft plan | Feedback + tests + pre-mortem | Flash → Claude |
+| 4. Plan | Claude (Opus/Sonnet) | Decision maker | Feedback + draft plan | Final plan with Tidy/Behavioral split (user approval) | — |
+| 5. Execute | Claude (Sonnet) | Executor | Approved plan + source | Code + tests + commits | — |
 
 ## Cost Estimation (per cycle)
 
 ```
-Gemini Flash (compress) : ~100K input  = $0.05
-Gemini Pro  (crosscheck): ~6K input    = $0.012
-Claude reads context map: ~4K input    = $0.06
-                                  Total: ~$0.12
+Gemini Flash (compress)             : ~100K input  = $0.05
+Gemini Pro  (crosscheck)            : ~6K input    = $0.012
+Gemini Flash (crosscheck fallback)  : ~6K input    = $0.003  ← if Pro fails
+Claude reads context map            : ~4K input    = $0.06
+                                               Total: ~$0.12
 
 vs. Opus reading full source directly : ~100K input = $1.50
                                   Savings: ~93%
@@ -97,15 +98,24 @@ vs. Opus reading full source directly : ~100K input = $1.50
 ## Fallback Strategy
 
 ```
-Gemini available?
-     │
-     ├── yes ──> full workflow (Steps 1-5)
-     │
-     └── no  ──> notify user "⚠️ Conservative mode"
-              ──> skip Step 1, 3
-              ──> Claude reads CLAUDE.md + source directly
-              ──> Claude generates test scenarios independently
-              ──> strengthened pre-read in execute
+Full workflow (Steps 1-5) running normally
+         │
+         │ Step 3 Cross-check
+         ▼
+gemini-3.1-pro-preview ──> success ──> continue
+         │
+      fails (rate limit / timeout)
+         ▼
+gemini-3-flash-preview ──> success ──> "⚠️ Gemini Pro → Flash fallback" notice, continue
+         │
+      fails
+         ▼
+Claude self-generate ──> "⚠️ Gemini unavailable" notice + test scenarios + pre-mortem self-generated, continue
+
+When Gemini is entirely unavailable:
+     └── skip Steps 1, 3
+     └── Claude reads CLAUDE.md + source directly
+     └── strengthened pre-read in execute
 ```
 
 ## Installation

@@ -135,7 +135,7 @@ PROMPT_HEADER
 ```bash
 _gemini_run() {
   local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model"
+  echo "[Gemini] $step 시도: $model" >&2
   if [ -n "$out_file" ]; then
     gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
   else
@@ -143,10 +143,10 @@ _gemini_run() {
   fi
   local rc=$?
   if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공"
+    echo "[Gemini] $step ✓ $model → 성공" >&2
   else
     local err_file
-    err_file=$(ls -t /tmp/gemini-client-error-*.json 2>/dev/null | head -1)
+    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
     local reset_info=""
     if [ -n "$err_file" ]; then
       local raw
@@ -162,7 +162,7 @@ _gemini_run() {
         reset_info=" (resets after ${raw} / ${reset_abs})"
       fi
     fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}"
+    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
   fi
   return $rc
 }
@@ -232,7 +232,7 @@ REVIEW_HEADER
 ```bash
 _gemini_run() {
   local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model"
+  echo "[Gemini] $step 시도: $model" >&2
   if [ -n "$out_file" ]; then
     gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
   else
@@ -240,10 +240,10 @@ _gemini_run() {
   fi
   local rc=$?
   if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공"
+    echo "[Gemini] $step ✓ $model → 성공" >&2
   else
     local err_file
-    err_file=$(ls -t /tmp/gemini-client-error-*.json 2>/dev/null | head -1)
+    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
     local reset_info=""
     if [ -n "$err_file" ]; then
       local raw
@@ -259,7 +259,7 @@ _gemini_run() {
         reset_info=" (resets after ${raw} / ${reset_abs})"
       fi
     fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}"
+    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
   fi
   return $rc
 }
@@ -276,7 +276,7 @@ Apply Pre-mortem results to the Plan's Assumption section.
 ```bash
 _gemini_run() {
   local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model"
+  echo "[Gemini] $step 시도: $model" >&2
   if [ -n "$out_file" ]; then
     gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
   else
@@ -284,10 +284,10 @@ _gemini_run() {
   fi
   local rc=$?
   if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공"
+    echo "[Gemini] $step ✓ $model → 성공" >&2
   else
     local err_file
-    err_file=$(ls -t /tmp/gemini-client-error-*.json 2>/dev/null | head -1)
+    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
     local reset_info=""
     if [ -n "$err_file" ]; then
       local raw
@@ -303,7 +303,7 @@ _gemini_run() {
         reset_info=" (resets after ${raw} / ${reset_abs})"
       fi
     fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}"
+    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
   fi
   return $rc
 }

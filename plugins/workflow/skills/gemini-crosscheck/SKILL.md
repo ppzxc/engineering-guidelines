@@ -14,7 +14,11 @@ Claude (plan/execute) + Gemini (context/review).
 
 ## Shell Helpers
 
+> ⚠️ **실행 지시:** 이 함수 정의 블록을 먼저 실행한 후, Step 1과 Step 3의 코드를 **동일한 셸 세션**에서 실행하세요.
+> 각 Step 코드블록을 독립 실행할 경우, 해당 블록 앞에 이 함수 정의를 복사하여 자체 완결적으로 실행하세요.
+
 `_gemini_run` — 모든 Gemini 호출에 사용하는 공통 래퍼 함수. **단 1회 정의, 3곳에서 호출.**
+호출 시 모델명은 `## ⚠️ Model Names` 표의 정확한 문자열만 사용할 것 — 수정 금지.
 
 ```bash
 _gemini_run() {
@@ -179,6 +183,8 @@ PROMPT_HEADER
 
 **Step 1-2. Run Gemini with the temp file:**
 
+> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+
 ```bash
 _gemini_run "Step 1" gemini-3-flash-preview "$PROMPT_FILE" .context-map.md
 rm -f "$PROMPT_FILE"
@@ -241,6 +247,8 @@ REVIEW_HEADER
 
 **Step 3-2. Run Gemini cross-check:**
 
+> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+
 ```bash
 _gemini_run "Step 3" gemini-3.1-pro-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```
@@ -251,6 +259,9 @@ Apply Pre-mortem results to the Plan's Assumption section.
 **Fallback chain (Step 3 only):**
 1. Run cross-check with `gemini-3.1-pro-preview` (command above). On success, `$REVIEW_FILE` is auto-deleted.
 2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
+
+> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+
 ```bash
 _gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```

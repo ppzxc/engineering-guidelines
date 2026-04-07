@@ -33,12 +33,22 @@ These are the **only** permitted model identifiers. Copy verbatim. **Do NOT infe
 
 ### 1. Gemini Context Compression
 
-Run **before** brainstorm. Regenerate `.context-map.md` if: file missing / 1 hour elapsed / `git rev-parse HEAD` mismatch.
+Run **before** brainstorm. Regenerate `.context-map.md` if any condition fails:
+
+```bash
+# 재생성 스킵 조건: 세 조건 모두 충족 시만 스킵
+[ -f .context-map.md ] \
+  && [ -z "$(find .context-map.md -mmin +60 2>/dev/null)" ] \
+  && grep -q "git:$(git rev-parse HEAD)" .context-map.md \
+  && echo "context-map 최신 상태 — 재생성 스킵" \
+  || echo "context-map 재생성 필요"
+```
 
 **Step 1-1. Collect project structure data into a temp file:**
 
 ```bash
 PROMPT_FILE=$(mktemp /tmp/gemini-context-XXXXXX.txt)
+trap 'rm -f "$PROMPT_FILE"' EXIT
 
 cat > "$PROMPT_FILE" <<'PROMPT_HEADER'
 You are a senior software architect with 10 years of experience.
@@ -200,6 +210,7 @@ Each approach: tradeoffs, risk level (H/M/L), complexity (1-10), rejection reaso
 
 ```bash
 REVIEW_FILE=$(mktemp /tmp/gemini-review-XXXXXX.txt)
+trap 'rm -f "$REVIEW_FILE"' EXIT
 
 cat > "$REVIEW_FILE" <<'REVIEW_HEADER'
 Cross-check the following draft execution plan as a senior architect.

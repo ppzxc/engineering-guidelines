@@ -268,6 +268,11 @@ Additional output:
 - 3 critical test scenarios to validate this plan (include boundary cases)
 - 3 most likely reasons this plan could fail (Pre-mortem)
 
+Output format for issues (use this table):
+| Tag | Item | Severity (H/M/L) |
+|-----|------|-----------------|
+| [consistency\|omission\|ordering\|risk\|feasibility\|version-compat] | 한 줄 설명 | H/M/L |
+
 If no issues: LGTM + test scenarios + failure scenarios.
 If issues found: tag each as [consistency|omission|ordering|risk|feasibility|version-compat], one line per item, max 5 + test scenarios + failure scenarios.
 

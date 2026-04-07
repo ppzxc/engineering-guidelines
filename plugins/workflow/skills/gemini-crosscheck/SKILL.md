@@ -229,42 +229,9 @@ REVIEW_HEADER
 
 **Step 3-2. Run Gemini cross-check:**
 
-<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
-```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
+> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
 
+```bash
 type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
 _gemini_run "Step 3" gemini-3.1-pro-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```
@@ -275,41 +242,10 @@ Apply Pre-mortem results to the Plan's Assumption section.
 **Fallback chain (Step 3 only):**
 1. Run cross-check with `gemini-3.1-pro-preview` (command above). On success, `$REVIEW_FILE` is auto-deleted.
 2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
-```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
 
+> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+
+```bash
 type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
 _gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```

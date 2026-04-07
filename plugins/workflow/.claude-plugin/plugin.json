@@ -1,6 +1,6 @@
 {
   "name": "workflow",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Workflow skills — multi-LLM cross-check with Gemini for planning and execution",
   "author": {
     "name": "ppzxc",

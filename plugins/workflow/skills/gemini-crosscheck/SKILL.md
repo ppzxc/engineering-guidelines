@@ -44,6 +44,16 @@ Run **before** brainstorm. Regenerate `.context-map.md` if any condition fails:
   || echo "context-map 재생성 필요"
 ```
 
+**Step 0. Quota probe** — Step 1 실행 전 Gemini 사용 가능 여부 확인:
+
+```bash
+gemini -e none -m gemini-3-flash-preview -p "reply: ok" 2>/dev/null \
+  && echo "[Gemini] 할당량 확인 ✓" \
+  || { echo "⚠️ Gemini 할당량 부족 또는 미사용 가능 — Conservative mode로 진행합니다"; GEMINI_UNAVAILABLE=1; }
+```
+
+`GEMINI_UNAVAILABLE=1`이 설정된 경우 Steps 1과 3을 건너뛰고 Conservative mode로 진행.
+
 **Step 1-1. Collect project structure data into a temp file:**
 
 ```bash
@@ -128,6 +138,14 @@ PROMPT_HEADER
   fi
 
   echo ""
+  echo "=== [Skill Files] ==="
+  find plugins -name 'SKILL.md' 2>/dev/null | sort | while read -r f; do
+    echo "--- $f ---"
+    head -30 "$f"
+    echo ""
+  done
+
+  echo ""
   echo "=== [Key Config Files] ==="
   for f in application.yml application.yaml application.properties .env.example docker-compose.yml docker-compose.yaml; do
     if [ -f "$f" ]; then
@@ -186,7 +204,19 @@ Append `<!-- git:$(git rev-parse HEAD) -->` to the bottom after generation.
 
 **If Step 1 fails (Gemini CLI unavailable, auth error, ModelNotFoundError, or any error):** notify user "⚠️ Conservative mode — Gemini unavailable", skip Steps 1 and 3, and proceed as follows:
 - Claude reads `CLAUDE.md`, `AGENTS.md`, and key source files directly to build project context
-- Claude generates test scenarios + pre-mortem independently in Step 3's place
+- Claude generates test scenarios + pre-mortem independently in Step 3's place, using the following format:
+
+```markdown
+## Test Scenarios (Claude self-generated)
+1. [정상 케이스] 설명 및 검증 방법
+2. [경계 케이스] 설명 및 검증 방법
+3. [실패 케이스] 설명 및 검증 방법
+
+## Pre-mortem (Claude self-generated)
+1. [실패 이유 1] 구체적 시나리오
+2. [실패 이유 2] 구체적 시나리오
+3. [실패 이유 3] 구체적 시나리오
+```
 - Strengthen source verification in Step 5 (pre-read all target files before any change)
 
 ### 2. Brainstorm
@@ -284,7 +314,19 @@ Apply Pre-mortem results to the Plan's Assumption section.
 type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
 _gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```
-3. If Flash also fails: `rm -f "$REVIEW_FILE"`, notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.
+3. If Flash also fails: trap이 `$REVIEW_FILE`을 자동 삭제. notify user "⚠️ Gemini unavailable, Claude self-generate". Claude가 아래 형식으로 직접 생성:
+
+```markdown
+## Test Scenarios (Claude self-generated)
+1. [정상 케이스] ...
+2. [경계 케이스] ...
+3. [실패 케이스] ...
+
+## Pre-mortem (Claude self-generated)
+1. [실패 이유 1] ...
+2. [실패 이유 2] ...
+3. [실패 이유 3] ...
+```
 
 > **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, review the actual source files directly.
 

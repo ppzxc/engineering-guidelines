@@ -12,6 +12,54 @@ Claude (plan/execute) + Gemini (context/review).
 
 `gemini -m <model> -p "<prompt>"` (v0.36.0+ required; if `-m` flag is unsupported, update via `npm install -g @google/gemini-cli` or fall back to Claude self-generate)
 
+## Shell Helpers
+
+`_gemini_run` — 모든 Gemini 호출에 사용하는 공통 래퍼 함수. **단 1회 정의, 3곳에서 호출.**
+
+```bash
+_gemini_run() {
+  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
+  echo "[Gemini] $step 시도: $model" >&2
+
+  # ARG_MAX 체크: 프롬프트 파일이 200KB 초과 시 경고
+  local file_size
+  file_size=$(wc -c < "$prompt_file" 2>/dev/null || echo 0)
+  if [ "$file_size" -gt 204800 ]; then
+    echo "[Gemini] ⚠️  프롬프트 크기 ${file_size}bytes — ARG_MAX 초과 위험. 계속 진행합니다." >&2
+  fi
+
+  if [ -n "$out_file" ]; then
+    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
+  else
+    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
+  fi
+  local rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "[Gemini] $step ✓ $model → 성공" >&2
+  else
+    local err_file
+    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
+    local reset_info=""
+    if [ -n "$err_file" ]; then
+      local raw
+      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
+      if [ -n "$raw" ]; then
+        local h m s
+        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
+        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
+        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
+        local total_sec=$(( h*3600 + m*60 + s ))
+        local reset_abs
+        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
+        reset_info=" (resets after ${raw} / ${reset_abs})"
+      fi
+    fi
+    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
+  fi
+  return $rc
+}
+```
+
 ## ⚠️ Model Names — EXACT STRINGS, DO NOT MODIFY
 
 These are the **only** permitted model identifiers. Copy verbatim. **Do NOT infer, construct, guess, or substitute** model names under any circumstance. If a model returns `ModelNotFoundError`, proceed to the defined fallback chain — **never** attempt alternative model names.
@@ -131,42 +179,7 @@ PROMPT_HEADER
 
 **Step 1-2. Run Gemini with the temp file:**
 
-<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
 ```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
-
 _gemini_run "Step 1" gemini-3-flash-preview "$PROMPT_FILE" .context-map.md
 rm -f "$PROMPT_FILE"
 ```
@@ -228,42 +241,7 @@ REVIEW_HEADER
 
 **Step 3-2. Run Gemini cross-check:**
 
-<!-- COPY THE COMMAND BELOW VERBATIM — do not modify the -m parameter -->
 ```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
-
 _gemini_run "Step 3" gemini-3.1-pro-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```
 
@@ -274,40 +252,6 @@ Apply Pre-mortem results to the Plan's Assumption section.
 1. Run cross-check with `gemini-3.1-pro-preview` (command above). On success, `$REVIEW_FILE` is auto-deleted.
 2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
 ```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
-
 _gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
 ```
 3. If Flash also fails: `rm -f "$REVIEW_FILE"`, notify user "⚠️ Gemini unavailable, Claude self-generate", Claude generates test scenarios + pre-mortem independently.

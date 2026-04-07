@@ -52,7 +52,7 @@ _gemini_run() {
         h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
         m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
         s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( h*3600 + m*60 + s ))
+        local total_sec=$(( 10#${h}*3600 + 10#${m}*60 + 10#${s} ))
         local reset_abs
         reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
         reset_info=" (resets after ${raw} / ${reset_abs})"
@@ -216,7 +216,7 @@ PROMPT_HEADER
 ```bash
 type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
 _gemini_run "Step 1" gemini-3-flash-preview "$PROMPT_FILE" .context-map.md
-grep -qxF '.context-map.md' .gitignore 2>/dev/null || echo '.context-map.md' >> .gitignore
+grep -qxF '.context-map.md' .gitignore 2>/dev/null || printf '\n.context-map.md\n' >> .gitignore
 rm -f "$PROMPT_FILE"
 ```
 
@@ -271,7 +271,7 @@ If `.context-map.md` exists, read it. If not (Step 1 skipped/failed), use the di
 
 ```bash
 REVIEW_FILE=$(mktemp /tmp/gemini-review-XXXXXX.txt)
-trap 'rm -f "$REVIEW_FILE"' EXIT
+trap 'rm -f "$REVIEW_FILE"' EXIT  # Step 1의 PROMPT_FILE trap과 별도 세션에서 실행할 것
 
 cat > "$REVIEW_FILE" <<'REVIEW_HEADER'
 Cross-check the following draft execution plan as a senior architect.
@@ -313,7 +313,7 @@ REVIEW_HEADER
     echo "⚠️  ERROR: DRAFT_PLAN 변수가 비어 있습니다. Step 2 초안 계획을 DRAFT_PLAN 변수에 저장하세요." >&2
     exit 1
   fi
-  echo "$DRAFT_PLAN"
+  printf '%s\n' "$DRAFT_PLAN"
 } >> "$REVIEW_FILE"
 ```
 

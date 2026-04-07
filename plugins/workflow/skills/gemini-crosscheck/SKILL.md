@@ -192,6 +192,12 @@ Each approach: tradeoffs, risk level (H/M/L), complexity (1-10), rejection reaso
 
 **Step 3-1. Build the cross-check prompt file:**
 
+> **사전 준비:** Step 2에서 확정한 초안 실행 계획 전문을 `DRAFT_PLAN` 변수에 저장한 뒤 아래 스크립트를 실행한다.
+>
+> ```bash
+> DRAFT_PLAN="<Step 2 초안 계획 전문 붙여넣기>"
+> ```
+
 ```bash
 REVIEW_FILE=$(mktemp /tmp/gemini-review-XXXXXX.txt)
 
@@ -223,7 +229,14 @@ REVIEW_HEADER
 
   echo ""
   echo "=== [Draft Execution Plan] ==="
-  echo "<INSERT DRAFT PLAN HERE>"
+  # ⚠️ 필수: 아래 변수에 Step 2에서 작성한 초안 실행 계획 전문을 저장한 후 이 스크립트를 실행할 것.
+  # DRAFT_PLAN 변수가 비어 있으면 크로스체크가 무의미한 결과를 반환함.
+  # 예시: DRAFT_PLAN="$(cat /tmp/my-draft-plan.txt)"
+  if [ -z "${DRAFT_PLAN:-}" ]; then
+    echo "⚠️  ERROR: DRAFT_PLAN 변수가 비어 있습니다. Step 2 초안 계획을 DRAFT_PLAN 변수에 저장하세요." >&2
+    exit 1
+  fi
+  echo "$DRAFT_PLAN"
 } >> "$REVIEW_FILE"
 ```
 

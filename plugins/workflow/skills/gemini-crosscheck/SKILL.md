@@ -193,8 +193,19 @@ Append `<!-- git:$(git rev-parse HEAD) -->` to the bottom after generation.
 
 If `.context-map.md` exists, read it. If not (Step 1 skipped/failed), use the directly gathered context from `CLAUDE.md` + source files instead.
 
-**2-1.** Present 2-3 approaches.
-Each approach: tradeoffs, risk level (H/M/L), complexity (1-10), rejection reason (Why NOT).
+**2-1.** 2-3개 접근법을 아래 형식으로 제시:
+
+```
+### 접근법 [A/B/C]: [이름]
+- **설명**: 한 문장 요약
+- **Impact**: H/M/L
+- **Effort**: H/M/L
+- **롤백 난이도**: H/M/L
+- **영향 파일 수 추정**: N개
+- **위험도**: H/M/L
+- **복잡도**: N/10
+- **Why NOT**: 이 접근법을 선택하지 않는다면 그 이유
+```
 
 **2-2.** Select the optimal approach with rationale + rejection reasons for discarded options. Structure the result as a **draft execution plan**.
 

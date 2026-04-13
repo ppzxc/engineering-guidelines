@@ -8,61 +8,9 @@ user-invocable: true
 Planner-Executor separation + multi-LLM cross-check.
 Claude (plan/execute) + Gemini (context/review).
 
-## Gemini CLI
+## Gemini MCP
 
-`gemini -m <model> -p "<prompt>"` (v0.36.0+ required; if `-m` flag is unsupported, update via `npm install -g @google/gemini-cli` or fall back to Claude self-generate)
-
-## Shell Helpers
-
-`_gemini_run` — 모든 Gemini 호출에 사용하는 공통 래퍼 함수. **단 1회 정의, 3곳에서 호출.**
-호출 시 모델명은 `## ⚠️ Model Names` 표의 정확한 문자열만 사용할 것 — 수정 금지.
-
-> ⚠️ **실행 지시:** 이 함수 정의 블록을 먼저 실행한 후, Step 1과 Step 3의 코드를 **동일한 셸 세션**에서 실행하세요.
-> 각 Step 코드블록을 독립 실행할 경우, 해당 블록 앞에 이 함수 정의를 복사하여 자체 완결적으로 실행하세요.
-
-```bash
-_gemini_run() {
-  local step="$1" model="$2" prompt_file="$3" out_file="${4:-}"
-  echo "[Gemini] $step 시도: $model" >&2
-
-  # ARG_MAX 체크: 프롬프트 파일이 200KB 초과 시 경고
-  local file_size
-  file_size=$(wc -c < "$prompt_file" 2>/dev/null || echo 0)
-  if [ "$file_size" -gt 204800 ]; then
-    echo "[Gemini] ⚠️  프롬프트 크기 ${file_size}bytes — ARG_MAX 초과 위험. 계속 진행합니다." >&2
-  fi
-
-  if [ -n "$out_file" ]; then
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")" > "$out_file"
-  else
-    gemini -e none -m "$model" -p "$(cat "$prompt_file")"
-  fi
-  local rc=$?
-  if [ $rc -eq 0 ]; then
-    echo "[Gemini] $step ✓ $model → 성공" >&2
-  else
-    local err_file
-    err_file=$(find /tmp -name 'gemini-client-error-*.json' -mmin -1 2>/dev/null | sort -r | head -1)
-    local reset_info=""
-    if [ -n "$err_file" ]; then
-      local raw
-      raw=$(grep -oP '(?<=reset after )[^"]+' "$err_file" 2>/dev/null | head -1 | tr -d '.')
-      if [ -n "$raw" ]; then
-        local h m s
-        h=$(echo "$raw" | grep -oP '\d+(?=h)' | head -1); h=${h:-0}
-        m=$(echo "$raw" | grep -oP '\d+(?=m)' | head -1); m=${m:-0}
-        s=$(echo "$raw" | grep -oP '\d+(?=s)' | head -1); s=${s:-0}
-        local total_sec=$(( 10#${h}*3600 + 10#${m}*60 + 10#${s} ))
-        local reset_abs
-        reset_abs=$(date -d "@$(( $(date +%s) + total_sec ))" '+%H:%M %Z' 2>/dev/null)
-        reset_info=" (resets after ${raw} / ${reset_abs})"
-      fi
-    fi
-    echo "[Gemini] $step ✗ $model → 실패${reset_info}" >&2
-  fi
-  return $rc
-}
-```
+Gemini는 MCP 도구(`mcp__gemini-cli__gemini_prompt`)를 통해 호출한다. CLI 직접 실행 금지.
 
 ## ⚠️ Model Names — EXACT STRINGS, DO NOT MODIFY
 
@@ -98,37 +46,20 @@ Run **before** brainstorm. Regenerate `.context-map.md` if any condition fails:
 
 **Step 0. Quota probe** — Step 1 실행 전 Gemini 사용 가능 여부 확인:
 
+`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+- `prompt`: `"reply: ok"`
+- `model`: `"gemini-3-flash-preview"`
+
+호출 성공 시 계속 진행. 실패 시 `GEMINI_UNAVAILABLE=true`로 설정하고 Conservative mode로 전환:
+> "⚠️ Gemini 할당량 부족 또는 미사용 가능 — Conservative mode로 진행합니다"
+
+`GEMINI_UNAVAILABLE=true`인 경우 Steps 1과 3을 건너뛰고 Conservative mode로 진행.
+
+**Step 1-1. Collect project structure data:**
+
+아래 bash 블록을 실행하여 프로젝트 구조 데이터를 수집하고 출력을 `PROJECT_DATA`로 캡처한다:
+
 ```bash
-gemini -e none -m gemini-3-flash-preview -p "reply: ok" 2>/dev/null \
-  && echo "[Gemini] 할당량 확인 ✓" \
-  || { echo "⚠️ Gemini 할당량 부족 또는 미사용 가능 — Conservative mode로 진행합니다"; GEMINI_UNAVAILABLE=1; }
-```
-
-`GEMINI_UNAVAILABLE=1`이 설정된 경우 Steps 1과 3을 건너뛰고 Conservative mode로 진행.
-
-**Step 1-1. Collect project structure data into a temp file:**
-
-```bash
-PROMPT_FILE=$(mktemp /tmp/gemini-context-XXXXXX.txt)
-trap 'rm -f "$PROMPT_FILE"' EXIT
-
-cat > "$PROMPT_FILE" <<'PROMPT_HEADER'
-You are a senior software architect with 10 years of experience.
-Create a compressed Context Map of this project so that another high-performance AI coding agent (Claude) can immediately understand and begin work. Maximum 4000 tokens.
-
-Must include:
-- Full module structure and dependency graph (hierarchical)
-- Core domain models (key entities, Aggregates, essential DTOs, major events)
-- Architecture conventions (package rules, naming conventions, error handling strategy, config management)
-- Current tech stack and critical external dependencies (pay special attention to build config files; do not summarize version numbers, output exact versions of core frameworks and libraries)
-- Recent development direction and intent based on the provided Git changes
-
-Output format: Markdown. Focus on structure and relationships. Do not include method-level implementation code blocks.
-
----
-
-PROMPT_HEADER
-
 {
   echo "=== [Project Tree (depth 3)] ==="
   tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null || find . -maxdepth 3 -not \( -path './.git' -prune -o -path './node_modules' -prune -o -path './target' -prune -o -path './build' -prune -o -path './dist' -prune -o -path './vendor' -prune \) -type f | head -100
@@ -206,23 +137,36 @@ PROMPT_HEADER
       echo ""
     fi
   done
-} >> "$PROMPT_FILE"
+}
 ```
 
-**Step 1-2. Run Gemini with the temp file:**
+**Step 1-2. Generate context map via Gemini:**
 
-> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+- `prompt`:
+  ```
+  You are a senior software architect with 10 years of experience.
+  Create a compressed Context Map of this project so that another high-performance AI coding agent (Claude) can immediately understand and begin work. Maximum 4000 tokens.
+
+  Must include:
+  - Full module structure and dependency graph (hierarchical)
+  - Core domain models (key entities, Aggregates, essential DTOs, major events)
+  - Architecture conventions (package rules, naming conventions, error handling strategy, config management)
+  - Current tech stack and critical external dependencies (pay special attention to build config files; do not summarize version numbers, output exact versions of core frameworks and libraries)
+  - Recent development direction and intent based on the provided Git changes
+
+  Output format: Markdown. Focus on structure and relationships. Do not include method-level implementation code blocks.
+  ```
+- `context`: Step 1-1에서 캡처한 `PROJECT_DATA` 전체
+- `model`: `"gemini-3-flash-preview"`
+
+MCP 응답을 `.context-map.md`에 저장한다. 저장 후 파일 맨 아래에 `<!-- git:<HEAD commit hash> -->`를 추가한다.
 
 ```bash
-type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
-_gemini_run "Step 1" gemini-3-flash-preview "$PROMPT_FILE" .context-map.md
 grep -qxF '.context-map.md' .gitignore 2>/dev/null || printf '\n.context-map.md\n' >> .gitignore
-rm -f "$PROMPT_FILE"
 ```
 
-Append `<!-- git:$(git rev-parse HEAD) -->` to the bottom after generation.
-
-**If Step 1 fails (Gemini CLI unavailable, auth error, ModelNotFoundError, or any error):** notify user "⚠️ Conservative mode — Gemini unavailable", skip Steps 1 and 3, and proceed as follows:
+**If Step 1 fails (MCP error, ModelNotFoundError, or any error):** notify user "⚠️ Conservative mode — Gemini unavailable", skip Steps 1 and 3, and proceed as follows:
 - Claude reads `CLAUDE.md`, `AGENTS.md`, and key source files directly to build project context
 - Claude generates test scenarios + pre-mortem independently in Step 3's place, using the following format:
 
@@ -261,85 +205,46 @@ If `.context-map.md` exists, read it. If not (Step 1 skipped/failed), use the di
 
 ### 3. Gemini Cross-check
 
-**Step 3-1. Build the cross-check prompt file:**
+**Step 3-1. Prepare cross-check input:**
 
-> **사전 준비:** Step 2에서 확정한 초안 실행 계획 전문을 `DRAFT_PLAN` 변수에 저장한 뒤 아래 스크립트를 실행한다.
->
-> ```bash
-> DRAFT_PLAN="<Step 2 초안 계획 전문 붙여넣기>"
-> ```
-
-```bash
-REVIEW_FILE=$(mktemp /tmp/gemini-review-XXXXXX.txt)
-trap 'rm -f "$REVIEW_FILE"' EXIT  # Step 1의 PROMPT_FILE trap과 별도 세션에서 실행할 것
-
-cat > "$REVIEW_FILE" <<'REVIEW_HEADER'
-Cross-check the following draft execution plan as a senior architect.
-
-Review criteria:
-1. Architecture consistency - does it conflict with existing conventions/patterns?
-2. Omissions - are there missing files or configurations that should be changed?
-3. Ordering - are there dependency issues in the execution sequence?
-4. Risk - are there side effects or hard-to-rollback changes?
-5. Feasibility - does it rely on assumptions that would fail at compile/runtime?
-6. Version compatibility - does it use APIs, syntax, or libraries unsupported by the project's tech stack version?
-
-Additional output:
-- 3 critical test scenarios to validate this plan (include boundary cases)
-- 3 most likely reasons this plan could fail (Pre-mortem)
-
-Output format for issues (use this table):
-| Tag | Item | Severity (H/M/L) |
-|-----|------|-----------------|
-| [consistency\|omission\|ordering\|risk\|feasibility\|version-compat] | 한 줄 설명 | H/M/L |
-
-If no issues: LGTM + test scenarios + failure scenarios.
-If issues found: tag each as [consistency|omission|ordering|risk|feasibility|version-compat], one line per item, max 5 + test scenarios + failure scenarios.
-
----
-
-REVIEW_HEADER
-
-{
-  echo "=== [Project Context] ==="
-  cat .context-map.md
-
-  echo ""
-  echo "=== [Draft Execution Plan] ==="
-  # ⚠️ 필수: 아래 변수에 Step 2에서 작성한 초안 실행 계획 전문을 저장한 후 이 스크립트를 실행할 것.
-  # DRAFT_PLAN 변수가 비어 있으면 크로스체크가 무의미한 결과를 반환함.
-  # 예시: DRAFT_PLAN="$(cat /tmp/my-draft-plan.txt)"
-  if [ -z "${DRAFT_PLAN:-}" ]; then
-    echo "⚠️  ERROR: DRAFT_PLAN 변수가 비어 있습니다. Step 2 초안 계획을 DRAFT_PLAN 변수에 저장하세요." >&2
-    exit 1
-  fi
-  printf '%s\n' "$DRAFT_PLAN"
-} >> "$REVIEW_FILE"
-```
+아래 두 항목을 결합하여 `REVIEW_CONTEXT`를 구성한다:
+1. `.context-map.md` 내용 (파일이 존재하는 경우)
+2. Step 2에서 확정한 초안 실행 계획 전문
 
 **Step 3-2. Run Gemini cross-check:**
 
-> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
+`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+- `prompt`:
+  ```
+  Cross-check the following draft execution plan as a senior architect.
 
-```bash
-type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
-_gemini_run "Step 3" gemini-3.1-pro-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
-```
+  Review criteria:
+  1. Architecture consistency - does it conflict with existing conventions/patterns?
+  2. Omissions - are there missing files or configurations that should be changed?
+  3. Ordering - are there dependency issues in the execution sequence?
+  4. Risk - are there side effects or hard-to-rollback changes?
+  5. Feasibility - does it rely on assumptions that would fail at compile/runtime?
+  6. Version compatibility - does it use APIs, syntax, or libraries unsupported by the project's tech stack version?
 
-Show accept/reject reasoning to the user.
-Apply Pre-mortem results to the Plan's Assumption section.
+  Additional output:
+  - 3 critical test scenarios to validate this plan (include boundary cases)
+  - 3 most likely reasons this plan could fail (Pre-mortem)
+
+  Output format for issues (use this table):
+  | Tag | Item | Severity (H/M/L) |
+  |-----|------|-----------------|
+  | [consistency|omission|ordering|risk|feasibility|version-compat] | 한 줄 설명 | H/M/L |
+
+  If no issues: LGTM + test scenarios + failure scenarios.
+  If issues found: tag each as [consistency|omission|ordering|risk|feasibility|version-compat], one line per item, max 5 + test scenarios + failure scenarios.
+  ```
+- `context`: `REVIEW_CONTEXT` (context-map + draft plan)
+- `model`: `"gemini-3.1-pro-preview"`
 
 **Fallback chain (Step 3 only):**
-1. Run cross-check with `gemini-3.1-pro-preview` (command above). On success, `$REVIEW_FILE` is auto-deleted.
-2. If Pro fails (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", retry with the **exact** model string below:
-
-> **사전 요건:** `_gemini_run` 함수가 정의되어 있어야 합니다 (`## Shell Helpers` 블록 먼저 실행).
-
-```bash
-type _gemini_run >/dev/null 2>&1 || { echo "ERROR: _gemini_run 미정의. 위 ## Shell Helpers 블록을 먼저 실행하세요." >&2; exit 1; }
-_gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REVIEW_FILE"
-```
-3. If Flash also fails: trap이 `$REVIEW_FILE`을 자동 삭제. notify user "⚠️ Gemini unavailable, Claude self-generate". Claude가 아래 형식으로 직접 생성:
+1. 위 파라미터로 호출. 성공 시 결과를 사용자에게 표시.
+2. 실패 시 (rate limit, timeout, ModelNotFoundError, any error): notify user "⚠️ Gemini Pro → Flash fallback", 동일 파라미터에 `model: "gemini-3-flash-preview"`로 재시도.
+3. Flash도 실패 시: notify user "⚠️ Gemini unavailable, Claude self-generate". Claude가 아래 형식으로 직접 생성:
 
 ```markdown
 ## Test Scenarios (Claude self-generated)
@@ -352,6 +257,9 @@ _gemini_run "Step 3 폴백" gemini-3-flash-preview "$REVIEW_FILE" && rm -f "$REV
 2. [실패 이유 2] ...
 3. [실패 이유 3] ...
 ```
+
+Show accept/reject reasoning to the user.
+Apply Pre-mortem results to the Plan's Assumption section.
 
 > **Flash fallback quality note:** Flash cross-check results may be less detailed than Pro. Interpret Flash results conservatively during Plan Finalization, and for high-risk changes, review the actual source files directly.
 
@@ -396,7 +304,7 @@ Include rollback-capable migration for DB changes.
 - `.context-map.md` is generated by Gemini. Do not edit manually. Automatically added to `.gitignore` on first generation.
 - During execute, verify against actual source, not the context map.
 - **Model names are immutable.** Use only the exact strings defined in the Model Names table. On `ModelNotFoundError`, follow the fallback chain — never guess alternative names.
-- **Shell safety:** Always construct Gemini prompts via temp files (`mktemp`). Never embed dynamic data (git log, file contents) directly inside shell quote strings.
+- **All Gemini invocations use MCP tool calls.** Do not invoke the Gemini CLI binary directly.
 - On Gemini Pro failure in Step 3, retry with `gemini-3-flash-preview` (verbatim) before falling back to Claude. On any Gemini failure, do not halt the workflow. Notify user and proceed with strengthened direct source verification.
 - Commits follow Tidy First: `refactor:` (structural) / `feat:`/`fix:` (behavioral). Every commit must be independently rollback-capable.
 

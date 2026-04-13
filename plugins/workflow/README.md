@@ -124,3 +124,11 @@ When Gemini is entirely unavailable:
 ```bash
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
+
+### MCP Server Requirement
+
+Gemini calls go through MCP. Register the MCP server before using this plugin:
+
+```bash
+claude mcp add gemini-cli -s user -- uvx --from git+https://github.com/DiversioTeam/gemini-cli-mcp.git gemini-mcp
+```

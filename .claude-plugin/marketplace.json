@@ -33,7 +33,7 @@
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Workflow skills — multi-LLM cross-check with Gemini for planning and execution",
-      "version": "0.0.7"
+      "version": "0.0.8"
     },
     {
       "name": "dev",

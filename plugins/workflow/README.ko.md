@@ -124,3 +124,11 @@ Gemini 전체 사용 불가 시:
 ```bash
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
+
+### MCP 서버 요건
+
+Gemini 호출은 MCP를 통해 이루어진다. 아래 명령어로 MCP 서버를 등록해야 한다:
+
+```bash
+claude mcp add gemini-cli -s user -- uvx --from git+https://github.com/DiversioTeam/gemini-cli-mcp.git gemini-mcp
+```

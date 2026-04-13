@@ -127,7 +127,7 @@ claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.gi
 
 ### MCP Server Requirement
 
-Gemini 호출은 MCP를 통해 이루어진다. 아래 명령어로 MCP 서버를 등록해야 한다:
+Gemini calls go through MCP. Register the MCP server before using this plugin:
 
 ```bash
 claude mcp add gemini-cli -s user -- uvx --from git+https://github.com/DiversioTeam/gemini-cli-mcp.git gemini-mcp

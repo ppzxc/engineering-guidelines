@@ -67,6 +67,6 @@ Chosen option: "(a) 단일 통합 스킬 `feature-pipeline` 추가", because 기
 
 ## More Information
 
-* [`plugins/workflow/skills/feature-pipeline/SKILL.md`](../plugins/workflow/skills/feature-pipeline/SKILL.md) — 스킬 구현
+* [`plugins/workflow/skills/feature-pipeline/SKILL.md`](../../plugins/workflow/skills/feature-pipeline/SKILL.md) — 스킬 구현
 * [`.claude/rules/workflow-rules.md`](../../.claude/rules/workflow-rules.md) — 파생 규칙
 * Gemini cross-check 피드백: 이중 실행 충돌([risk H]), worktree 경로 불일치([ordering M]), LLM 단계 망각([feasibility M]) — 모두 SKILL.md에서 대응

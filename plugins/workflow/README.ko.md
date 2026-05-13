@@ -10,6 +10,7 @@ Claude(plan/execute) + Gemini(context/review).
 | 스킬 | 슬래시 커맨드 | 설명 |
 |------|--------------|------|
 | gemini-crosscheck | `/workflow:gemini-crosscheck` | 코딩 전 Gemini 멀티 LLM 크로스체크 — 컨텍스트 압축, 브레인스토밍, 계획 확정, 실행 |
+| feature-pipeline | `/workflow:feature-pipeline` | 전체 기능 오케스트레이션 — grill-me → worktree → TDD 강제 plan → 인라인 Gemini 검증 → 서브에이전트 실행 → PR |
 
 ## 아키텍처 개요
 

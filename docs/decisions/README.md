@@ -17,6 +17,7 @@
 | [ADR-0008](0008-adopt-aip-filter-fieldmask-partial-response.md) | accepted | AIP filter 표현식, updateMask 필수화, Partial Response 도입 |
 | [ADR-0009](0009-adopt-strict-api-security-and-versioning-rules.md) | accepted | 엄격한 API 보안 및 버저닝 규칙 도입 (OWASP Top 10, 하위 호환성) |
 | [ADR-0010](0010-adopt-tiered-api-profile-system.md) | accepted | API 플러그인 계층화 프로필 시스템 도입 (T1/T2/T3 점진적 채택) |
+| [ADR-0011](0011-add-feature-pipeline-orchestrator.md) | accepted | feature-pipeline 오케스트레이터 스킬 추가 (아이디어→PR 단일 파이프라인) |
 
 ## 새 ADR 추가
 

@@ -10,6 +10,7 @@ Claude (plan/execute) + Gemini (context/review).
 | Skill | Slash Command | Description |
 |-------|---------------|-------------|
 | gemini-crosscheck | `/workflow:gemini-crosscheck` | Multi-LLM cross-check with Gemini before coding — context compression, brainstorm, plan finalization, and execution |
+| feature-pipeline | `/workflow:feature-pipeline` | Full feature orchestration — grill-me → worktree → TDD-enforced plan → inline Gemini cross-check → subagent execution → PR |
 
 ## Architecture Overview
 

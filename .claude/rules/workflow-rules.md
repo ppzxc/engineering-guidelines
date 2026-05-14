@@ -13,3 +13,8 @@ feature-pipeline 스킬을 사용하거나 구현할 때 반드시 다음 제약
 ✓ feature-pipeline S3 시작 전 cwd가 worktree 경로와 일치하는지 `pwd && git rev-parse --show-toplevel` 로 검증할 것 [ADR-0014]
 ✓ feature-pipeline S4 완료 후 plan 파일에 `## Cross-check Feedback` 섹션이 존재하는지 grep으로 확인할 것 [ADR-0014]
 ✓ feature-pipeline Gate 1/2/3에서 사용자 응답을 받기 전까지 다음 단계를 시작하지 말 것 [ADR-0014]
+✓ feature-pipeline은 superpowers:writing-plans 스킬을 호출하지 않고 plan을 직접 작성할 것 [ADR-0015]
+✓ feature-pipeline plan 파일은 최상단에 Goal/Architecture/Tech Stack 헤더 3줄을 포함할 것 [ADR-0015]
+✓ feature-pipeline plan의 각 task는 Files: Create/Modify/Test 줄로 파일 매핑을 명시할 것 [ADR-0015]
+✓ feature-pipeline은 ExitPlanMode 흐름에 진입하지 않을 것 (Gate 3 승인은 AskUserQuestion만으로 처리) [ADR-0016]
+✓ feature-pipeline plan 파일에 grill-me 대화 본문을 누적하지 않을 것 (결정/태스크/cross-check 요약만, 8KB 이하 유지) [ADR-0016]

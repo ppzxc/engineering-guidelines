@@ -18,3 +18,4 @@ feature-pipeline 스킬을 사용하거나 구현할 때 반드시 다음 제약
 ✓ feature-pipeline plan의 각 task는 Files: Create/Modify/Test 줄로 파일 매핑을 명시할 것 [ADR-0015]
 ✓ feature-pipeline은 ExitPlanMode 흐름에 진입하지 않을 것 (Gate 3 승인은 AskUserQuestion만으로 처리) [ADR-0016]
 ✓ feature-pipeline plan 파일에 grill-me 대화 본문을 누적하지 않을 것 (결정/태스크/cross-check 요약만, 8KB 이하 유지) [ADR-0016]
+✓ feature-pipeline의 S6 subagent 프롬프트 paste 본문에 Simplicity First(§2), Surgical Changes(§3), Goal-Driven Execution(§4) 가드레일을 인라인으로 포함할 것 [ADR-0013][ADR-0017]

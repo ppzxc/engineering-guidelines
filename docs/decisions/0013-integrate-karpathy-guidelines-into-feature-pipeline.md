@@ -66,3 +66,4 @@ Chosen option: "Option A — S1 직후 1회 invoke + 인라인 가드레일", be
 - karpathy-guidelines 원본: `andrej-karpathy-skills:karpathy-guidelines` (글로벌 마켓플레이스)
 - 관련 rules: `.claude/rules/workflow-rules.md` `[ADR-0013]` 항목
 - 참고 ADR: [ADR-0011](0011-add-feature-pipeline-orchestrator.md) — feature-pipeline 오케스트레이터 도입 배경
+- Refined by: [ADR-0017](0017-concentrate-karpathy-guardrails-in-s6-subagent-prompt.md) — paste-only 규약 하에서 §2/§4를 S6 인라인으로 집중 매핑

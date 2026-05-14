@@ -32,8 +32,8 @@
     {
       "name": "workflow",
       "source": "./plugins/workflow",
-      "description": "Workflow skills — multi-LLM cross-check with Gemini for planning and execution, full feature pipeline from idea to committed code",
-      "version": "0.0.12"
+      "description": "Workflow skills — multi-LLM cross-check with Gemini, including feature-pipeline with S1.5 Karpathy guidelines integration",
+      "version": "0.0.13"
     },
     {
       "name": "dev",

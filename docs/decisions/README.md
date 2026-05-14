@@ -20,6 +20,8 @@
 | [ADR-0011](0011-add-feature-pipeline-orchestrator.md) | accepted | feature-pipeline 오케스트레이터 스킬 추가 (아이디어→PR 단일 파이프라인) |
 | [ADR-0013](0013-integrate-karpathy-guidelines-into-feature-pipeline.md) | accepted | feature-pipeline에 karpathy-guidelines 정신 통합 (S1.5 invoke + 단계별 가드레일) |
 | [ADR-0014](0014-strengthen-feature-pipeline-evidence-based-gates.md) | accepted | feature-pipeline 오케스트레이션 강화: 외부 증거 기반 게이트 도입 (grep/pwd 검증, 8단계 재편) |
+| [ADR-0015](0015-remove-writing-plans-from-feature-pipeline.md) | accepted | feature-pipeline S3에서 writing-plans 외부 스킬 호출 제거 (자체 작성으로 전환, 토큰 절약) |
+| [ADR-0016](0016-avoid-plan-mode-in-feature-pipeline.md) | accepted | feature-pipeline에서 플랜 모드 회피 및 plan 파일 슬림화 (압축 폭주 차단) |
 
 ## 새 ADR 추가
 

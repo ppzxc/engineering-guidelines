@@ -92,13 +92,13 @@ Skill tool → andrej-karpathy-skills:karpathy-guidelines
 
 **plan 이전에 worktree를 만들어야 한다** — 그래야 plan 파일이 worktree 안에 생성되어 subagent가 올바른 경로에서 읽는다. plan 후 worktree 생성 시 경로 불일치로 S6가 실패한다.
 
-**S3 시작 전 worktree 경로를 반드시 검증하라:**
+**S3 시작 전 worktree 진입 여부를 반드시 검증하라:**
 
 ```bash
-pwd && git rev-parse --show-toplevel
+git rev-parse --git-dir && git rev-parse --git-common-dir
 ```
 
-두 경로가 같은 worktree를 가리키지 않으면 STOP — worktree 진입 후 재시작.
+두 경로가 **같으면**(= main repo) STOP — EnterWorktree 진입 후 재시작. 다르면 worktree 안에 있음.
 
 ## S3: Plan 파일 구조
 
@@ -174,7 +174,7 @@ grep '## Cross-check Feedback' "$(pwd)/docs/plans/<slug>.md"
 plan 파일 경로를 확인하고 아래 명령을 실행한 뒤 결과를 응답에 인용한다:
 
 ```bash
-grep -E '^### Task .+\[(TDD|TDD-EXEMPT|TIDY)' "$(pwd)/docs/plans/<slug>.md"
+grep -E '^### Task .+\[(TDD-EXEMPT[^]]*|TDD|TIDY)\]' "$(pwd)/docs/plans/<slug>.md"
 ```
 
 인용한 결과를 기반으로 아래 4개 항목을 체크:

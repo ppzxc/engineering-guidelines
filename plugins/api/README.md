@@ -6,46 +6,48 @@ RESTful API design guidelines.
 
 ---
 
+## Profile Guide
+
+Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. When a profile is specified, only rules at that Tier or below are applied.
+
+| Profile | Tiers Included | Target | Rule Count |
+|--------|-----------|------|---------|
+| **Essential** | T1 only | All APIs — from day one | ~87 |
+| **Standard** | T1 + T2 | Production operation phase | ~121 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~146 |
+
+**Tier Criteria (ADR-0010):**
+- **T1 (Essential):** Breaking change risk if introduced later / Security mandatory / HTTP standards / API contract fundamentals
+- **T2 (Standard):** Production operation convenience, can be introduced later
+- **T3 (Full):** Enterprise/Advanced patterns, domain-specific
+
+---
+
 ## Table of Contents
 
 1. [Overview](#1-overview)
    - [Compliance Levels](#compliance-levels)
-2. [REST Basics](#2-rest-basics)
-   - [URL Design](#21-url-design)
-   - [HTTP Methods & Status Codes](#22-http-methods--status-codes)
-   - [Query Parameters](#23-query-parameters)
-   - [HTTP Headers](#24-http-headers)
-   - [JSON Data Format](#25-json-data-format)
-   - [Error Response](#26-error-response)
-3. [REST Design](#3-rest-design)
-   - [Resource Schema & Field Rules](#31-resource-schema--field-rules)
-   - [CRUD Operations](#32-crud-operations)
-   - [Actions](#33-actions)
-   - [Collections & Pagination](#34-collections--pagination)
-   - [Filtering & Sorting](#35-filtering--sorting)
-   - [Partial Response](#36-partial-response)
-   - [Expand/Embed](#37-expandembed)
-   - [Bulk Operations](#38-bulk-operations)
-4. [API Operations](#4-api-operations)
-   - [API Versioning](#41-api-versioning)
-   - [Deprecation](#42-deprecation)
-   - [Rate Limiting](#43-rate-limiting)
-   - [Long-Running Operations](#44-long-running-operations)
-   - [Idempotency-Key](#45-idempotency-key)
-5. [Authentication & Security](#5-authentication--security)
-   - [5.1 Authentication Methods](#51-authentication-methods)
-   - [5.2 Authorization & Access Control](#52-authorization--access-control)
-   - [5.3 Input Validation & Mass Assignment](#53-input-validation--mass-assignment)
-   - [5.4 Security Headers](#54-security-headers)
-   - [5.5 401 vs 403 Distinction](#55-401-vs-403-distinction)
-   - [5.6 Webhooks](#56-webhooks)
-6. [Health Check](#6-health-check)
-7. [OpenAPI Specification](#7-openapi-specification)
-   - [7.1 API First](#71-api-first)
-   - [7.2 Spec Quality](#72-spec-quality)
-   - [7.3 Schema Mapping](#73-schema-mapping)
-   - [7.4 Extensions & Validation](#74-extensions--validation)
-8. [References](#8-references)
+2. [URL Design](#2-url-design)
+3. [HTTP Methods & Status Codes](#3-http-methods--status-codes)
+4. [Headers](#4-headers)
+5. [JSON Format](#5-json-format)
+6. [Error Response](#6-error-response)
+7. [Resource Schema & Field Rules](#7-resource-schema--field-rules)
+8. [CRUD Behavior](#8-crud-behavior)
+9. [Actions](#9-actions)
+10. [Collections & Pagination](#10-collections--pagination)
+11. [Filtering & Sorting](#11-filtering--sorting)
+12. [Partial Response & Resource Expansion](#12-partial-response--resource-expansion)
+13. [Bulk Operations](#13-bulk-operations)
+14. [API Versioning](#14-api-versioning)
+15. [Deprecation](#15-deprecation)
+16. [Rate Limiting & Retries](#16-rate-limiting--retries)
+17. [Caching](#17-caching)
+18. [Long-Running Operations](#18-long-running-operations)
+19. [Idempotency-Key](#19-idempotency-key)
+20. [OpenAPI Specification](#20-openapi-specification)
+21. [Authentication & Security](#21-authentication--security)
+22. [References](#22-references)
 
 ---
 
@@ -58,13 +60,8 @@ RESTful API design guidelines.
   - They must be intuitively understandable.
   - They must provide clear messages when errors occur.
   - They must maintain backward compatibility across versions.
-- Follows Roy Fielding's RESTful principles ([Architectural Styles and the Design of Network-based Software Architectures](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)).
+- Follows Roy Fielding's RESTful principles.
   - HATEOAS is not implemented.
-
-### Scope
-
-- All new HTTP/HTTPS APIs developed within the organization
-- Applied as much as possible when improving existing APIs
 
 ### Compliance Levels
 
@@ -78,1542 +75,304 @@ The key words "MUST", "MUST NOT", "SHOULD", "MAY", and "DO NOT" in this document
 
 ---
 
-## 2. REST Basics
+## 2. URL Design
 
-### 2.1 URL Design
+- **Resource-oriented design** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
+- Every resource MUST support at least GET (retrieval). `[T1]`
+- Prefer **standard methods** (GET, POST, PATCH, DELETE); use custom methods only when standard methods cannot express the operation. `[T1]`
+- Do not mirror database structure in API schema. `[T1]`
 
-#### Basic Structure
+- **kebab-case** for path segments: `/user-profiles`, `/product-categories/123`. `[T1]`
+- **Plural nouns** for collections: `/articles` not `/article`. `[T1]`
+- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`). `[T1]`
+- **No file extensions** (`.json`, `.xml`). `[T1]`
+- **No trailing slash** — `/articles` not `/articles/`. `[T1]`
+- **camelCase** for query parameters: `pageSize=20&sortOrder=desc`. `[T1]`
+- ASCII lowercase letters, numerals, and hyphens only in path segments. `[T1]`
+- Repeat parameter names for arrays: `?tag=tech&tag=design`. `[T1]`
+- **Single sub-resource nesting** — `/{parent}/{parentId}/{child}/{childId}` e.g., `/users/42/profiles/7`. `[T2]`
 
-```
-https://{host}/{service-root}/{resource}/{id}
-https://{host}/{service-root}/{resource}/{id}/{sub-resource}/{sub-id}
-```
-
-Example:
-
-```
-# Single resource
-GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000
-
-# Nested sub-resource (maximum depth)
-GET https://api.example.com/orders/550e8400-e29b-41d4-a716-446655440000/items/6ba7b810-9dad-11d1-80b4-00c04fd430c8
-```
-
-#### URL Casing
-
-✅ **Required**: Use lowercase kebab-case for URL paths.
-
-```
-# Good
-GET /user-profiles
-GET /product-categories/123
-
-# Bad
-GET /userProfiles
-GET /UserProfiles
-GET /user_profiles
-```
-
-✅ **Required**: Use plural nouns for resource collection names.
-
-```
-# Good
-GET /articles
-GET /users/123/comments
-
-# Bad
-GET /article
-GET /user/123/comment
-```
-
-❌ **Prohibited**: Do not include verbs in URLs. Express actions using HTTP methods.
-
-```
-# Bad
-POST /createUser
-GET /getArticles
-DELETE /deleteComment/123
-
-# Good
-POST /users
-GET /articles
-DELETE /comments/123
-```
-
-❌ **Prohibited**: Do not include file extensions (`.json`, `.xml`) in URLs. Use the `Accept` header for content negotiation.
-
-#### URL Nesting Depth
-
-✅ **Required**: Limit URL nesting to a maximum of 2 levels (`/{resource}/{id}/{sub-resource}/{subId}`).
-
-| Depth | Pattern | Example | Allowed |
-|-------|---------|---------|---------|
-| 0 | `/{resource}` | `/articles` | ✅ |
-| 1 | `/{resource}/{id}` | `/articles/123` | ✅ |
-| 2 | `/{resource}/{id}/{sub}` | `/articles/123/comments` | ✅ |
-| 2 | `/{resource}/{id}/{sub}/{subId}` | `/articles/123/comments/456` | ✅ |
-| 3+ | `/{a}/{id}/{b}/{id}/{c}` | — | ❌ |
-
-❌ **Prohibited**: Do not nest more than 2 levels deep. Promote deeply nested resources to top-level routes instead.
+**Nesting depth rule:** `[T2]`
+Nest at most one sub-resource under a parent. For deeper relationships, promote to a flat top-level route.
 
 | Situation | ✅ Do | ❌ Don't |
 |-----------|-------|---------|
-| Items under an order | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
-| Reviews on an order item | `/order-items/{itemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
-
-#### Allowed Characters
-
-✅ **Required**: Use only lowercase ASCII letters, digits, and hyphens (`-`) in URL path segments.
-
-✅ **Required**: Use camelCase for query parameter names.
-
-```
-# Good
-GET /articles?pageSize=20&sortOrder=desc
-
-# Bad
-GET /articles?page_size=20&sort_order=desc
-```
+| Order items under an order | `/orders/{orderId}/items/{itemId}` | `/users/{userId}/orders/{orderId}/items/{itemId}` |
+| Reviews on an order item | `/order-items/{orderItemId}/reviews/{reviewId}` | `/users/{userId}/orders/{orderId}/items/{itemId}/reviews/{reviewId}` |
 
 ---
 
-#### URL Length
+## 3. HTTP Methods & Status Codes
 
-⚠️ **Recommended**: Keep URLs under 2000 characters. If longer URLs are needed, consider moving query parameters to the request body.
+| Method | Purpose | Idempotent | Safe |
+|--------|---------|-----------|------|
+| GET | Retrieve | Yes | Yes |
+| POST | Create / execute custom method | No | No |
+| PUT | Full content replacement (file/binary upload) | Yes | No |
+| PATCH | Partial update (default update method) | No | No |
+| DELETE | Remove | Yes | No |
+| HEAD | Retrieve metadata only (no body) | Yes | Yes |
+| OPTIONS | Retrieve allowed methods/CORS info | Yes | Yes |
 
----
+- **HEAD:** Clients SHOULD use HEAD to check resource existence or last-modified time without downloading the full body. `[T2]`
+- **OPTIONS:** Servers MUST support OPTIONS for CORS preflight and SHOULD use it to describe supported methods via the `Allow` header. `[T2]`
+- GET, HEAD, DELETE must not include request bodies. `[T1]`
 
-### 2.2 HTTP Methods & Status Codes
+**2xx Success:**
+- `200 OK` — standard success. `[T1]`
+- `201 Created` — creation success; include `Location` header with new resource URL. `[T1]`
+- `202 Accepted` — request accepted, processing not complete; used for async or deferred operations. `[T2]`
+- `204 No Content` — success with no body (DELETE, etc.). `[T1]`
 
-#### HTTP Methods
+**4xx Client Error:**
+- `400 Bad Request` — malformed request, validation failure. `[T1]`
+- `401 Unauthorized` — missing/expired authentication. `[T1]`
+- `403 Forbidden` — authenticated but not authorized. `[T1]`
+- `404 Not Found` — resource doesn't exist. `[T1]`
+- `409 Conflict` — duplicate resource (same ID or unique constraint violation). `[T1]`
+- `412 Precondition Failed` — `If-Match` etag mismatch (conditional request failed). `[T1]`
+- `422 Unprocessable Entity` — semantic validation failure. `[T1]`
+- `429 Too Many Requests` — rate limit exceeded. `[T1]`
 
-| Method | Meaning | Idempotent | Safe |
-|--------|---------|------------|------|
-| GET | Retrieve a resource | ✅ | ✅ |
-| POST | Create a resource or perform an action | ❌ | ❌ |
-| PUT | Fully replace a resource | ✅ | ❌ |
-| PATCH | Partially update a resource | ❌ | ❌ |
-| DELETE | Delete a resource | ✅ | ❌ |
-| HEAD | Retrieve headers only | ✅ | ✅ |
-
-✅ **Required**: GET requests must not modify server state.
-
-✅ **Required**: PUT requests must be idempotent — sending the same request multiple times must produce the same result.
-
-⚠️ **Recommended**: Use PATCH instead of PUT for partial updates.
-
-❌ **Prohibited**: Do not include a request body in GET, HEAD, or DELETE requests.
-
-#### Status Codes
-
-✅ **Required**: Use the standard HTTP status codes below with their precise meanings.
-
-**2xx Success**
-
-| Code | Meaning | When to Use |
-|------|---------|-------------|
-| 200 OK | Success | Successful GET, PUT, PATCH, POST (action) |
-| 201 Created | Created | Successful resource creation via POST |
-| 204 No Content | No Content | Successful DELETE, no response body |
-
-**4xx Client Errors**
-
-| Code | Meaning | When to Use |
-|------|---------|-------------|
-| 400 Bad Request | Bad Request | Malformed request, validation failure |
-| 401 Unauthorized | Authentication Required | Missing or expired authentication token |
-| 403 Forbidden | Access Denied | Authenticated but lacks permission |
-| 404 Not Found | Not Found | Resource does not exist |
-| 409 Conflict | Conflict | Duplicate resource, optimistic lock failure |
-| 422 Unprocessable Entity | Unprocessable | Semantic validation failure |
-| 429 Too Many Requests | Too Many Requests | Rate limit exceeded |
-
-**5xx Server Errors**
-
-| Code | Meaning | When to Use |
-|------|---------|-------------|
-| 500 Internal Server Error | Server Error | Unexpected server error |
-| 503 Service Unavailable | Service Unavailable | Temporary server overload or maintenance |
-
-✅ **Required**: Include the URL of the created resource in the `Location` header for 201 Created responses.
-
-```
-HTTP/1.1 201 Created
-Location: https://api.example.com/users/articles/456
-Content-Type: application/json
-
-{
-  "id": "456",
-  "title": "New Article Title"
-}
-```
-
-❌ **Prohibited**: Do not return 200 OK for error situations.
+**5xx Server Error:**
+- `500 Internal Server Error` — unexpected failure. `[T1]`
+- `503 Service Unavailable` — temporary unavailability. `[T1]`
 
 ---
 
-### 2.3 Query Parameters
+## 4. Headers
 
-✅ **Required**: Use camelCase for query parameter names.
-
-✅ **Required**: Pass array values by repeating the same parameter name.
-
-```
-GET /articles?tag=tech&tag=design
-```
-
-⚠️ **Recommended**: Design query parameters as optional. Include required values in the path.
-
-⚠️ **Recommended**: Do not include sensitive information (passwords, tokens, etc.) in query parameters, as they may be recorded in server logs.
-
-❌ **Prohibited**: Do not use query parameters for operations that modify server state.
+- `Content-Type: application/json` for bodies. `[T1]`
+- `Accept: application/json` for content negotiation. `[T1]`
+- `Location` header on 201 Created. `[T1]`
+- `Total-Count` for collection size. `[T2]`
+- RFC 8288 `Link` header for pagination. `[T2]`
+- **No `X-` prefix on custom headers** (RFC 6648) — All new APIs MUST define custom headers without this prefix. `[T1]`
+- `Cache-Control` header specifies caching strategy. `[T2]`
+- `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response. `[T1]`
+- `ETag` — opaque string representing the resource version; server includes in responses. `[T1]`
+- `If-Match` — client sends etag value on Update/Delete requests for optimistic concurrency control. `[T1]`
 
 ---
 
-### 2.4 HTTP Headers
+## 5. JSON Format
 
-#### Request Headers
+- **camelCase** field names: `userId`, `createdAt`, `isActive`. `[T1]`
+- Never snake_case or abbreviations. `[T1]`
+- Omit null/missing fields entirely (do not send `"field": null`). `[T1]`
+- Date/time values as RFC 3339 strings; server responses in UTC (`Z`). `[T1]`
+- Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only). `[T1]`
+- Servers must ignore read-only fields in request bodies. `[T1]`
 
-✅ **Required**: Include the `Content-Type` header when the request has a body.
-
-```
-Content-Type: application/json
-```
-
-⚠️ **Recommended**: Use the `Accept` header for response format negotiation.
-
-```
-Accept: application/json
-```
-
-#### Response Headers
-
-✅ **Required**: Include the `Content-Type` header when the response has a body.
-
-⚠️ **Recommended**: Use the `Cache-Control` header to specify caching strategy.
-
-```
-Cache-Control: no-cache
-Cache-Control: max-age=3600
-```
-
-⚠️ **Recommended**: Use the RFC 8288 `Link` header for collection pagination responses.
-
-```
-Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
-      <https://api.example.com/articles?pageSize=20>; rel="first"
-```
-
-⚠️ **Recommended**: Use the `Total-Count` header when providing total item count.
-
-```
-Total-Count: 100
-```
-
-#### Custom Headers
-
-⚠️ **Recommended**: Use clear names without the `X-` prefix for custom headers. The `X-` prefix was deprecated in RFC 6648 (2012).
-
-```
-Request-Id: abc-123
-Correlation-Id: xyz-789
-```
-
-> **Note**: Headers like `X-Request-Id` and `X-Correlation-Id` that have become de facto standards are allowed for legacy compatibility. Do not use the `X-` prefix for new custom headers.
-
-#### Request Tracing
-
-✅ **Required**: Include a `Request-Id` header (UUID v4) in every response for request tracing.
-
-```
-Request-Id: 550e8400-e29b-41d4-a716-446655440000
-```
-
-- If the client sends a `Request-Id` header, the server SHOULD adopt the value or generate a new one
-- Propagate `Request-Id` across microservices for distributed tracing
-- Include `Request-Id` in all service logs for debugging correlation
-- The `traceId` field in error responses (RFC 9457) MUST match the `Request-Id` header value
-
-❌ **Prohibited**: Do not redefine the meaning of standard HTTP headers.
+**State Enum Pattern (AIP-216):** `[T1]`
+- State field name MUST be `state` (not `status`).
+- First enum value MUST always be `STATE_UNSPECIFIED`.
+- `state` is OUTPUT_ONLY — state transitions via custom methods only.
 
 ---
 
-### 2.5 JSON Data Format
+## 6. Error Response
 
-#### Field Naming
-
-✅ **Required**: Use camelCase for JSON field names.
-
-```json
-// Good
-{
-  "userId": "123",
-  "createdAt": "2024-01-20T10:00:00Z",
-  "isActive": true
-}
-
-// Bad
-{
-  "user_id": "123",
-  "created_at": "2024-01-20T10:00:00Z",
-  "is_active": true
-}
-```
-
-✅ **Required**: Field names must start with a lowercase letter.
-
-❌ **Prohibited**: Do not overuse abbreviations in field names. Prefer clear, complete words.
-
-```json
-// Bad
-{
-  "usr": "john",
-  "ts": "2024-01-20T10:00:00Z",
-  "cnt": 5
-}
-
-// Good
-{
-  "username": "john",
-  "timestamp": "2024-01-20T10:00:00Z",
-  "count": 5
-}
-```
-
-#### Type System
-
-##### Boolean
-
-✅ **Required**: Use JSON `true`/`false` for boolean values. Do not use strings `"true"`/`"false"` or numbers `1`/`0`.
-
-✅ **Required**: Use prefixes like `is`, `has`, `can` for boolean field names.
-
-```json
-{
-  "isActive": true,
-  "hasPermission": false,
-  "canEdit": true
-}
-```
-
-##### Number
-
-✅ **Required**: Use JSON number type for numeric values.
-
-⚠️ **Recommended**: Return large integers that exceed JavaScript's safe integer range (2^53 - 1) as strings.
-
-```json
-{
-  "count": 42,
-  "price": 19.99,
-  "largeId": "9007199254740993"
-}
-```
-
-##### String
-
-⚠️ **Recommended**: Distinguish between empty string (`""`) and `null`. Omit the field for meaningful "no value" cases; use empty string only when the value is intentionally empty.
-
-#### Dates and Times
-
-✅ **Required**: Represent all date/time values as strings in RFC 3339 format (ISO 8601 profile).
-
-✅ **Required**: Always include the timezone when present. Use `Z` for UTC.
-
-✅ **Required**: Return all time values in server responses as UTC (`Z`). Clients handle conversion to local timezone.
-
-⚠️ **Recommended**: Send time values in client requests as UTC (`Z`). If an offset is included, the server normalizes to UTC before storing.
-
-⚠️ **Recommended**: Use `YYYY-MM-DD` format without timezone for date-only fields (e.g., date of birth).
-
-❌ **Prohibited**: Do not use Unix timestamps (epoch milliseconds/seconds) as the default time format.
-
-##### Server Response Example
-
-```json
-{
-  "createdAt": "2024-01-20T10:00:00Z",
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "birthDate": "1990-05-15"
-}
-```
-
-##### Client Request Example
-
-```json
-// ⚠️ Recommended: UTC
-{ "scheduledAt": "2024-01-25T00:30:00Z" }
-
-// Allowed: with offset → server normalizes to UTC before storing
-{ "scheduledAt": "2024-01-25T09:30:00+09:00" }
-```
-
-##### Server Normalization Rules
-
-✅ **Required**: When a client sends a time with an offset, the server converts it to UTC before storing. Do not return an error.
-
-✅ **Required**: Responses after server normalization must always be returned as UTC (`Z`).
-
-⚠️ **Recommended**: If timezone information is business-critical (e.g., preserving the user's original timezone), use a separate `timeZone` field.
-
-```json
-{
-  "scheduledAt": "2024-01-25T00:30:00Z",
-  "timeZone": "Asia/Seoul"
-}
-```
-
-#### Enum Handling
-
-✅ **Required**: Use UPPER_SNAKE_CASE strings for enum values.
-
-```json
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
-⚠️ **Recommended**: Design for clients to receive unknown enum values. Handle new enum values being added without breaking existing clients.
-
-❌ **Prohibited**: Do not use numbers or unclear abbreviations for enum values.
-
-```json
-// Bad
-{
-  "status": 1,
-  "priority": "hi"
-}
-
-// Good
-{
-  "status": "PUBLISHED",
-  "priority": "HIGH"
-}
-```
-
----
-
-### 2.6 Error Response
-
-#### Error Response Structure
-
-✅ **Required**: All error responses must follow the RFC 7807 / RFC 9457 (Problem Details for HTTP APIs) standard.
-
-✅ **Required**: Use `application/problem+json` as the `Content-Type` for error responses.
-
-```json
-{
-  "type": "https://api.example.com/errors/resource-not-found",
-  "title": "Resource Not Found",
-  "status": 404,
-  "detail": "The requested article could not be found.",
-  "instance": "/articles/999",
-  "traceId": "abc-123-xyz"
-}
-```
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| `type` | ✅ Required | URI identifying the error type (serves as documentation link; `about:blank` allowed) |
-| `title` | ✅ Required | Short, human-readable summary of the error type |
-| `status` | ✅ Required | HTTP status code (numeric) |
-| `detail` | ✅ Required | Specific error description for this request (in language the user can understand) |
-| `instance` | ⚠️ Recommended | Request path where the problem occurred |
-| `errors` | ⚠️ Recommended | Extension field — list of field-level validation error details |
-| `traceId` | ⚠️ Recommended | Extension field — MUST match `Request-Id` response header value |
-
-> **References**: [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), [RFC 9457](https://datatracker.ietf.org/doc/html/rfc9457)
-
-⚠️ **Recommended**: Return all validation errors at once on validation failure (do not return one at a time).
+✅ **Required**: All error responses MUST follow RFC 7807 / RFC 9457 standard and use `application/problem+json`.
 
 ```json
 {
   "type": "https://api.example.com/errors/validation-failed",
   "title": "Validation Failed",
   "status": 400,
-  "detail": "Request data failed validation.",
-  "instance": "/articles",
-  "errors": [
-    { "field": "title", "message": "Title is required." },
-    { "field": "content", "message": "Content must be at least 10 characters." }
-  ],
-  "traceId": "abc-123-xyz"
-}
-```
-
-❌ **Prohibited**: Do not expose internal implementation details in error responses, such as stack traces, internal system paths, or database error messages.
-
----
-
-## 3. REST Design
-
-### 3.1 Resource Schema & Field Rules
-
-Resources are the core entities exposed by a service. Each resource must be accessible via a unique URL.
-
-✅ **Required**: Every resource must have a unique identifier (`id`).
-
-✅ **Required**: Resource schemas must maintain a consistent structure.
-
-**Standard Resource Fields**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique resource identifier |
-| `createdAt` | string (RFC 3339) | Creation timestamp |
-| `updatedAt` | string (RFC 3339) | Last modification timestamp |
-
-Example:
-
-```json
-{
-  "id": "123",
-  "title": "RESTful API Design",
-  "content": "...",
-  "createdAt": "2024-01-15T09:00:00Z",
-  "updatedAt": "2024-01-20T14:30:00Z"
-}
-```
-
-⚠️ **Recommended**: Design resource identifiers as opaque strings. Clients should not parse or depend on the structure of identifiers.
-
-❌ **Prohibited**: Do not include null-valued fields in responses. Omit fields with no value from the response.
-
-```json
-// Bad
-{
-  "id": "123",
-  "title": "Title",
-  "deletedAt": null
-}
-
-// Good
-{
-  "id": "123",
-  "title": "Title"
-}
-```
-
-#### Field Mutability
-
-Fields are classified by whether they can be changed after creation.
-
-| Classification | Description | Examples |
-|----------------|-------------|---------|
-| **Create-only** | Can only be set at creation, cannot be changed afterward | `id`, `createdAt` |
-| **Read-only** | Managed by the server, cannot be modified by clients | `updatedAt` |
-| **Mutable** | Can be modified by clients | `title`, `content` |
-
-✅ **Required**: Ignore server-managed read-only fields (`id`, `createdAt`, `updatedAt`) if included by the client in the request body.
-
-⚠️ **Recommended**: Document the mutability of each field in the API documentation.
-
-#### State Enum Pattern (AIP-216)
-
-Use a dedicated `state` field (not `status`) to represent the lifecycle state of a resource.
-
-✅ **Required**: Name the state field `state`, not `status`. (`status` conflicts with HTTP status codes.)
-
-✅ **Required**: The first enum value MUST be `STATE_UNSPECIFIED` (represents unknown or default state).
-
-✅ **Required**: The `state` field is `OUTPUT_ONLY` — clients MUST NOT set it directly via PATCH.
-
-✅ **Required**: State transitions MUST be performed via custom methods (e.g., `:activate`, `:deactivate`), not by patching the `state` field directly.
-
-⚠️ **Recommended**: Common patterns: `ACTIVE` / `INACTIVE`, `PENDING` / `RUNNING` / `SUCCEEDED` / `FAILED`.
-
-```json
-{
-  "id": "job-123",
-  "state": "RUNNING"
-}
-```
-
-```
-# Correct: state transition via custom method
-POST /jobs/123:cancel
-
-# Incorrect: directly patching state
-PATCH /jobs/123?updateMask=state
-{ "state": "CANCELLED" }   ← Prohibited
-```
-
----
-
-### 3.2 CRUD Operations
-
-#### POST — Create Resource
-
-✅ **Required**: Return 201 Created with the created resource upon successful resource creation.
-
-```
-POST /articles
-Content-Type: application/json
-
-{
-  "title": "New Article Title",
-  "content": "Article body content"
-}
-
----
-
-HTTP/1.1 201 Created
-Location: /articles/456
-Content-Type: application/json
-
-{
-  "id": "456",
-  "title": "New Article Title",
-  "content": "Article body content",
-  "createdAt": "2024-01-20T10:00:00Z",
-  "updatedAt": "2024-01-20T10:00:00Z"
-}
-```
-
-#### PUT — Full Resource Replacement
-
-✅ **Required**: PUT requests fully replace the resource. Mutable fields not included in the request body are treated as default or null values.
-
-✅ **Required**: PUT requests must be idempotent.
-
-#### PATCH — Partial Update (AIP-161)
-
-✅ **Required**: All PATCH requests MUST include the `updateMask` query parameter specifying which fields to update.
-
-```
-PATCH /articles/456?updateMask=title,content
-Content-Type: application/json
-
-{
-  "title": "Updated Title",
-  "content": "New content"
-}
-```
-
-✅ **Required**: Only the fields listed in `updateMask` are modified. Fields not in the mask remain unchanged.
-
-✅ **Required**: Return 200 OK with the updated full resource.
-
-⚠️ **Recommended**: Use `updateMask=*` to update all mutable fields present in the request body.
-
-✅ **Required**: Empty `updateMask` → 400 Bad Request. Unknown field path in `updateMask` → 400 Bad Request.
-
-⚠️ **Recommended**: Use dot notation for nested field paths: `?updateMask=address.city`.
-
-**Field Behavior interactions with `updateMask`:**
-
-| Field Annotation | Behavior when included in mask |
-|---|---|
-| `OUTPUT_ONLY` | Silently ignored — not an error |
-| `IMMUTABLE` | `400 Bad Request` if value is changed |
-| `REQUIRED` | Field must be present in request body |
-| `OPTIONAL` | May be omitted from body (retains current value) |
-
-#### DELETE — Delete Resource
-
-✅ **Required**: Return 204 No Content upon successful deletion.
-
-⚠️ **Recommended**: Return either 404 Not Found or 204 No Content for re-deletion of already-deleted resources. Decide based on service characteristics.
-
-⚠️ **Recommended**: Support the `force` query parameter for cascading deletion of child resources.
-
-```
-DELETE /projects/123?force=true
-```
-
-#### Soft Delete (AIP-164)
-
-For resources that require recovery capability instead of immediate permanent deletion:
-
-✅ **Required**: Add `deleteTime` (deletion timestamp) and `expireTime` (scheduled permanent deletion) fields, both `OUTPUT_ONLY`.
-
-✅ **Required**: Provide a restore endpoint: `POST /{resource}/{id}:undelete`.
-
-✅ **Required**: List responses exclude soft-deleted resources by default. Use `?showDeleted=true` to include them.
-
-⚠️ **Recommended**: Get returns soft-deleted resources normally (with `deleteTime` included).
-
-⚠️ **Recommended**: Permanently delete after a retention period (default 30 days).
-
-```
-# Soft delete
-DELETE /articles/123
-
-# Restore
-POST /articles/123:undelete
-
-# List including deleted
-GET /articles?showDeleted=true
-```
-
-#### Change Validation / Dry Run (AIP-163)
-
-Pre-validate Create or Update requests without applying changes:
-
-⚠️ **Recommended**: Support the `?validateOnly=true` query parameter.
-
-✅ **Required**: When `validateOnly=true`, perform validation only — no resource changes, no side effects.
-
-✅ **Required**: On validation success, return a response similar to actual execution (server-generated fields may be omitted).
-
-✅ **Required**: On validation failure, return the same RFC 9457 error format as a real request.
-
-```
-# Validate without creating
-POST /articles?validateOnly=true
-Content-Type: application/json
-
-{ "title": "New Article" }
-
----
-
-HTTP/1.1 200 OK
-{ "id": null, "title": "New Article" }   # id omitted (not yet created)
-```
-
----
-
-### 3.3 Actions (AIP-136)
-
-Use the action pattern for operations that are difficult to express as CRUD (e.g., approve, send, lock).
-
-✅ **Required**: Express actions as `:action` appended to the resource URL.
-
-```
-POST /articles/123:publish
-POST /users/456:deactivate
-POST /orders/789:cancel
-```
-
-✅ **Required**: Use the POST method for action endpoints.
-
-⚠️ **Recommended**: Use verb infinitives for action names (publish, cancel, approve).
-
-**Action Response Status Codes:**
-
-| Scenario | Status Code | Response Body |
-|----------|-------------|---------------|
-| Sync action — resource updated | `200 OK` | Updated resource |
-| Sync action — no response body | `204 No Content` | None |
-| Async action — fire-and-forget | `202 Accepted` | None or minimal acknowledgement |
-| Async action — pollable job created | `201 Created` + `Location` header | Created job resource |
-
-**Request Example:**
-
-```
-POST /articles/123:publish
-Content-Type: application/json
-
-{}
-
----
-
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "id": "123",
-  "status": "PUBLISHED",
-  "publishedAt": "2024-01-20T15:00:00Z"
-}
-```
-
----
-
-### 3.4 Collections & Pagination
-
-#### Collection Response Structure
-
-✅ **Required**: Return a resource array (top-level JSON array) as the collection response body.
-
-```
-HTTP/1.1 200 OK
-Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
-      <https://api.example.com/articles?pageSize=20>; rel="first",
-      <https://api.example.com/articles?pageSize=20&pageToken=xyz>; rel="last"
-Total-Count: 100
-
-[
-  { "id": "1", "title": "First Article" },
-  { "id": "2", "title": "Second Article" }
-]
-```
-
-| Header | Required | Description |
-|--------|----------|-------------|
-| `Link` | ⚠️ Recommended | Pagination navigation (RFC 8288) |
-| `Total-Count` | ⚠️ Recommended | Total item count |
-
-| rel value | Description |
-|-----------|-------------|
-| `next` | Next page |
-| `prev` | Previous page |
-| `first` | First page |
-| `last` | Last page |
-
-#### Empty Collection Response
-
-✅ **Required**: Return `200 OK` with an empty array `[]` when a collection has no items. Do not return `404 Not Found` for empty collections.
-
-⚠️ **Recommended**: Include the `Total-Count: 0` header for empty collections.
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-Total-Count: 0
-
-[]
-```
-
-> **Note**: A collection endpoint always exists as a resource even when empty ([RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)). `404 Not Found` indicates the endpoint itself does not exist, not that the collection is empty.
-
-#### Cursor-Based Pagination (Recommended)
-
-⚠️ **Recommended**: Use cursor-based pagination instead of offset-based for large datasets.
-
-**Request:**
-
-```
-GET /articles?pageSize=20&pageToken=eyJwYWdlIjoyf...
-```
-
-**Response:**
-
-```
-HTTP/1.1 200 OK
-Link: <https://api.example.com/articles?pageSize=20&pageToken=abc>; rel="next",
-      <https://api.example.com/articles?pageSize=20>; rel="first"
-
-[
-  { "id": "1", "title": "First Article" },
-  ...
-]
-```
-
-✅ **Required**: Exclude `rel="next"` from the `Link` header when there is no next page.
-
-✅ **Required**: `pageToken` is an opaque value. Clients MUST NOT parse, construct, or make assumptions about its internal format.
-
-✅ **Required**: Servers MAY change the encoding of `pageToken` at any time without notice.
-
-> **Note**: This follows the same principle as resource identifiers — opaque strings that clients must not depend on structurally.
-
-#### Offset-Based Pagination
-
-Offset-based pagination is also acceptable for small datasets.
-
-**Request:**
-
-```
-GET /articles?page=2&pageSize=20
-```
-
-**Response:**
-
-```
-HTTP/1.1 200 OK
-Link: <https://api.example.com/articles?pageSize=20&page=1>; rel="first",
-      <https://api.example.com/articles?pageSize=20&page=1>; rel="prev",
-      <https://api.example.com/articles?pageSize=20&page=3>; rel="next",
-      <https://api.example.com/articles?pageSize=20&page=5>; rel="last"
-Total-Count: 100
-
-[
-  { "id": "21", "title": "Article 21" },
-  ...
-]
-```
-
-⚠️ **Recommended**: Set the default page size (`pageSize`) to 20.
-
-⚠️ **Recommended**: Limit the maximum page size to 100.
-
-✅ **Required**: Return `400 Bad Request` when `pageSize` is less than 1.
-
-⚠️ **Recommended**: When `pageSize` exceeds the maximum allowed value, cap it to the maximum rather than returning an error. Include the applied `pageSize` in the response.
-
-```
-# Request: pageSize=500 (max is 100)
-# Server applies pageSize=100
-
-HTTP/1.1 200 OK
-Link: <https://api.example.com/articles?pageSize=100&pageToken=abc>; rel="next"
-
-[ ... 100 items ... ]
-```
-
-#### Keyset Pagination
-
-⚠️ **Recommended**: Use keyset pagination for large datasets where consistent performance is critical.
-
-Keyset pagination uses the last item's sort key as a cursor, achieving O(1) lookup regardless of page depth.
-
-**Request:**
-
-```
-GET /articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...
-```
-
-**Response:**
-
-```
-HTTP/1.1 200 OK
-Link: <https://api.example.com/articles?pageSize=20&orderBy=createdAt:desc&after=eyJjcmVhdGVkQXQiOi...>; rel="next"
-
-[
-  { "id": "455", "createdAt": "2024-01-20T09:55:00Z" },
-  ...
-  { "id": "440", "createdAt": "2024-01-15T08:00:00Z" }
-]
-```
-
-✅ **Required**: The keyset cursor (`after`/`before`) MUST be an opaque token — clients must not construct it manually.
-
-⚠️ **Recommended**: Encode compound sort keys into the opaque cursor.
-
-> **Trade-off**: Keyset pagination cannot jump to arbitrary pages. Use offset pagination when random page access is required.
-
----
-
-### 3.5 Filtering & Sorting
-
-#### Filtering
-
-✅ **Required**: Use the `filter` query parameter with a structured expression string (AIP-160).
-
-**Filter expression syntax:**
-
-```
-GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
-```
-
-**Operators:**
-
-| Type | Operators | Example |
-|---|---|---|
-| Comparison | `=`, `!=`, `<`, `>`, `<=`, `>=` | `?filter=price >= 100` |
-| Logical | `AND`, `OR`, `NOT` | `?filter=status = "ACTIVE" AND NOT archived = true` |
-| Grouping | `( )` | `?filter=(status = "ACTIVE" OR status = "PENDING") AND price < 1000` |
-
-**Value types:**
-
-- Strings and timestamps: double-quoted — `?filter=createdAt > "2024-01-01T00:00:00Z"`
-- Numbers: unquoted — `?filter=price >= 100`
-- Booleans: `true` / `false` — `?filter=isPublished = true`
-- Nested fields: dot notation — `?filter=author.name = "Kim"`
-- Repeated field membership: `has()` — `?filter=has(tags, "golang")`
-
-**Examples:**
-
-```
-# Single condition
-GET /articles?filter=status = "PUBLISHED"
-
-# Multiple conditions (AND)
-GET /articles?filter=status = "PUBLISHED" AND authorId = "user-123"
-
-# OR condition
-GET /articles?filter=status = "PUBLISHED" OR status = "DRAFT"
-
-# Grouped complex condition
-GET /articles?filter=(status = "PUBLISHED" OR status = "DRAFT") AND createdAt > "2024-01-01T00:00:00Z"
-
-# Negation
-GET /articles?filter=NOT status = "DELETED"
-
-# Date range
-GET /articles?filter=createdAt >= "2024-01-01T00:00:00Z" AND createdAt < "2024-02-01T00:00:00Z"
-
-# Numeric range
-GET /products?filter=price >= 100 AND price <= 500
-
-# Nested field
-GET /articles?filter=author.name = "Kim"
-
-# Repeated field membership
-GET /articles?filter=has(tags, "golang")
-```
-
-❌ **Prohibited**: Do not use individual query parameters for filtering (e.g., `?status=PUBLISHED`, `?createdAfter=...`).
-
-✅ **Required**: Invalid filter expression → 400 Bad Request with RFC 9457 error body.
-
-#### Sorting
-
-⚠️ **Recommended**: Use the `orderBy` parameter for sorting, combining field name and direction.
-
-```
-GET /articles?orderBy=createdAt:desc
-GET /articles?orderBy=title:asc
-GET /articles?orderBy=createdAt:desc,title:asc
-```
-
-⚠️ **Recommended**: Document the default sort order in the API documentation.
-
----
-
-### 3.6 Partial Response
-
-✅ **Required**: Support the `fields` query parameter for clients to request specific response fields (AIP-157).
-
-```
-GET /articles/123?fields=id,title,author.name
-```
-
-✅ **Required**: `id` is always included in the response regardless of the `fields` value.
-
-⚠️ **Recommended**: Use dot notation to select nested fields.
-
-```
-GET /articles/123?fields=id,author.name,author.email
-```
-
-✅ **Required**: Apply `fields` filtering to each item in List responses.
-
-✅ **Required**: `INPUT_ONLY` fields are always excluded from responses regardless of `fields`.
-
-⚠️ **Recommended**: ETag reflects the full resource, not the partial view.
-
-✅ **Required**: Unknown field name in `fields` → 400 Bad Request.
-
-**Example:**
-
-```
-GET /articles?fields=id,title,author.name
-
----
-
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-[
-  {
-    "id": "123",
-    "title": "REST API Design",
-    "author": {
-      "name": "Kim"
+  "code": "VALIDATION_ERROR",
+  "detail": "The request contains invalid fields.",
+  "instance": "/users",
+  "traceId": "abc-123-xyz",
+  "details": [
+    {
+      "@type": "type.googleapis.com/google.rpc.BadRequest",
+      "fieldViolations": [
+        {
+          "field": "user.email",
+          "description": "Must be a valid email address."
+        }
+      ]
     }
-  }
-]
+  ]
+}
+```
+
+- **Machine-readable code:** Include a `code` string field (UPPER_SNAKE_CASE). `[T1]`
+- **Field-level errors (AIP-193 style):** Include a `details` array with polymorphic objects. `[T1]`
+- Include **all** validation failures at once. `[T1]`
+- `traceId` MUST match the `Request-Id` response header. `[T1]`
+- Never expose internal implementation details. `[T1]`
+
+---
+
+## 7. Resource Schema & Field Rules
+
+**Field Behavior Annotations (AIP-203):** `[T1]`
+Declare behavior in OpenAPI schema using `x-field-behavior`.
+
+| Annotation | Meaning |
+|-----------|---------|
+| `REQUIRED` | Client must provide |
+| `OUTPUT_ONLY` | Set by server; client must not provide |
+| `INPUT_ONLY` | Client-provided; excluded from response |
+| `IMMUTABLE` | Cannot change after creation |
+| `OPTIONAL` | Optionally provided |
+| `IDENTIFIER` | Resource identifier; cannot change |
+
+---
+
+## 8. CRUD Behavior
+
+**Standard method response rules:**
+- POST (Create): return `201` with full resource + `Location` header. `[T1]`
+- PATCH (Update): return the updated full resource. `[T1]`
+- DELETE: return `204` with no body. `[T1]`
+
+**PATCH (Update — default):** `[T1]`
+- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content`.
+- Only modify fields specified by `updateMask`.
+- Empty mask or unknown field path → `400 Bad Request`.
+
+**Optimistic Concurrency Control (AIP-154):** `[T1]`
+- Include an `etag` field in the resource (OUTPUT_ONLY).
+- Pass etag via `If-Match: {etag}` header on Update/Delete requests.
+- Etag mismatch → return `412 Precondition Failed`.
+
+---
+
+## 9. Actions
+
+**Non-CRUD actions (AIP-136):** `[T1]`
+Use `POST` with colon syntax for operations that carry side-effects.
+
+```
+POST /orders/{id}:cancel
+POST /reports:generate
 ```
 
 ---
 
-### 3.7 Expand/Embed
+## 10. Collections & Pagination
 
-✅ **Required**: Support the `expand` query parameter to include related resources in the response.
+- Collections return **top-level JSON array** `[]`. `[T1]`
+- **Empty collections**: return `200 OK` + `[]` — never `404`. `[T1]`
 
-```
-GET /articles/123?expand=author,comments.author
-```
-
-✅ **Required**: To prevent N+1 query explosions and DoS attacks (Unrestricted Resource Consumption), the server MUST enforce a strict upper limit on the **total number of expanded entities** returned in a single response (e.g., maximum 100 entities).
-
-✅ **Required**: If an expansion request would exceed the maximum entity limit, return `400 Bad Request`.
-
-⚠️ **Recommended**: Limit the maximum expansion depth to 3 levels.
+**Token-based Pagination (AIP-158, Recommended):** `[T2]`
+- Use `pageSize` and `pageToken` (opaque token).
+- Link header with `rel="next"`, `prev`, `first`.
 
 ---
 
-### 3.8 Bulk Operations
+## 11. Filtering & Sorting
 
-Bulk operations allow processing multiple resources in a single request to reduce network overhead.
+❌ Do not use individual query parameters for filtering.
 
-✅ **Required**: Express bulk operations as custom methods on the collection URL using colon syntax.
+**Filter expression (AIP-160):** `[T1]`
+- Syntax: `?filter=status = "ACTIVE" AND price >= 1000`.
+- Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`, `AND`, `OR`, `NOT`, `has()`.
+- Invalid filter expression → `400 Bad Request`.
 
-| Method | Goal | Endpoint |
-|--------|------|----------|
-| `batchCreate` | Create multiple resources | `POST /{resources}:batchCreate` |
-| `batchGet` | Retrieve multiple resources by ID | `POST /{resources}:batchGet` |
-| `batchUpdate` | Update multiple resources | `POST /{resources}:batchUpdate` |
-| `batchDelete` | Delete multiple resources | `POST /{resources}:batchDelete` |
-
-✅ **Required**: The request body MUST contain an array of items or IDs to process.
-
-✅ **Required**: Specify whether the bulk operation is atomic (all-or-nothing) or non-atomic (partial success allowed).
-
-✅ **Required**: For non-atomic operations, the response MUST use a structure that can express per-item success or failure (including RFC 9457 error objects for failed items).
+**Sorting:** `?orderBy=createdAt:desc,title:asc`. `[T2]`
 
 ---
 
-## 4. API Operations
+## 12. Partial Response & Resource Expansion
 
-### 4.1 API Versioning
+**Partial Response (AIP-157):** `[T2]`
+- Use `fields` query parameter: `?fields=id,title,author.name`.
+- `id` is always included.
 
-#### Version Notation
+**Resource Expansion (Expand/Embed):** `[T2]`
+- Use `expand` query parameter: `?expand=author`.
+- **Total Entity Limit REQUIRED:** MUST enforce a hard limit (e.g., max 100 entities). `[T1]`
+- Exceeding limit → `400 Bad Request`.
 
-❌ **Prohibited**: Do not include the API version in the URL path.
+---
 
-> **Reason**: A URL is a resource identifier. `/v1/articles` and `/v2/articles` represent the same resource but with different URLs, which violates REST principles. URL versioning also forces clients to rewrite their code entirely. Header versioning allows clients to migrate gradually and gives the server flexibility to apply a default version when no version header is specified.
+## 13. Bulk Operations
 
-✅ **Required**: Specify the version in the `Api-Version` header using ISO 8601 (`YYYY-MM-DD`) date format.
+✅ **Required**: Express bulk operations as custom methods on the collection URL using colon syntax. `[T3]`
+- `batchCreate`, `batchGet`, `batchUpdate`, `batchDelete`.
+- Specify whether atomic or non-atomic.
 
+---
+
+## 14. API Versioning
+
+❌ **URL path versioning is PROHIBITED.** `[T1]`
+
+✅ **Header versioning is REQUIRED:** `[T1]`
 ```
 Api-Version: 2024-01-20
 ```
 
-❌ **Prohibited**: Do not apply a default or latest version when the version header is missing.
-✅ **Required**: If the `Api-Version` header is missing, the server MUST return `400 Bad Request` to enforce explicit versioning and prevent accidental backward compatibility breaks.
-
-#### Backward Compatibility
-
-✅ **Required**: Maintain backward compatibility within the same version.
-
-**Breaking changes** (require new `Api-Version` date):
-
-| Category | Examples |
-|----------|----------|
-| Removal | Endpoint, field, or enum value removal |
-| Rename | Field or endpoint name change |
-| Type change | Field type or format change (e.g., `string` → `int`) |
-| Constraint tightening | `optional` → `required`, new required field, stricter validation rules |
-| Semantic change | Status code meaning change, default value change, sort order change |
-
-**Compatible changes** (no version bump required):
-
-| Category | Examples |
-|----------|----------|
-| Addition | New endpoint, new optional field, new enum value, new query parameter |
-| Relaxation | `required` → `optional`, loosened validation rules |
-| Metadata | Response property order change, description update |
-
-#### Compatibility Principles
-
-✅ **Required**: Clients MUST ignore unknown fields in responses (tolerant reader pattern).
-
-✅ **Required**: Servers MUST ignore unknown fields in requests.
-
-✅ **Required**: Treat enums as open-ended — clients MUST handle unknown enum values gracefully rather than failing.
-
-⚠️ **Recommended**: Maintain the previous version for at least 6 months before a version bump.
+- Requests without version header MUST receive **`400 Bad Request`**. `[T1]`
+- Responses always include the applied version. `[T1]`
+- Maintain previous versions for minimum 6 months. `[T2]`
 
 ---
 
-### 4.2 Deprecation
+## 15. Deprecation
 
-✅ **Required**: Notify clients of deprecated APIs via response headers.
-
-```
-Deprecation: true
-Sunset: Sat, 01 Jan 2025 00:00:00 GMT
-Link: <https://api.example.com/users/articles>; rel="successor-version"
-```
-
-⚠️ **Recommended**: Announce deprecation at least 6 months before the end-of-life date.
-
-⚠️ **Recommended**: Notify clients with `Deprecation`, `Sunset`, and `Link` headers on deprecated API calls.
-
-```
-HTTP/1.1 200 OK
-Deprecation: true
-Sunset: Sat, 01 Jan 2025 00:00:00 GMT
-Link: <https://api.example.com/users/articles>; rel="successor-version"
-
-[
-  { "id": "1", "title": "Item 1" },
-  ...
-]
-```
+- Include headers: `Deprecation: true`, `Sunset`, `Link`. `[T1]`
+- Notice must be given at least 6 months before sunset. `[T1]`
 
 ---
 
-### 4.3 Rate Limiting
+## 16. Rate Limiting & Retries
 
-API servers limit request frequency per client to ensure service stability.
-
-#### Response Headers
-
-✅ **Required**: Include the following headers in all responses where rate limiting applies.
-
-**Legacy headers (X-RateLimit-\*)**
-
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-RateLimit-Limit` | Maximum requests allowed within the time window | `100` |
-| `X-RateLimit-Remaining` | Remaining requests in the current time window | `99` |
-| `X-RateLimit-Reset` | Time when the window resets (Unix timestamp, seconds) | `1742342450` |
-
-**IETF standard headers ([draft-ietf-httpapi-ratelimit-headers-10](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/), Internet-Draft, Standards Track)**
-
-| Header | Description | Example |
-|--------|-------------|---------|
-| `RateLimit` | Current rate limit state (Structured Field) | `limit=100, remaining=99, reset=50` |
-| `RateLimit-Policy` | Active rate limit policy | `100;w=3600` |
-
-> **Note**: The `reset` value in the `RateLimit` header is **delta-seconds** (seconds until window reset), while `X-RateLimit-Reset` is a **Unix timestamp**. Be careful not to confuse them.
->
-> **`RateLimit-Policy` structure**: `100;w=3600` — `100` is the maximum allowed requests, `w=3600` is the window size in seconds. Include in all responses.
-
-**Normal response example:**
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 99
-X-RateLimit-Reset: 1742342450
-RateLimit: limit=100, remaining=99, reset=50
-RateLimit-Policy: 100;w=3600
-
-[
-  { "id": "1", "title": "Item 1" }
-]
-```
-
-#### 429 Too Many Requests Response
-
-✅ **Required**: Return `429 Too Many Requests` when rate limit is exceeded.
-
-✅ **Required**: Include the `Retry-After` header in 429 responses. Use delta-seconds (seconds to wait before retrying).
-
-✅ **Required**: Use RFC 7807/9457 Problem Details structure for 429 response bodies.
-
-**429 response example:**
-
-```
-HTTP/1.1 429 Too Many Requests
-Content-Type: application/problem+json
-Retry-After: 50
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1742342450
-RateLimit: limit=100, remaining=0, reset=50
-RateLimit-Policy: 100;w=3600
-```
-
-```json
-{
-  "type": "https://api.example.com/errors/too-many-requests",
-  "title": "Rate Limit Exceeded",
-  "status": 429,
-  "detail": "You have exceeded the allowed request limit. Please try again in 50 seconds."
-}
-```
-
-#### Client Retry Strategy
-
-✅ **Required**: Clients must wait for the duration specified in the `Retry-After` header before retrying after a 429 response.
-
-⚠️ **Recommended**: When the `Retry-After` header is absent or other transient errors occur (503, etc.), use an exponential backoff + jitter strategy. `attempt` starts at 1 (1 = first retry).
-
-```
-wait_time = min(maxDelay, baseDelay × 2^(attempt - 1)) + random(0, jitterRange)
-```
-
-Example: attempt=1 → `min(60, 1 × 2^0) + random(0,1)` = 1~2 seconds
-
-| Parameter | Recommended Value | Description |
-|-----------|-------------------|-------------|
-| `baseDelay` | 1 second | Wait time for the first retry |
-| `maxDelay` | 60 seconds | Maximum wait time cap |
-| `jitterRange` | 0 ~ 1 second | Random delay (to prevent thundering herd) |
-| Max retry count | 3 ~ 5 times | Prevent infinite retries |
-
-❌ **Prohibited**: Do not retry immediately or at fixed intervals after receiving a 429 response.
-
-❌ **Prohibited**: Do not ignore the `Retry-After` header and use your own wait time when it is present.
+- **Response headers:** `RateLimit: limit=N, remaining=N, reset=N`. `[T2]`
+- **429 Too Many Requests:** Include `Retry-After` + RFC 9457 body. `[T2]`
+- **Client retry strategy:** Exponential Backoff with Jitter. `[T2]`
 
 ---
 
-### 4.4 Long-Running Operations
+## 17. Caching
 
-For operations that do not complete immediately (report generation, data import, etc.), create a domain resource immediately and track processing progress via the resource's status field.
-
-✅ **Required**: Upon receiving a long-running operation request, create the domain resource immediately and return `201 Created` + `Location` header.
-
-✅ **Required**: Include a `status` field in the domain resource to represent processing state.
-
-⚠️ **Recommended**: Use the following status values:
-
-| Status | Description |
-|--------|-------------|
-| `PENDING` | Operation is waiting to start |
-| `IN_PROGRESS` | Operation is being processed |
-| `COMPLETED` | Operation has completed |
-| `FAILED` | Operation has failed |
-
-⚠️ **Recommended**: When status is `FAILED`, include an RFC 7807/9457 error structure in the resource.
-
-**Example:**
-
-```
-# Start operation — immediately create domain resource
-POST /reports  →  201 Created
-                  Location: /reports/123
-                  { "id": "123", "status": "PENDING" }
-
-# Poll status
-GET /reports/123  →  { "id": "123", "status": "IN_PROGRESS" }
-GET /reports/123  →  { "id": "123", "status": "COMPLETED", ... }
-GET /reports/123  →  { "id": "123", "status": "FAILED", "error": { ... } }
-```
-
-❌ **Prohibited**: Do not use a separate generic `/operations` resource. Track status within the domain resource itself.
+- `Cache-Control` header. `[T2]`
+- `ETag` usage for all mutable resources. `[T2]`
 
 ---
 
-### 4.5 Idempotency-Key
+## 18. Long-Running Operations
 
-POST is not idempotent, so retrying after a network error can result in duplicate resource creation. Use the `Idempotency-Key` header for APIs where duplicate execution is dangerous, such as payments, orders, and email sending.
-
-✅ **Required**: Support the `Idempotency-Key` header for POST endpoints where duplicate execution is risky.
-
-```
-POST /orders
-Content-Type: application/json
-Idempotency-Key: a8098c1a-f86e-11da-bd1a-00112444be1e
-
-{
-  "productId": "123",
-  "quantity": 2
-}
-```
-
-**Server Behavior:**
-- First request: Process normally and store the result
-- Re-request with same key: Return the stored result without reprocessing
-- Same request with different key: Treat as a separate request
-
-✅ **Required**: Use client-generated UUID v4 for `Idempotency-Key` values.
-
-⚠️ **Recommended**: Return the same status code and body as the original response for re-requests with the same key.
-
-⚠️ **Recommended**: Set the validity period of `Idempotency-Key` to at least 24 hours.
-
-❌ **Prohibited**: Do not design POST endpoints with financial impact (payments, orders, etc.) without `Idempotency-Key` support.
+- Return `201 Created` + `Location` header immediately. `[T3]`
+- Include `status` field: `PENDING`, `IN_PROGRESS`, `COMPLETED`, `FAILED`. `[T3]`
 
 ---
 
-## 5. Authentication & Security
+## 19. Idempotency-Key
 
-### 5.1 Authentication Methods
-
-#### Bearer Token (JWT)
-
-✅ **Required**: Use the `Authorization` header for authentication tokens. Do not include in query parameters or request body.
-
-```
-Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
-```
-
-#### API Key
-
-⚠️ **Recommended**: Use the `Authorization` header for API Key authentication.
-
-```
-Authorization: ApiKey your-api-key-here
-```
-
-❌ **Prohibited**: Do not pass API Keys as query parameters. URLs may be recorded in server logs.
-
-```
-# Bad
-GET /articles?apiKey=secret-key
-```
+- Support `Idempotency-Key` header for risky POST endpoints. `[T3]`
+- Use UUID v4. Key validity: minimum 24 hours. `[T3]`
 
 ---
 
-### 5.2 Authorization & Access Control
+## 20. OpenAPI Specification
 
-✅ **Required**: **Prevent BOLA (Broken Object Level Authorization):** Every endpoint accessing a specific resource (`/{resource}/{id}`) MUST verify that the authenticated user (or tenant) is the owner of the resource or holds explicit permission to access it. Never rely solely on the unpredictability of the ID.
-
----
-
-### 5.3 Input Validation & Mass Assignment
-
-✅ **Required**: **Prevent Mass Assignment (BOPA):** When processing `PATCH` or `POST` requests, the server MUST implement a strict **Allowlist** in the DTO (Data Transfer Object) layer. Clients MUST NOT be able to arbitrarily update protected fields (e.g., `role`, `isVerified`, `balance`) by including them in the request body or `updateMask`.
+- All APIs MUST maintain an OpenAPI 3.0+ spec (API First). `[T2]`
+- `description` and `operationId` required. `[T2]`
+- MUST validate spec compliance in CI using linters. `[T1]`
 
 ---
 
-### 5.4 Security Headers
+## 21. Authentication & Security
 
-✅ **Required**: All API responses MUST include the following security headers:
-- `X-Content-Type-Options: nosniff` (Prevents MIME-sniffing attacks)
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (Enforces HTTPS)
+- **HTTPS Required.** `[T1]`
+- **Security Headers REQUIRED:** `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`. `[T1]`
+- `Authorization` header for Bearer tokens or API Keys. `[T1]`
 
----
+**Authorization (BOLA Prevention):** `[T1]`
+- Servers MUST verify ownership/permissions for *every* specific resource access.
 
-### 5.5 401 vs 403 Distinction
-
-| Status Code | Meaning | When to Use |
-|-------------|---------|-------------|
-| `401 Unauthorized` | Authentication failure | Missing token, expired token, malformed token |
-| `403 Forbidden` | Authorization failure | Authenticated but lacks permission for the resource/action |
-
-✅ **Required**: Include the `WWW-Authenticate` header in 401 responses.
-
-```
-HTTP/1.1 401 Unauthorized
-WWW-Authenticate: Bearer realm="api", error="token_expired"
-Content-Type: application/problem+json
-
-{
-  "type": "https://api.example.com/errors/unauthorized",
-  "title": "Authentication Required",
-  "status": 401,
-  "detail": "The access token has expired."
-}
-```
-
-⚠️ **Recommended**: Do not reveal resource existence in 403 responses. For security-sensitive resources, you may respond with 404 as if the resource does not exist.
-
-```
-HTTP/1.1 403 Forbidden
-Content-Type: application/problem+json
-
-{
-  "type": "https://api.example.com/errors/forbidden",
-  "title": "Access Denied",
-  "status": 403,
-  "detail": "You do not have permission to access this resource."
-}
-```
+**Mass Assignment Prevention (BOPA):** `[T1]`
+- Servers MUST use an Allowlist in DTOs. `PATCH` body/`updateMask` must not modify protected fields.
 
 ---
 
-### 5.6 Webhooks
+## 22. References
 
-✅ **Required**: Use a consistent payload wrapper for webhook events.
-
-```json
-{
-  "id": "evt_123",
-  "type": "article.published",
-  "created": "2024-01-20T10:00:00Z",
-  "data": { ... }
-}
-```
-
-✅ **Required**: Sign payloads using HMAC-SHA256 with a shared secret. Include the signature in the `X-Hub-Signature-256` header.
-
-⚠️ **Recommended**: Webhook handlers should be idempotent to handle duplicate events safely.
-
----
-
-## 6. Health Check
-
-✅ **Required**: Provide a `GET /health` endpoint to monitor service availability.
-
-✅ **Required**: Return `200 OK` with `{"status": "UP"}` if the service is healthy.
-
-⚠️ **Recommended**: Distinguish between shallow (liveness) and deep (readiness) checks. Deep checks should verify dependencies like databases and caches.
-
----
-
-## 7. OpenAPI Specification
-
-### 7.1 API First
-
-✅ **Required**: All APIs MUST maintain an OpenAPI 3.0+ specification as the single source of truth.
-
-⚠️ **Recommended**: Define the OpenAPI spec before implementation (API First approach).
-
-### 7.2 Spec Quality
-
-✅ **Required**: Every endpoint, parameter, and schema property MUST include a `description` field.
-
-✅ **Required**: Every operation MUST have a unique `operationId` — this enables code generation and documentation automation.
-
-⚠️ **Recommended**: Key schemas and parameters SHOULD include `example` or `examples` for documentation clarity.
-
-```yaml
-# Good
-paths:
-  /articles:
-    get:
-      operationId: listArticles
-      description: Retrieve a paginated list of articles.
-      parameters:
-        - name: pageSize
-          in: query
-          description: Number of items per page.
-          schema:
-            type: integer
-            example: 20
-```
-
-### 7.3 Schema Mapping
-
-✅ **Required**: Map field behaviors to OpenAPI properties:
-
-| Field Behavior | OpenAPI Property |
-|----------------|------------------|
-| Read-only (e.g., `id`, `createdAt`) | `readOnly: true` |
-| Create-only (e.g., write-once fields) | `writeOnly: true` |
-| Nullable (explicit need only) | `nullable: true` (OpenAPI 3.0); `type: ["string", "null"]` (OpenAPI 3.1) |
-
-⚠️ **Recommended**: Follow the field-omission principle — minimize use of `nullable`. Omit fields rather than sending `null`.
-
-✅ **Required**: Define RFC 9457 Problem Details as a shared `$ref` component for error responses.
-
-```yaml
-components:
-  schemas:
-    ProblemDetail:
-      type: object
-      required: [type, title, status, detail]
-      properties:
-        type:
-          type: string
-          format: uri
-          description: URI identifying the error type.
-          example: "https://api.example.com/errors/validation-failed"
-        title:
-          type: string
-          description: Short summary of the error type.
-        status:
-          type: integer
-          description: HTTP status code.
-        detail:
-          type: string
-          description: Specific error description.
-        instance:
-          type: string
-          description: Request path where the problem occurred.
-        traceId:
-          type: string
-          description: Matches Request-Id response header.
-```
-
-### 7.4 Extensions & Validation
-
-⚠️ **Recommended**: Mark non-public endpoints with the `x-internal: true` extension.
-
-⚠️ **Recommended**: Validate spec compliance in CI using linters such as Spectral or Zally.
-
----
-
-## 8. References
-
-**Google API Improvement Proposals (AIP):**
-
-- [AIP-121: Resource-oriented design](https://google.aip.dev/121)
-- [AIP-136: Custom methods](https://google.aip.dev/136)
-- [AIP-154: Resource freshness validation (ETags)](https://google.aip.dev/154)
-- [AIP-157: Partial responses](https://google.aip.dev/157)
-- [AIP-160: Filtering](https://google.aip.dev/160)
-- [AIP-161: Field masks](https://google.aip.dev/161)
-- [AIP-163: Change validation](https://google.aip.dev/163)
-- [AIP-164: Soft delete](https://google.aip.dev/164)
-- [AIP-203: Field behavior documentation](https://google.aip.dev/203)
-- [AIP-216: States](https://google.aip.dev/216)
-
-**RFCs & Standards:**
-
-- [RFC 2119 - Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119)
-- [RFC 8174 - Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words](https://datatracker.ietf.org/doc/html/rfc8174)
-- [RFC 3339 - Date and Time on the Internet](https://datatracker.ietf.org/doc/html/rfc3339)
-- [RFC 9110: HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
-- [RFC 8288 - Web Linking](https://datatracker.ietf.org/doc/html/rfc8288)
-- [RFC 6585 - Additional HTTP Status Codes (429)](https://datatracker.ietf.org/doc/html/rfc6585#section-4)
-- [RFC 8594: The Sunset HTTP Header Field](https://datatracker.ietf.org/doc/html/rfc8594)
-- [RFC 9745: The Deprecation HTTP Response Header Field](https://datatracker.ietf.org/doc/html/rfc9745)
-- [draft-ietf-httpapi-ratelimit-headers-10: RateLimit Header Fields for HTTP](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
-
-**Industry Guidelines & Other:**
-
-- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
-- [JSON:API Specification](https://jsonapi.org/)
-- [Architectural Styles and the Design of Network-based Software Architectures - Roy Fielding](https://roy.gbiv.com/pubs/dissertation/fielding_dissertation.pdf)
-- [Day1, 2-2. 그런 REST API로 괜찮은가](https://www.youtube.com/watch?v=RP_f5dMoHFc)
+- [Google API Improvement Proposals (AIP)](https://google.aip.dev)
+- [RFC 9457: Problem Details for HTTP APIs](https://datatracker.ietf.org/doc/html/rfc9457)
+- [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)

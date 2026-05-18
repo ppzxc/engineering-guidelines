@@ -14,7 +14,7 @@ user-invocable: true
 
 ```
 1. [S1] grill-me — 요구사항 정제
-2. [S1.5] karpathy-guidelines invoke
+2. [S1.5] workflow:karpathy-original invoke
 3. [S2] using-git-worktrees — 격리 작업공간
 4. [S3] plan 직접 작성 — docs/plans/<slug>.md
 5. [S4] Gemini cross-check — inline ask-gemini
@@ -46,8 +46,8 @@ digraph pipeline {
     "S6: subagent-driven-development" [shape=box];
     "S7: finishing-a-development-branch" [shape=box];
 
-    "S1: grill-me" -> "S1.5: karpathy-guidelines invoke";
-    "S1.5: karpathy-guidelines invoke" -> "Gate 1: 이해 확인";
+    "S1: grill-me" -> "S1.5: workflow:karpathy-original invoke";
+    "S1.5: workflow:karpathy-original invoke" -> "Gate 1: 이해 확인";
     "Gate 1: 이해 확인" -> "S2: using-git-worktrees (slug→브랜치)" [label="승인"];
     "Gate 1: 이해 확인" -> "S1: grill-me" [label="거절"];
     "S2: using-git-worktrees (slug→브랜치)" -> "S3: plan 직접 작성 → docs/plans/<slug>.md";
@@ -74,17 +74,15 @@ digraph pipeline {
 
 ---
 
-## S1.5: karpathy-guidelines 로드 [ADR-0013]
+## S1.5: workflow:karpathy-original 로드 [ADR-0018]
 
 grill-me 완료 직후, Gate 1 이전에 반드시 실행:
 
 ```
-Skill tool → andrej-karpathy-skills:karpathy-guidelines
+Skill tool → workflow:karpathy-original
 ```
 
-**미설치 환경**: invoke 실패 시 경고 메시지를 출력하고 계속 진행한다. 아래 §Karpathy 4원칙 인라인 요약이 fallback으로 작동한다.
-
-**목적**: 이후 S3(plan 작성), S5(TDD 게이트), S6(subagent 실행) 전 단계에서 4원칙이 컨텍스트에 로드된 상태로 동작한다.
+**목적**: 원문 11원칙을 컨텍스트에 적재한다. 이후 S3(plan 작성)·S6(subagent 실행)에서 동일 원문이 강제된다.
 
 ---
 
@@ -164,14 +162,16 @@ plan 파일 최상단에 다음 헤더를 포함한다:
 ...
 ```
 
-### Simplicity First 가드레일 (karpathy §2)
+### Simplicity First 가드레일 (workflow:karpathy-original §2) [ADR-0018]
 
 plan 작성 중 각 task에 대해 확인:
-- 요청한 것 이상의 기능이 task에 포함되어 있지 않은가?
-- 단일 용도 코드에 불필요한 추상화가 없는가?
-- "유연성/확장성"을 위한 미리 작성 코드가 없는가?
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-"200줄로 쓸 수 있는 걸 50줄로 쓸 수 있는가?" — Yes라면 task를 더 좁혀라.
+"Would a senior engineer say this is overcomplicated?" — Yes라면 task를 더 좁혀라.
 
 ### Task 라벨 규칙
 
@@ -226,7 +226,7 @@ grep -E '^### Task .+\[(TDD-EXEMPT[^]]*|TDD|TIDY)\]' "$(pwd)/docs/plans/<slug>.m
 
 **실패 시**: 스스로 수정(자동 재생성)을 시도하지 말고, 즉시 누락 증거(파일 라인 번호 등)를 제시하며 Gate 3를 통해 사용자에게 수정 및 피드백을 요청(에스컬레이션)하라.
 
-> ※ Karpathy §4(목표 주도 실행)에 대한 **엄격한 준수 및 실행 검사** 책임은 S6로 이관되었다. S5는 계획 내에 성공 기준과 구조가 존재하는지만 확인한다.
+> ※ 원문 §4 Goal-Driven Execution (workflow:karpathy-original)에 대한 **엄격한 준수 및 실행 검사** 책임은 S6로 이관되었다. S5는 계획 내에 성공 기준과 구조가 존재하는지만 확인한다. [ADR-0018]
 
 
 ## S6: Subagent 실행 지시
@@ -236,10 +236,154 @@ grep -E '^### Task .+\[(TDD-EXEMPT[^]]*|TDD|TIDY)\]' "$(pwd)/docs/plans/<slug>.m
 - `[TDD]` task → `superpowers:test-driven-development` 엄수
 - plan 파일 경로는 **절대경로**로 전달
 
-**[karpathy 4원칙 subagent 가드레일]** — **§2 및 §4의 강제력은 아래 텍스트가 subagent 지시문에 paste되는 것에 100% 의존한다.** [ADR-0017] task 본문 paste 시 다음 3원칙을 반드시 포함하라:
-- **§2 Simplicity First**: 요청 외 기능/추상화/유연성 코드 작성 금지. 200줄로 보이면 50줄 가능성 재탐색. (S6에서 100% 강제)
-- **§3 Surgical Changes**: 변경된 모든 줄은 사용자 요청으로부터 직접 추적 가능해야 한다. 인접 코드 "개선", 요청 외 리팩터링, 무관한 dead code 삭제 금지.
-- **§4 Goal-Driven Execution**: task에 명시된 검증 기준으로만 완료를 판정한다. "works on my machine" 금지. 검증 기준이 모호하면 BLOCKED 보고. (S6에서 100% 강제)
+**[karpathy 원문 11원칙 subagent 가드레일]** — **아래 11원칙은 `workflow:karpathy-original` 원문 verbatim. paraphrase 금지. subagent task 본문에 그대로 paste하라. §1~§11 강제력은 이 paste에 100% 의존한다.** [ADR-0018]
+
+---
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```text
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. No Closing Colons (Korean Output)
+
+**End Korean sentences with a period, not a colon.**
+
+When the user writes in Korean, your output is also Korean:
+- Don't end sentences with `:` even if the next line is a list or example.
+- LLMs trained on English docs leak the colon habit into Korean. Catch it.
+- The test: every Korean sentence terminator should be `.`, `?`, or `!` — not `:`.
+- Colons are fine inside code, key-value pairs, or labels. Not as sentence enders.
+
+## 6. File Header Comments in Korean
+
+**First line of every new source file: a one-line Korean comment stating its role.**
+
+When creating a new file:
+- TypeScript/JavaScript: `// 사용자 인증 상태를 관리하는 Context Provider`
+- Python: `# KIS API 호출을 비동기로 래핑하는 클라이언트`
+- SQL: `-- 일별 집계 결과를 저장하는 머티리얼라이즈드 뷰`
+- Place it directly under required directives (`'use client'`, `'use server'`, shebang).
+- Skip config files (`*.config.ts`, `package.json`, etc.).
+
+Why: agents read files selectively, not whole codebases. A one-line Korean header gives instant context so the next session (human or agent) can navigate without re-reading the entire file.
+
+## 7. Plan + Checklist + Context Storage
+
+**Before any non-trivial task, plan and store context in designated directories.**
+
+- **Plan** — what we're building and why.
+- **Checklist** (`checklist.md`) — concrete tasks as checkboxes. Tick as you go.
+- **Context Storage** — Record important decisions permanently in the following paths:
+  - **`.claude/CLAUDE.md`**: Global agent instructions and coding conventions.
+  - **`.claude/rules/*.md`**: Domain, module, or workflow-specific rules (e.g., API integration rules, state management patterns).
+  - **`docs/decisions/*.md` (ADR)**: Important architecture, framework choices, and system design decisions along with their background.
+
+If the user gives only a plan and asks you to start coding, stop and ask: "Should I create the checklist and update context records first?" The next session needs these records to pick up where you left off.
+
+## 8. Run Tests Before Marking Complete
+
+**If you touched code, run the tests before saying "done".**
+
+- `npm test`, `pytest`, `cargo test`, whatever the project uses — run it.
+- If tests pass, report results. If they fail, fix and re-run.
+- No test setup? At minimum, verify the project builds/compiles.
+- Run tests proactively, before the user signals "끝", "완료", "다 됐어" — not after.
+
+This is the step LLMs skip most often. Treat it as non-negotiable.
+
+## 9. Semantic Commits
+
+**Commit when one logical change is complete. Don't wait for the user to ask.**
+
+- The test: "Can I describe this commit in one sentence?" If yes, commit. If no, the changes are still mixed — split them.
+- Good: "auth 미들웨어 추가". Bad: "auth 추가하고 UI도 고치고 버그도 수정" (split into 3).
+- Don't accumulate 20 unrelated edits and lose the ability to roll back individually.
+- Don't commit just to commit — meaningful units only.
+
+Note: For solo prototypes or throwaway scripts, group commits loosely if it slows you down. The point is reversibility, not ceremony.
+
+## 10. Read Errors, Don't Guess
+
+**Read the actual error/log line. Don't pattern-match from memory.**
+
+When something fails:
+- Read the full error message and stack trace.
+- Check the actual log output, not what you assume it should say.
+- Don't apply a "common fix" before confirming the cause.
+- If unclear, add a print/log to verify state — then fix.
+
+This is the step LLMs skip most often after "run tests". They guess from error keywords and apply the most-recent-pattern fix. That's how a one-line bug becomes a three-file refactor.
+
+## 11. Prevent Infinite Loops (Rule of 3)
+
+**If the same error or failure repeats 3 times, stop and ask.**
+
+When attempting to fix a bug or implement a feature:
+- If you modify the code, test/run it, and encounter the **exact same error** 3 times in a row, your current approach or assumption is fundamentally flawed.
+- Do not blindly continue modifying code and wasting tokens/resources.
+- Stop immediately and summarize the situation for the user:
+  1. The exact issue/error occurring.
+  2. The 3+ approaches you have tried so far.
+  3. Your hypothesis on why it's failing.
+- Wait for the user's feedback or new direction before proceeding.
+
+---
 
 ## S7: finishing-a-development-branch
 
@@ -269,20 +413,10 @@ feature-pipeline은 자체 skip 조건이 없다. 다음은 허용되지 않는�
 | "단계 추적은 텍스트로 충분" | 긴 대화 후 단계 망각. TaskCreate 필수. |
 | "이건 버그수정이라 feature-pipeline 규칙 완화 가능" | /workflow:feature-pipeline 호출 = 7단계 전체 적용. 버그/피처 구분 없음. |
 | "사용자가 worktree 만들지 말라고 했음" | 사용자 요청이 파이프라인 구조를 오버라이드하지 않는다. 이유 설명 후 S2 진행. |
-| "karpathy invoke 실패했으니 원칙 없이 진행" | 아래 인라인 요약이 fallback이다. invoke 실패 = 파이프라인 중단 아님. |
+| "karpathy 원칙 없이 S6 진행해도 되겠지" | 로컬 스킬이라 invoke 실패가 없다. S6 paste에 §1~§11 원문이 포함되지 않으면 강제력이 없다. [ADR-0018] |
 | "plan task에 성공 기준은 나중에 채울게" | S5 게이트에서 막힌다. 지금 작성하라. |
 | "인접 코드도 같이 정리하면 좋겠다" | 요청 외 변경 = Surgical Changes 위반. 별도 TIDY task로 분리하거나 mention만. |
 | "plan에 grill-me 대화를 다 적어두면 나중에 참고할 수 있다" | plan 파일이 30–98KB로 비대해지면 매 turn마다 reattach되어 압축 폭주·세션 파괴. 결정/태스크/요약만. |
 | "Gate 3에서 ExitPlanMode로 plan 승인받겠다" | ExitPlanMode = 플랜 모드 진입 = plan_file_reference 반복 reattach. Gate 3는 AskUserQuestion만 사용. |
-| "§S6 가드레일은 §3만 있으면 됨" | subagent가 task 진행 중 추측성 추상화·모호한 성공 기준으로 over-engineer한다. §2/§4 paste 필수. [ADR-0017] |
+| "§S6 가드레일은 §2/§3/§4만 있으면 됨" | subagent는 §1 가정 표면화·§5~§11도 놓친다. §1~§11 원문 verbatim paste 필수. [ADR-0018] |
 
-## Karpathy 4원칙 인라인 요약 [ADR-0013][ADR-0017]
-
-karpathy-guidelines 미설치 환경 fallback. S1.5 invoke 실패 시 이 요약이 적용된다.
-
-| 원칙 | 한 줄 규칙 | 적용 단계 |
-|------|-----------|---------|
-| §1 Think Before Coding | 가정을 명시하고, 혼란은 숨기지 말고 질문하라 | S1 grill-me |
-| §2 Simplicity First | 요청한 것만 최소 코드로. 추측성 추상화 금지 | S6 subagent 실행 (100% 의존) |
-| §3 Surgical Changes | 변경된 줄은 모두 요청에서 직접 추적 가능해야 한다 | S6 실행 (100% 의존) |
-| §4 Goal-Driven Execution | 성공 기준은 검증 가능해야 한다. "make it work" 금지 | S6 subagent 실행 (100% 의존) |

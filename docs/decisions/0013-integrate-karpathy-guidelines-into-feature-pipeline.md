@@ -1,6 +1,6 @@
 # feature-pipeline에 karpathy-guidelines 정신 통합
 
-* Status: accepted
+* Status: superseded by ADR-0018
 * Date: 2026-05-13
 * Decision Makers: ppzxc
 * Consulted: -

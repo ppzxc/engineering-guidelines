@@ -10,17 +10,8 @@ Claude (plan/execute) + Gemini (context/review).
 | Skill | Slash Command | Description |
 |-------|---------------|-------------|
 | gemini-crosscheck | `/workflow:gemini-crosscheck` | Multi-LLM cross-check with Gemini before coding — context compression, brainstorm, plan finalization, and execution |
-| feature-pipeline | `/workflow:feature-pipeline` | Full feature orchestration — grill-me → worktree → TDD-enforced plan → inline Gemini cross-check → subagent execution → PR |
-
-## Optional Dependency
-
-`/workflow:feature-pipeline` uses `andrej-karpathy-skills:karpathy-guidelines` (invoked at S1.5) to enforce coding principles at each stage. Install it for best results:
-
-```bash
-claude plugin marketplace add https://github.com/multica-ai/andrej-karpathy-skills.git
-```
-
-If not installed, the pipeline continues using the inline 4-principle summary in the skill file.
+| feature-pipeline | `/workflow:feature-pipeline` | Full feature orchestration — grill-me → worktree → TDD-enforced plan → inline Gemini cross-check → subagent execution → PR (applies karpathy-original at S1.5/S6) |
+| karpathy-original | `/workflow:karpathy-original` | Original 11 Karpathy coding guidelines verbatim — invoked by feature-pipeline at S1.5, paste source for S6 subagent |
 
 ## Architecture Overview
 

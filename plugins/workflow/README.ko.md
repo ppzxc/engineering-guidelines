@@ -10,17 +10,8 @@ Claude(plan/execute) + Gemini(context/review).
 | 스킬 | 슬래시 커맨드 | 설명 |
 |------|--------------|------|
 | gemini-crosscheck | `/workflow:gemini-crosscheck` | 코딩 전 Gemini 멀티 LLM 크로스체크 — 컨텍스트 압축, 브레인스토밍, 계획 확정, 실행 |
-| feature-pipeline | `/workflow:feature-pipeline` | 전체 기능 오케스트레이션 — grill-me → worktree → TDD 강제 plan → 인라인 Gemini 검증 → 서브에이전트 실행 → PR |
-
-## 선택적 외부 의존성
-
-`/workflow:feature-pipeline`은 S1.5 단계에서 `andrej-karpathy-skills:karpathy-guidelines`를 invoke하여 각 단계에서 코딩 원칙을 강제합니다. 최상의 효과를 위해 설치 권장:
-
-```bash
-claude plugin marketplace add https://github.com/multica-ai/andrej-karpathy-skills.git
-```
-
-미설치 시 파이프라인은 스킬 파일의 인라인 4원칙 요약으로 계속 동작합니다.
+| feature-pipeline | `/workflow:feature-pipeline` | 전체 기능 오케스트레이션 — grill-me → worktree → TDD 강제 plan → 인라인 Gemini 검증 → 서브에이전트 실행 → PR (karpathy-original 11원칙 S1.5/S6 적용) |
+| karpathy-original | `/workflow:karpathy-original` | Karpathy 코딩 원칙 원문 11개 verbatim — feature-pipeline S1.5에서 invoke, S6 subagent paste 원본 |
 
 ## 아키텍처 개요
 

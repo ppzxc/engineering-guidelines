@@ -1,6 +1,6 @@
 # S6 subagent 프롬프트에 karpathy 가드레일 집중 매핑
 
-* Status: accepted
+* Status: superseded by ADR-0018
 * Date: 2026-05-14
 * Decision Makers: ppzxc
 * Consulted: -

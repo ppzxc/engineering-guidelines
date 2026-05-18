@@ -1,5 +1,4 @@
 ---
-name: feature-pipeline
 description: Use when a user wants to develop a feature end-to-end in one session — from idea or rough draft through a cross-checked TDD plan to committed code. Triggered by /workflow:feature-pipeline or "build X with full workflow".
 user-invocable: true
 ---
@@ -76,6 +75,10 @@ digraph pipeline {
 
 ## S1.5: workflow:karpathy-original 로드 [ADR-0018]
 
+Skill tool 호출 **직전** 사용자에게 다음 안내문을 출력한다:
+
+> **S1 (의도 추출) 완료 → S1.5 진입.** 지금 `workflow:karpathy-original` 11원칙을 컨텍스트에 로드합니다. 이후 S3(plan)·S5(TDD 게이트)·S6(subagent)에서 동일 원문이 강제됩니다.
+
 grill-me 완료 직후, Gate 1 이전에 반드시 실행:
 
 ```
@@ -99,6 +102,8 @@ git rev-parse --git-dir && git rev-parse --git-common-dir
 두 경로가 **같으면**(= main repo) STOP — EnterWorktree 진입 후 재시작. 다르면 worktree 안에 있음.
 
 ## S3: Plan 파일 직접 작성 [ADR-0015]
+
+> _카파시 적용: §2 Simplicity First (plan 작성 가드레일)_
 
 `superpowers:writing-plans` 호출 없이 grill-me 결과를 plan 파일로 직접 작성한다.
 
@@ -125,6 +130,7 @@ plan 파일 최상단에 다음 헤더를 포함한다:
 **Goal:** <한 문장 — 이 플랜이 무엇을 구현하는가>
 **Architecture:** <2-3 문장 — 접근 방식>
 **Tech Stack:** <핵심 기술/라이브러리>
+**Karpathy applied:** S1.5 invoke; §2 in S3 plan, §4 in S5 gate, §1~§11 verbatim in S6 subagent
 ```
 
 ### Task 구조
@@ -212,6 +218,8 @@ grep '## Cross-check Feedback' "$(pwd)/docs/plans/<slug>.md"
 
 ## S5: TDD 검증 게이트
 
+> _카파시 적용: §4 Goal-Driven Execution (구조 검사만; 엄격한 §4 검사는 S6)_
+
 plan 파일 경로를 확인하고 아래 명령을 실행한 뒤 결과를 응답에 인용한다:
 
 ```bash
@@ -230,6 +238,8 @@ grep -E '^### Task .+\[(TDD-EXEMPT[^]]*|TDD|TIDY)\]' "$(pwd)/docs/plans/<slug>.m
 
 
 ## S6: Subagent 실행 지시
+
+> _카파시 적용: §1~§11 원문 verbatim paste (강제력 100%)_
 
 `superpowers:subagent-driven-development` 호출 시 implementer 프롬프트에 명시:
 - `[TIDY]` task → `dev:tidy` 스킬 활성화, `[PHASE: STRUCTURAL]` 엄수

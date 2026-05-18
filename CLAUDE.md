@@ -12,6 +12,7 @@
 |------|------|
 | ADR 작성 / 규칙 수정 | `.claude/rules/rules-maintenance.md` |
 | workflow 스킬 사용 / 수정 | `.claude/rules/workflow-rules.md` |
+| git 스킬 사용 / 수정 | `.claude/rules/git-rules.md` |
 
 ### 참조
 

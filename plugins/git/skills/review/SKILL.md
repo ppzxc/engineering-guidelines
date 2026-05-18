@@ -47,16 +47,20 @@ Collect the unique set of detected languages.
 
 ### 4. Load Reviewer Skills
 
-From the list of skills available in the system (shown in session context), find skills whose name contains `reviewer`.
+Map detected languages to reviewer skills using the table below. **Do not infer skill names from descriptions or partial matches** — use the exact names listed.
 
-For each detected language, attempt to match a reviewer skill:
-- `go` → look for a skill containing `golang` or `go` and `reviewer` (e.g., `golang:reviewer`)
-- `java` → look for a skill containing `java` and `reviewer` (e.g., `java-reviewer:java-reviewer`)
-- Other languages → look for skill containing the language name and `reviewer`
+| Detected language | Required skill | Conditional skill |
+|-------------------|----------------|-------------------|
+| `go` | `golang:reviewer` | — |
+| `java` | `java:reviewer` | `java:spring` if PR diff contains any of `@RestController`, `@Service`, `@Component`, `@Repository`, `@Controller`, `@Configuration`, or `import org.springframework.` |
 
-For each matched reviewer skill, invoke it using the `Skill` tool to load its review criteria into context.
+Process **all** rows whose language was detected — do not stop after the first match.
 
-If no reviewer skill matches a detected language, fall back to the general review criteria for that language's files.
+For each row that matches the detected languages:
+1. Invoke the required skill via the `Skill` tool.
+2. If the conditional skill's trigger is present in the diff: if you have not yet fetched the full diff, run `gh pr diff <PR_NUMBER>` now, then check for the trigger strings before invoking the conditional skill.
+
+Languages not listed in the table → skip skill loading and fall back to the general review criteria for that language's files. **Do not guess a skill name** (e.g., `<lang>:reviewer`) for unlisted languages — only invoke skills that appear in the table.
 
 ### 5. Code Review & Generate Fixes
 

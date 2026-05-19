@@ -31,7 +31,7 @@ Supersedes: [ADR-0013](0013-integrate-karpathy-guidelines-into-feature-pipeline.
 
 * Good, because 외부 의존·fallback 분기·4원칙 paraphrase 축약 테이블이 모두 소멸한다.
 * Good, because §1/§5~§11이 S1.5(invoke) 및 S6(paste)를 통해 처음으로 강제 경로를 확보한다.
-* Bad, because S6 subagent 프롬프트 본문이 약 30~40줄 증가한다 (plan 파일에는 적재되지 않으므로 ADR-0016의 8KB 가드와 충돌 없음).
+* Bad, because S6 subagent 프롬프트 본문이 약 30~40줄 증가한다 (plan 파일에는 적재되지 않으므로 ADR-0016/0020의 사이즈 가드와 충돌 없음).
 * Bad, because 향후 11원칙 수정 시 스킬 본문과 S6 paste 본문을 동시에 갱신해야 한다 (workflow-rules.md drift 금지 규칙으로 명문화).
 
 ### Confirmation

@@ -34,7 +34,7 @@ Chosen option: "Option A — S6 인라인 가드레일 확장", because paste-on
 
 * Good, because §S6 프롬프트 paste 본문에 §2/§4 가드레일이 포함되어 subagent 구현 중 과도한 추상화·모호한 성공 기준을 사전에 차단한다
 * Good, because karpathy-guidelines 스킬 미설치 환경에서도 결정적으로 동작한다 (인라인이므로)
-* Good, because plan 파일 크기에 영향 없다 (ADR-0016 8KB 가드 유지)
+* Good, because plan 파일 크기에 영향 없다 (ADR-0016/0020 사이즈 가드 유지)
 * Bad, because §S6 프롬프트 본문이 약 12줄 증가한다
 
 ### Confirmation

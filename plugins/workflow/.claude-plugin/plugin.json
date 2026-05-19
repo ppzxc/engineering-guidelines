@@ -1,6 +1,6 @@
 {
   "name": "workflow",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Workflow skills — multi-LLM cross-check with Gemini; feature-pipeline applies workflow:karpathy-original (11 principles, verbatim) at S1.5 and S6.",
   "author": {
     "name": "ppzxc",

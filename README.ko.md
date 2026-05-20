@@ -11,7 +11,7 @@
 | [api](./plugins/api) | v0.2.1 | RESTful API 설계 가이드라인 — URL 구조, HTTP 메서드, 상태 코드, JSON 형식, 에러 응답, 버전 관리, 헤더, 비-CRUD action endpoint |
 | [docs](./plugins/docs) | v0.0.4 | 문서 결정 기록 — ADR (Nygard 포맷) 및 MADR (MADR 4.0) 아키텍처 결정 기록 |
 | [git](./plugins/git) | v0.0.9 | Git 워크플로우 스킬 — 안전한 커밋, PR 생성, PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
-| [workflow](./plugins/workflow) | v0.1.2 | 워크플로우 스킬 — Gemini 멀티 LLM 크로스체크 + 아이디어에서 커밋까지 전체 파이프라인 오케스트레이션 |
+| [workflow](./plugins/workflow) | v0.1.3 | 워크플로우 스킬 — Gemini 멀티 LLM 크로스체크 + 아이디어에서 커밋까지 전체 파이프라인 오케스트레이션 |
 | [dev](./plugins/dev) | v0.0.1 | 개발 방법론 스킬 — Tidy First, TDD, 언어 무관 개발 프랙티스 |
 
 ## 마켓플레이스 등록

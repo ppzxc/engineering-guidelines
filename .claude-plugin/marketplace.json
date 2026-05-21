@@ -27,13 +27,13 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, PR creation, PR review, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.0.9"
+      "version": "0.0.10"
     },
     {
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Workflow skills — multi-LLM cross-check with Gemini; feature-pipeline applies workflow:karpathy-original (11 principles, verbatim) at S1.5 and S6.",
-      "version": "0.1.3"
+      "version": "0.1.4"
     },
     {
       "name": "dev",

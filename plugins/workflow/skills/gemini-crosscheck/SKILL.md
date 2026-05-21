@@ -10,7 +10,7 @@ Claude (plan/execute) + Gemini (context/review).
 
 ## Gemini MCP
 
-Gemini는 MCP 도구(`mcp__gemini-cli__gemini_prompt`)를 통해 호출한다. CLI 직접 실행 금지.
+Gemini는 MCP 도구(`mcp__gemini-cli__ask-gemini`)를 통해 호출한다. CLI 직접 실행 금지.
 
 ## ⚠️ Model Names — EXACT STRINGS, DO NOT MODIFY
 
@@ -46,7 +46,7 @@ Run **before** brainstorm. Regenerate `.context-map.md` if any condition fails:
 
 **Step 0. Quota probe** — Step 1 실행 전 Gemini 사용 가능 여부 확인:
 
-`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+`mcp__gemini-cli__ask-gemini`를 아래 파라미터로 호출한다:
 - `prompt`: `"reply: ok"`
 - `model`: `"gemini-3-flash-preview"`
 
@@ -142,7 +142,7 @@ Run **before** brainstorm. Regenerate `.context-map.md` if any condition fails:
 
 **Step 1-2. Generate context map via Gemini:**
 
-`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+`mcp__gemini-cli__ask-gemini`를 아래 파라미터로 호출한다:
 - `prompt`:
   ```
   You are a senior software architect with 10 years of experience.
@@ -212,7 +212,7 @@ If `.context-map.md` exists, read it. If not (Step 1 skipped/failed), use the di
 
 **Step 3-2. Run Gemini cross-check:**
 
-`mcp__gemini-cli__gemini_prompt`를 아래 파라미터로 호출한다:
+`mcp__gemini-cli__ask-gemini`를 아래 파라미터로 호출한다:
 - `prompt`:
   ```
   Cross-check the following draft execution plan as a senior architect.

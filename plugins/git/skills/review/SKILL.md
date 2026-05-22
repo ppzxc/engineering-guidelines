@@ -80,10 +80,17 @@ PR diff 획득: `gh pr diff <PR_NUMBER>`.
 | 자기가 누구인가 | peer reviewer 호출 |
 |----------------|-------------------|
 | Claude Code | Read `.context-map.md` if exists. `mcp__agy__agy_cross_check(plan=<PR diff 전문>, context_map=<.context-map.md 내용 또는 "">)` |
-| Gemini CLI | Bash (300s timeout): `claude -p "<peer review 지시 + PR diff>"` |
-| Antigravity (agy host) | Bash (300s timeout): `claude -p "<peer review 지시 + PR diff>"` |
+| Gemini CLI | Bash (300s timeout): `printf '%s' "$PR_DIFF" \| claude -p "<peer review 지시>"` — diff는 stdin pipe로 전달 |
+| Antigravity (agy host) | (Gemini CLI와 동일) |
 
-자기 호스트 식별: LLM 자기 인지(Claude는 자기가 Claude임을 안다). 모호한 경우 `mcp__agy__` 도구 노출 여부를 보조 시그널로 사용 (노출 시 Claude Code).
+**Pre-flight** — `claude -p` 분기 진입 전 `timeout 3 claude --version` 실행. exit ≠ 0이면 즉시 `CLAUDE_CLI_NOT_FOUND:` sentinel 발동 (미인증/오프라인 상태로 300s hang 방지).
+
+**Safety** — PR diff는 반드시 stdin pipe 또는 임시 파일로 전달한다. CLI 인자에 직접 보간하지 않는다 — shell metacharacter (백틱·`$()`) injection 및 `ARG_MAX` 초과 위험을 차단한다.
+
+자기 호스트 식별: LLM 자기 인지(Claude는 자기가 Claude임을 안다). 보조 시그널 (강한 시그널 우선 적용):
+- `mcp__agy__agy_cross_check` 도구가 호출 가능 → Claude Code
+- `mcp__agy__` 도구가 보이지 않으나 `claude` CLI는 PATH에 있음 → Gemini CLI 또는 Antigravity
+- 두 시그널 모두 없으면 self-only review로 fallback
 
 **동기 실행** — 결과를 받기 전 Step 5b로 넘어가지 않는다.
 

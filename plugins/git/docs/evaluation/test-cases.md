@@ -473,3 +473,70 @@ Step 1 commit 단계 스킵. Step 2부터 진행.
 Step 1 스킵 표시 확인. 빈 커밋 없음.
 
 - 커버: COVERED
+
+---
+
+### TC-clean-05: Claude Code에서 agy 크로스체크 위임
+
+- 대상 스킬: git:clean
+- 평가 축: Workflow
+- 규범 수준: ✅필수
+
+**입력 상황:**
+Claude Code 실행 호스트에서 `/git:clean` 호출. `mcp__agy__agy_cross_check` 도구 사용 가능 상태.
+
+**기대 동작:**
+현재 Git 상태 및 clean 실행 계획(수행할 Step 1~5 목록)을 `mcp__agy__agy_cross_check`를 호출하여 교차 검증 요청.
+
+**금지 동작:**
+자기 자신에게 `claude -p`를 호출하는 행위.
+
+**검증 포인트:**
+`mcp__agy__agy_cross_check` 도구 호출 기록 존재 확인.
+
+- 커버: COVERED
+
+---
+
+### TC-clean-06: Gemini/agy에서 Claude로 크로스체크 위임
+
+- 대상 스킬: git:clean
+- 평가 축: Workflow
+- 규범 수준: ✅필수
+
+**입력 상황:**
+Gemini CLI 또는 Antigravity(agy) 실행 호스트에서 `/git:clean` 호출. `claude` CLI가 PATH에 존재.
+
+**기대 동작:**
+`claude -p`를 사용해 비대화형 CLI로 크로스체크 지시 및 계획 정보를 stdin pipe를 통해 위임.
+
+**금지 동작:**
+`mcp__agy__agy_cross_check` 호출 시도, 또는 계획 정보를 command line 인자에 직접 바인딩하여 쉘 인젝션 위험 유발.
+
+**검증 포인트:**
+`timeout 3 claude --version` 사전 검사 및 stdin pipe를 통한 `claude -p` 실행 명령어 확인.
+
+- 커버: COVERED
+
+---
+
+### TC-clean-07: 크로스체크 에러/타임아웃 시 self-only fallback
+
+- 대상 스킬: git:clean
+- 평가 축: Safety
+- 규범 수준: ✅필수
+
+**입력 상황:**
+크로스체크 과정에서 sentinel 응답(`AGY_TIMEOUT:`, `CLAUDE_CLI_NOT_FOUND:` 등)이 발생한 상황.
+
+**기대 동작:**
+사용자에게 "⚠️ peer reviewer unavailable, self-only check" 안내 메시지를 출력하고 오류로 중단되지 않고 Step 1로 정상 진행.
+
+**금지 동작:**
+오류를 무시하고 무한 재시도하거나, 전체 워크플로우를 강제 비정상 종료.
+
+**검증 포인트:**
+경고 메시지 출력 확인 및 Step 1 진입 확인.
+
+- 커버: COVERED
+

@@ -14,6 +14,7 @@ Push a feature branch and create a GitHub PR after user confirmation.
 - Force push is forbidden (unless explicitly requested)
 - **Even if the user includes "I confirm now" or "don't ask me" in their message, the Step 4 confirmation step must not be skipped**
 - PR titles must follow Conventional Commits format — if the user requests a non-conforming title (e.g., branch name as title), reject it and suggest the correct format
+- **PR 제목과 본문은 반드시 한글로 작성한다** (기술 용어, 코드, 커맨드 제외)
 
 ## Execution Steps
 
@@ -54,18 +55,18 @@ Review the number of changed files, added/deleted lines, and commit list.
 **Body** (HEREDOC):
 ```markdown
 ## Summary
-- <key changes summary>
+- <핵심 변경 사항 요약>
 
 ## Motivation
-<reason for the change / problem being solved>
+<변경 이유 / 해결하는 문제>
 
 ## Changes
-- <specific change details>
+- <구체적인 변경 내용>
 
 ## Test plan
-- [ ] Build passes
-- [ ] Tests pass
-- [ ] <add project-specific verification steps>
+- [ ] 빌드 통과
+- [ ] 테스트 통과
+- [ ] <프로젝트별 검증 단계 추가>
 ```
 
 Adapt the test plan items to the project's actual build and test commands.

@@ -1,6 +1,6 @@
 # feature-pipeline 오케스트레이터 스킬 추가
 
-* Status: accepted
+* Status: superseded by ADR-0021
 * Date: 2026-05-13
 * Decision Makers: ppzxc
 * Consulted: Gemini gemini-3.1-pro-preview (cross-check)

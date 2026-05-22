@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.5"
+    "version": "0.0.6"
   },
   "plugins": [
     {
@@ -26,14 +26,20 @@
     {
       "name": "git",
       "source": "./plugins/git",
-      "description": "Git workflow skills — safe commit, PR creation, PR review, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.0.10"
+      "description": "Git workflow skills — safe commit, Korean PR creation, PR review with agy cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
+      "version": "0.0.11"
+    },
+    {
+      "name": "llm",
+      "source": "./plugins/llm",
+      "description": "LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check",
+      "version": "0.1.0"
     },
     {
       "name": "workflow",
       "source": "./plugins/workflow",
-      "description": "Workflow skills — multi-LLM cross-check with Gemini; feature-pipeline applies workflow:karpathy-original (11 principles, verbatim) at S1.5 and S6.",
-      "version": "0.1.4"
+      "description": "Workflow skills — karpathy-guideline (11 Karpathy coding principles, verbatim)",
+      "version": "0.2.0"
     },
     {
       "name": "dev",

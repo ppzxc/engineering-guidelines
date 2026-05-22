@@ -104,16 +104,16 @@ Sentinel 발생 시: notify user "⚠️ peer reviewer unavailable, self-only re
 
 ### 5b. Synthesize Findings
 
-**Skip this step if Step 5a was skipped (agy unavailable).** In that case, proceed directly with Step 5 findings.
+**Skip this step if Step 5a was skipped (peer reviewer unavailable).** In that case, proceed directly with Step 5 findings.
 
-Merge Step 5 (Claude) and Step 5a (agy) results into a single unified review:
+Merge Step 5 (local host self-review) and Step 5a (peer reviewer) results into a single unified review:
 
 | Case | Action |
 |------|--------|
 | Both found the same issue | Merge into one entry; note high confidence |
-| Claude-only finding | Include as-is |
-| agy-only finding | Tag with `[agy]`; include if Claude judges it valid after checking source |
-| Disagreement | Claude makes final call; record the conflict briefly |
+| Local-only finding | Include as-is |
+| Peer-only finding | Tag with `[peer]`; include if local host judges it valid after checking source |
+| Disagreement | Local host makes final call; record the conflict briefly |
 
 Result: a single list of issues with exact code modifications for all included findings.
 
@@ -137,14 +137,14 @@ If no issues were found, skip this step.
 
 Once fixes are pushed (or if no fixes were needed), submit a review comment on the PR.
 
-If fixes were applied and agy was available:
+If fixes were applied and peer reviewer was available:
 ```bash
-gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (Claude + agy). <N> issue(s) found and fixed."
+gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (local + peer). <N> issue(s) found and fixed."
 ```
 
-If fixes were applied and agy was unavailable:
+If fixes were applied and peer reviewer was unavailable:
 ```bash
-gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (Claude only). <N> issue(s) found and fixed."
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (local only). <N> issue(s) found and fixed."
 ```
 
 If no issues were found:
@@ -163,7 +163,7 @@ gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
 | CI failing | Include CI failure details in review |
 | Empty diff | Display "No changes found" and abort |
 | No reviewer skill found | Use general review criteria, note it in results |
-| agy unavailable | Proceed with Claude-only review, notify user |
+| Peer reviewer unavailable | Proceed with local-only self-review, notify user |
 
 ## Usage
 

@@ -51,3 +51,7 @@
 | clean-S2 | Step 5 (cleanup) auto 모드에서도 확인 필수 | Safety | TC-clean-02 | COVERED |
 | clean-W1 | PR 이미 존재 시 Step 2 스킵 | Workflow | TC-clean-03 | COVERED |
 | clean-W2 | 미커밋 없을 때 Step 1 스킵 | Workflow | TC-clean-04 | COVERED |
+| clean-W3 | Claude 실행 시 agy 크로스체크 위임 | Workflow | TC-clean-05 | COVERED |
+| clean-W4 | Gemini/agy 실행 시 Claude 크로스체크 위임 | Workflow | TC-clean-06 | COVERED |
+| clean-S3 | 크로스체크 에러/타임아웃 시 self-only fallback | Safety | TC-clean-07 | COVERED |
+

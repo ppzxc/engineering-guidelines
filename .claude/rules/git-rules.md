@@ -7,4 +7,4 @@ git 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약
 ✓ `.java` 파일 변경 시 항상 `java:reviewer`를 로드하고, PR diff에 Spring 어노테이션(@RestController/@Service/@Component/@Repository/@Controller/@Configuration) 또는 `import org.springframework.`가 보이면 `java:spring`을 추가 로드할 것
 ✓ `.go` 파일 변경 시 `golang:reviewer`를 로드할 것
 ✓ PR 제목과 본문은 한글로 작성할 것 (기술 용어·코드·커맨드 제외)
-✓ `git:review`의 peer cross-review는 자기 호스트와 다른 LLM에게 위임할 것. 자기 자신에게 cross-check를 보내는 호출 금지 [ADR-0022]
+✓ git:review와 git:clean의 peer crosscheck는 자기 호스트와 다른 LLM에게 위임할 것. 자기 자신에게 cross-check를 보내는 호출 금지 [ADR-0022][ADR-0023]

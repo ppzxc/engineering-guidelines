@@ -1,11 +1,11 @@
 ---
-description: Load the original 11 Karpathy coding guidelines verbatim. Invoked by feature-pipeline at S1.5 — do not paraphrase or summarize. Also user-invocable via /workflow:karpathy-original to load guidelines into context before any coding session.
+description: Load the original 11 Karpathy coding guidelines verbatim — do not paraphrase or summarize. User-invocable via /workflow:karpathy-guideline to load guidelines into context before any coding session.
 user-invocable: true
 ---
 
 # Karpathy Original Guidelines (11 Principles, Verbatim)
 
-원문을 그대로 적재한다. paraphrase 금지. feature-pipeline S1.5에서 invoke되며, 이후 S6 subagent paste 본문의 단일 권위 출처이다. [ADR-0018]
+원문을 그대로 적재한다. paraphrase 금지. [ADR-0018]
 
 ---
 
@@ -154,4 +154,4 @@ When attempting to fix a bug or implement a feature:
 
 ---
 
-> 본 스킬 본문은 feature-pipeline S6 subagent paste 원본과 동일해야 한다. drift 금지. [ADR-0018]
+> 본 스킬 본문은 원문 11원칙 verbatim이다. paraphrase 또는 요약 금지. [ADR-0018]

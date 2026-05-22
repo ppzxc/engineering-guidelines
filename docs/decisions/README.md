@@ -27,6 +27,7 @@
 | [ADR-0019](0019-make-feature-pipeline-plan-mode-compatible.md) | accepted | feature-pipeline 단계 재구성 — S2를 S5 뒤로 이동, plan mode 외부 활성 통합 (supersedes ADR-0014 부분, ADR-0016 부분) |
 | [ADR-0020](0020-raise-feature-pipeline-plan-size-cap-to-16kb.md) | accepted | feature-pipeline plan 파일 사이즈 캡 16KB 상향 + plan-skip HIGH 위험 차단 (supersedes ADR-0016 8KB 수치 부분) |
 | [ADR-0021](0021-migrate-llm-backend-from-gemini-cli-to-agy.md) | accepted | gemini-cli MCP 제거 및 agy 백엔드 교체 (feature-pipeline 제거, llm 플러그인 신설) |
+| [ADR-0022](0022-bidirectional-peer-cross-review.md) | accepted | `git:review` 양방향 peer cross-review (호스트별 라우팅, Claude↔agy↔Gemini) |
 
 ## 새 ADR 추가
 

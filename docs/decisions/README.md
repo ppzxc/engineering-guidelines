@@ -17,7 +17,7 @@
 | [ADR-0008](0008-adopt-aip-filter-fieldmask-partial-response.md) | accepted | AIP filter 표현식, updateMask 필수화, Partial Response 도입 |
 | [ADR-0009](0009-adopt-strict-api-security-and-versioning-rules.md) | accepted | 엄격한 API 보안 및 버저닝 규칙 도입 (OWASP Top 10, 하위 호환성) |
 | [ADR-0010](0010-adopt-tiered-api-profile-system.md) | accepted | API 플러그인 계층화 프로필 시스템 도입 (T1/T2/T3 점진적 채택) |
-| [ADR-0011](0011-add-feature-pipeline-orchestrator.md) | accepted | feature-pipeline 오케스트레이터 스킬 추가 (아이디어→PR 단일 파이프라인) |
+| [ADR-0011](0011-add-feature-pipeline-orchestrator.md) | superseded by ADR-0021 | feature-pipeline 오케스트레이터 스킬 추가 (아이디어→PR 단일 파이프라인) |
 | [ADR-0013](0013-integrate-karpathy-guidelines-into-feature-pipeline.md) | superseded by ADR-0018 | feature-pipeline에 karpathy-guidelines 정신 통합 (S1.5 invoke + 단계별 가드레일) |
 | [ADR-0014](0014-strengthen-feature-pipeline-evidence-based-gates.md) | accepted | feature-pipeline 오케스트레이션 강화: 외부 증거 기반 게이트 도입 (grep/pwd 검증, 8단계 재편) — cwd 검증 시점 변경은 [ADR-0019](0019-make-feature-pipeline-plan-mode-compatible.md) 참조 |
 | [ADR-0015](0015-remove-writing-plans-from-feature-pipeline.md) | accepted | feature-pipeline S3에서 writing-plans 외부 스킬 호출 제거 (자체 작성으로 전환, 토큰 절약) |
@@ -26,6 +26,7 @@
 | [ADR-0018](0018-replace-external-karpathy-with-local-original-skill.md) | accepted | 외부 karpathy 의존 제거, 로컬 workflow:karpathy-original 신설 (원문 11원칙 verbatim) |
 | [ADR-0019](0019-make-feature-pipeline-plan-mode-compatible.md) | accepted | feature-pipeline 단계 재구성 — S2를 S5 뒤로 이동, plan mode 외부 활성 통합 (supersedes ADR-0014 부분, ADR-0016 부분) |
 | [ADR-0020](0020-raise-feature-pipeline-plan-size-cap-to-16kb.md) | accepted | feature-pipeline plan 파일 사이즈 캡 16KB 상향 + plan-skip HIGH 위험 차단 (supersedes ADR-0016 8KB 수치 부분) |
+| [ADR-0021](0021-migrate-llm-backend-from-gemini-cli-to-agy.md) | accepted | gemini-cli MCP 제거 및 agy 백엔드 교체 (feature-pipeline 제거, llm 플러그인 신설) |
 
 ## 새 ADR 추가
 

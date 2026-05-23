@@ -1,4 +1,5 @@
 ---
+name: docs:adr
 description: "Use when creating an Architecture Decision Record — /docs:adr, \"ADR 작성\", \"결정 사항 기록\", or any request to document an architecture decision in Nygard format"
 user-invocable: true
 ---

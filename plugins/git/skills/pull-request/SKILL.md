@@ -1,4 +1,5 @@
 ---
+name: git:pull-request
 description: Use when the user wants to push changes and create a GitHub PR — /git:pull-request, "PR 만들어", "PR 생성", "push하고 PR", or any request to open a pull request
 user-invocable: true
 ---

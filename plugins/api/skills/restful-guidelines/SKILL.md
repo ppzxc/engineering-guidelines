@@ -1,4 +1,5 @@
 ---
+name: api:restful-guidelines
 description: "Use when designing, implementing, or reviewing REST APIs — URL structure, HTTP methods, status codes, JSON format, error responses, and headers. Source: github.com/ppzxc/restful-api-guidelines"
 user-invocable: true
 ---

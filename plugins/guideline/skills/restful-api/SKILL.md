@@ -205,7 +205,7 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
   - `IMMUTABLE` in mask + value changed → `400 Bad Request`
   - `REQUIRED` in mask → field must be present in body
 
-**Optimistic Concurrency Control (AIP-154):** `[T1]` Include an `etag` field in the resource JSON schema (opaque string, OUTPUT_ONLY, updated on every change); the server also includes the same value in the `ETag` response header.
+**Optimistic Concurrency Control (RFC 7232):** `[T1]` Include an `etag` field in the resource JSON schema (opaque string, OUTPUT_ONLY, updated on every change); the server also includes the same value in the `ETag` response header.
 
 - Pass etag via `If-Match: {etag}` header on Update/Delete requests
 - Etag mismatch → return `412 Precondition Failed` (include current resource in response body)
@@ -496,7 +496,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Client polls `GET {Location}` to check progress `[T3]`
 - On failure: include error details in response body `[T3]`
 
-## Idempotency-Key
+## Idempotency-Key (AIP-154)
 
 - Support `Idempotency-Key` header for POST endpoints where duplicate execution is risky (payments, orders) `[T3]`
 - Client-generated UUID v4 `[T3]`

@@ -101,7 +101,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 - `Location` header on 201 Created `[T1]`
 - `Total-Count` for collection size `[T2]`
 - RFC 8288 `Link` header for pagination `[T2]`
-- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility `[T1]`
+- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`, `X-Content-Type-Options`, `X-Hub-Signature-256`) retain their names for compatibility `[T1]`
 - `Cache-Control` header specifies caching strategy `[T2]`
 - `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one `[T1]`
 - Propagate `Request-Id` across microservices for distributed tracing `[T1]`

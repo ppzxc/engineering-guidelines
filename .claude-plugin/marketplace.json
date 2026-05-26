@@ -32,8 +32,8 @@
     {
       "name": "llm",
       "source": "./plugins/llm",
-      "description": "LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check",
-      "version": "0.1.2"
+      "description": "LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck",
+      "version": "0.1.3"
     },
     {
       "name": "workflow",

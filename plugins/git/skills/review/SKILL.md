@@ -1,5 +1,5 @@
 ---
-name: git:review
+name: review
 description: Use when the user wants to review and automatically fix a GitHub PR — /git:review, "PR 리뷰", "코드 리뷰", or any request to review, fix, and comment on a pull request
 user-invocable: true
 ---

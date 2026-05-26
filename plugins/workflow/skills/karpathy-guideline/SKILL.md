@@ -1,5 +1,5 @@
 ---
-name: workflow:karpathy-guideline
+name: karpathy-guideline
 description: Load the original 11 Karpathy coding guidelines verbatim — do not paraphrase or summarize. User-invocable via /workflow:karpathy-guideline to load guidelines into context before any coding session.
 user-invocable: true
 ---

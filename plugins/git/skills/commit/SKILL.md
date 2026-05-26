@@ -1,5 +1,5 @@
 ---
-name: git:commit
+name: commit
 description: Use when the user wants to commit changes — /git:commit, "커밋", "변경사항 커밋", or any request to stage and commit local changes
 user-invocable: true
 ---

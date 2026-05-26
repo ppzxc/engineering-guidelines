@@ -1,5 +1,5 @@
 ---
-name: dev:tidy
+name: tidy
 description: Use when refactoring code or preparing structural changes — /dev:tidy, "tidy first", "구조 정리", "리팩토링", or any request to separate structural changes from behavioral changes following Kent Beck's Tidy First principles.
 user-invocable: true
 ---

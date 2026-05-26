@@ -1,5 +1,5 @@
 ---
-name: git:clean
+name: clean
 description: Use when the user wants to complete the full PR workflow — /git:clean, "PR 완료", "PR 전체 흐름", "worktree 정리", or any request to commit, push, review, merge, and cleanup in sequence
 user-invocable: true
 ---

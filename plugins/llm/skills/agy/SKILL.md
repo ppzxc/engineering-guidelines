@@ -1,5 +1,5 @@
 ---
-name: llm:agy
+name: agy
 description: Generate context map and cross-check execution plans using Antigravity (agy). Analysis output only — no code execution. — /llm:agy, "agy crosscheck", "교차검증", "context map"
 user-invocable: true
 ---

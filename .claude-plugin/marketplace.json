@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.8"
+    "version": "0.0.9"
   },
   "plugins": [
     {
@@ -39,7 +39,7 @@
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Workflow skills — karpathy-guideline (11 Karpathy coding principles, verbatim)",
-      "version": "0.2.3"
+      "version": "0.2.4"
     },
     {
       "name": "dev",

@@ -4,13 +4,9 @@ description: Load the original 11 Karpathy coding guidelines verbatim to load gu
 user-invocable: true
 ---
 
-# Karpathy Original Guidelines (11 Principles, Verbatim)
+# Karpathy Guidelines
 
-원문을 그대로 적재한다. paraphrase 금지. [ADR-0018]
-
----
-
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+Behavioral guidelines to reduce common LLM coding mistakes, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
@@ -62,7 +58,7 @@ Transform tasks into verifiable goals:
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
-```text
+```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
 3. [Step] → verify: [check]
@@ -70,43 +66,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. No Closing Colons (Korean Output)
-
-**End Korean sentences with a period, not a colon.**
-
-When the user writes in Korean, your output is also Korean:
-- Don't end sentences with `:` even if the next line is a list or example.
-- LLMs trained on English docs leak the colon habit into Korean. Catch it.
-- The test: every Korean sentence terminator should be `.`, `?`, or `!` — not `:`.
-- Colons are fine inside code, key-value pairs, or labels. Not as sentence enders.
-
-## 6. File Header Comments in Korean
-
-**First line of every new source file: a one-line Korean comment stating its role.**
-
-When creating a new file:
-- TypeScript/JavaScript: `// 사용자 인증 상태를 관리하는 Context Provider`
-- Python: `# KIS API 호출을 비동기로 래핑하는 클라이언트`
-- SQL: `-- 일별 집계 결과를 저장하는 머티리얼라이즈드 뷰`
-- Place it directly under required directives (`'use client'`, `'use server'`, shebang).
-- Skip config files (`*.config.ts`, `package.json`, etc.).
-
-Why: agents read files selectively, not whole codebases. A one-line Korean header gives instant context so the next session (human or agent) can navigate without re-reading the entire file.
-
-## 7. Plan + Checklist + Context Storage
-
-**Before any non-trivial task, plan and store context in designated directories.**
-
-- **Plan** — what we're building and why.
-- **Checklist** (`checklist.md`) — concrete tasks as checkboxes. Tick as you go.
-- **Context Storage** — Record important decisions permanently in the following paths:
-  - **`.claude/CLAUDE.md`**: Global agent instructions and coding conventions.
-  - **`.claude/rules/*.md`**: Domain, module, or workflow-specific rules (e.g., API integration rules, state management patterns).
-  - **`docs/decisions/*.md` (ADR)**: Important architecture, framework choices, and system design decisions along with their background.
-
-If the user gives only a plan and asks you to start coding, stop and ask: "Should I create the checklist and update context records first?" The next session needs these records to pick up where you left off.
-
-## 8. Run Tests Before Marking Complete
+## 5. Run Tests Before Marking Complete
 
 **If you touched code, run the tests before saying "done".**
 
@@ -117,18 +77,7 @@ If the user gives only a plan and asks you to start coding, stop and ask: "Shoul
 
 This is the step LLMs skip most often. Treat it as non-negotiable.
 
-## 9. Semantic Commits
-
-**Commit when one logical change is complete. Don't wait for the user to ask.**
-
-- The test: "Can I describe this commit in one sentence?" If yes, commit. If no, the changes are still mixed — split them.
-- Good: "auth 미들웨어 추가". Bad: "auth 추가하고 UI도 고치고 버그도 수정" (split into 3).
-- Don't accumulate 20 unrelated edits and lose the ability to roll back individually.
-- Don't commit just to commit — meaningful units only.
-
-Note: For solo prototypes or throwaway scripts, group commits loosely if it slows you down. The point is reversibility, not ceremony.
-
-## 10. Read Errors, Don't Guess
+## 6. Read Errors, Don't Guess
 
 **Read the actual error/log line. Don't pattern-match from memory.**
 
@@ -140,19 +89,3 @@ When something fails:
 
 This is the step LLMs skip most often after "run tests". They guess from error keywords and apply the most-recent-pattern fix. That's how a one-line bug becomes a three-file refactor.
 
-## 11. Prevent Infinite Loops (Rule of 3)
-
-**If the same error or failure repeats 3 times, stop and ask.**
-
-When attempting to fix a bug or implement a feature:
-- If you modify the code, test/run it, and encounter the **exact same error** 3 times in a row, your current approach or assumption is fundamentally flawed.
-- Do not blindly continue modifying code and wasting tokens/resources.
-- Stop immediately and summarize the situation for the user:
-  1. The exact issue/error occurring.
-  2. The 3+ approaches you have tried so far.
-  3. Your hypothesis on why it's failing.
-- Wait for the user's feedback or new direction before proceeding.
-
----
-
-> 본 스킬 본문은 원문 11원칙 verbatim이다. paraphrase 또는 요약 금지. [ADR-0018]

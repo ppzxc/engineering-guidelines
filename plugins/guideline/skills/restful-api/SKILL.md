@@ -1,6 +1,6 @@
 ---
-name: restful-guidelines
-description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /api:restful-guidelines, \"REST API 설계\", \"REST API 리뷰\", \"API 가이드라인\""
+name: restful-api
+description: Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /guideline:restful-api, "REST API 설계", "REST API 리뷰", "API 가이드라인"
 user-invocable: true
 ---
 

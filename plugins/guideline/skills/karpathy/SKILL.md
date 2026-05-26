@@ -1,6 +1,6 @@
 ---
-name: karpathy-guideline
-description: Load the original 11 Karpathy coding guidelines verbatim to load guidelines into context before any coding session (do not paraphrase or summarize). — /workflow:karpathy-guideline, "Karpathy 가이드라인", "코딩 가이드라인"
+name: karpathy
+description: Load the original 11 Karpathy coding guidelines verbatim to load guidelines into context before any coding session (do not paraphrase or summarize). — /guideline:karpathy, "Karpathy 가이드라인", "코딩 가이드라인"
 user-invocable: true
 ---
 
@@ -88,4 +88,3 @@ When something fails:
 - If unclear, add a print/log to verify state — then fix.
 
 This is the step LLMs skip most often after "run tests". They guess from error keywords and apply the most-recent-pattern fix. That's how a one-line bug becomes a three-file refactor.
-

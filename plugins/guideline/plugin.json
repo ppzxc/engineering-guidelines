@@ -1,0 +1,10 @@
+{
+  "name": "guideline",
+  "version": "0.1.0",
+  "description": "Software engineering guidelines and coding principles — including RESTful API guidelines and Andrej Karpathy's 11 coding principles",
+  "author": {
+    "name": "ppzxc",
+    "email": "cjh8487@naver.com",
+    "url": "https://ppzxc.github.io"
+  }
+}

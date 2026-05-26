@@ -463,7 +463,7 @@ Api-Version: 2024-01-20   (ISO 8601 date format)
 
 ## Deprecation
 
-Deprecated APIs MUST include these response headers (RFC 9745, RFC 8594): `[T1]`
+Deprecated APIs MUST include these response headers (RFC 8594): `[T1]`
 
 ```
 Deprecation: true

@@ -194,8 +194,8 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
 - Clients SHOULD be able to specify resource ID (optional).
 - Duplicate creation MUST return `409 Conflict`.
 
-**PATCH (Update — default):** Only modify fields specified by `updateMask`; unlisted fields are unchanged. `[T1]`
-- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content`
+**PATCH (Update — default, AIP-134):** Only modify fields specified by `updateMask`; unlisted fields are unchanged. `[T1]`
+- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content` (AIP-134 HTTP binding: resource in body, mask as query param)
 - Response MUST return the updated full resource.
 - `updateMask=*`: update all mutable fields present in the request body.
 - Empty mask → `400 Bad Request`; unknown field path → `400 Bad Request`

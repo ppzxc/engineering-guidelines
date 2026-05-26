@@ -20,3 +20,6 @@ A collection of engineering guidelines for software development, as a Claude Cod
 ```bash
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
+
+### Import to Antigravity CLI (agy)
+For installing this plugin in the Antigravity CLI environment, please refer to the [Antigravity CLI Import Guidelines](docs/agy-import-guidelines.md).

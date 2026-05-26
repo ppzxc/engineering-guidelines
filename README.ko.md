@@ -20,3 +20,6 @@
 ```bash
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
+
+### Antigravity CLI (agy)에서 가져오기
+Antigravity CLI 환경에서 본 스킬 플러그인을 정상적으로 설치하려면 [Antigravity CLI Import 가이드라인](docs/agy-import-guidelines.md)을 참조하세요.

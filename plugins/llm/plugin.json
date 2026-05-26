@@ -1,0 +1,10 @@
+{
+  "name": "llm",
+  "version": "0.1.1",
+  "description": "LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check",
+  "author": {
+    "name": "ppzxc",
+    "email": "cjh8487@naver.com",
+    "url": "https://ppzxc.github.io"
+  }
+}

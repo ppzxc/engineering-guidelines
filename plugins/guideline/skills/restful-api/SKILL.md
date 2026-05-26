@@ -210,6 +210,7 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
 - Pass etag via `If-Match: {etag}` header on Update/Delete requests
 - Etag mismatch → return `412 Precondition Failed` (include current resource in response body)
 - If `If-Match` header is omitted → execute unconditionally (opt-in behavior)
+- **Sensitive resources** (inventory, permissions, financial transactions): `If-Match` MUST be required; omission MUST return `428 Precondition Required` `[T1]`
 
 **PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead. `[T1]`
 

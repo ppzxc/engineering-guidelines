@@ -8,13 +8,19 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "guideline",
       "source": "./plugins/guideline",
       "description": "Software engineering guidelines and coding principles — including RESTful API guidelines and Andrej Karpathy's 11 coding principles",
+      "version": "0.1.0"
+    },
+    {
+      "name": "workflow",
+      "source": "./plugins/workflow",
+      "description": "Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering",
       "version": "0.1.0"
     },
     {

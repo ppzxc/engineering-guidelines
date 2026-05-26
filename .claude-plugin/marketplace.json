@@ -8,44 +8,44 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.0.6"
+    "version": "0.0.7"
   },
   "plugins": [
     {
       "name": "api",
       "source": "./plugins/api",
       "description": "RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, headers, and non-CRUD action endpoints",
-      "version": "0.2.2"
+      "version": "0.2.3"
     },
     {
       "name": "docs",
       "source": "./plugins/docs",
       "description": "Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions",
-      "version": "0.0.5"
+      "version": "0.0.6"
     },
     {
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.0.14"
+      "version": "0.0.15"
     },
     {
       "name": "llm",
       "source": "./plugins/llm",
       "description": "LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check",
-      "version": "0.1.1"
+      "version": "0.1.2"
     },
     {
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Workflow skills — karpathy-guideline (11 Karpathy coding principles, verbatim)",
-      "version": "0.2.1"
+      "version": "0.2.2"
     },
     {
       "name": "dev",
       "source": "./plugins/dev",
       "description": "Development methodology skills — Tidy First, TDD, and language-agnostic development practices",
-      "version": "0.0.2"
+      "version": "0.0.3"
     }
   ]
 }

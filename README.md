@@ -8,12 +8,12 @@ A collection of engineering guidelines for software development, as a Claude Cod
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| [api](./plugins/api) | v0.2.2 | RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, headers, non-CRUD action endpoints |
-| [docs](./plugins/docs) | v0.0.5 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
-| [git](./plugins/git) | v0.0.14 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
-| [llm](./plugins/llm) | v0.1.1 | LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check |
-| [workflow](./plugins/workflow) | v0.2.1 | Workflow skills — karpathy-guideline (11 Karpathy coding principles, verbatim) |
-| [dev](./plugins/dev) | v0.0.2 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
+| [api](./plugins/api) | v0.2.3 | RESTful API design guidelines — URL structure, HTTP methods, status codes, JSON format, error responses, versioning, headers, non-CRUD action endpoints |
+| [docs](./plugins/docs) | v0.0.6 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
+| [git](./plugins/git) | v0.0.15 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
+| [llm](./plugins/llm) | v0.1.2 | LLM delegation skills — agy(Antigravity CLI) context map generation and execution plan cross-check |
+| [workflow](./plugins/workflow) | v0.2.2 | Workflow skills — karpathy-guideline (11 Karpathy coding principles, verbatim) |
+| [dev](./plugins/dev) | v0.0.3 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
 
 ## Marketplace Registration
 

@@ -12,7 +12,7 @@ A collection of engineering guidelines for software development, as a Claude Cod
 | [workflow](./plugins/workflow) | v0.1.0 | Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering |
 | [docs](./plugins/docs) | v0.0.7 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
 | [git](./plugins/git) | v0.0.16 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
-| [llm](./plugins/llm) | v0.1.3 | LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck |
+| [llm](./plugins/llm) | v0.2.0 | LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck |
 | [dev](./plugins/dev) | v0.0.4 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
 
 ## Marketplace Registration

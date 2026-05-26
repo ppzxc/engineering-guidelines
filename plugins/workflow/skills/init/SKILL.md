@@ -40,11 +40,11 @@ digraph init_flow {
 다음 3가지 규율 스킬을 **반드시 순서대로 로드(view_file로 읽기)**하고, 대화의 응답 본문에 아래 마커를 각각 출력하십시오:
 
 1. **Karpathy Guidelines** (사고 방식)
-   - `.claude/skills/karpathy-guideline/SKILL.md` (또는 `/root/.gemini/skills/karpathy-guideline/SKILL.md`) 로드
-   - 출력 마커: `[LOADED] karpathy-guideline`
+   - `guideline:karpathy` 스킬 로드
+   - 출력 마커: `[LOADED] karpathy`
 2. **Tidy First** (구조 분리)
-   - `.claude/skills/tidy-first/SKILL.md` (또는 `/root/.gemini/skills/tidy-first/SKILL.md`) 로드
-   - 출력 마커: `[LOADED] tidy-first`
+   - `dev:tidy` 스킬 로드
+   - 출력 마커: `[LOADED] tidy`
 3. **Test-Driven Development** (개발 규율)
    - RED -> GREEN -> REFACTOR의 엄격한 준수.
    - 출력 마커: `[LOADED] test-driven-development`

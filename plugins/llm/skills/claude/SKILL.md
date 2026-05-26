@@ -48,10 +48,16 @@ timeout 3 claude --version || echo "CLAUDE_CLI_NOT_FOUND"
 
 **Step 2-2. 비대화형 CLI 위임 호출 (stdin pipe 사용):**
 대용량 파일/디프 전송 시 `ARG_MAX` 한계 초과 및 쉘 인젝션을 방지하기 위해 반드시 **stdin 리디렉션 파이프** 형식을 고수합니다.
+또한, 이미 생성된 `.context-map.md` 파일이 존재하는 경우 이를 리뷰 내용에 함께 결합하여 전달함으로써, Claude가 프로젝트 전반의 도메인 지식과 컨벤션을 파악한 상태에서 정밀한 아키텍처 리뷰를 수행하도록 유도합니다.
+
 ```bash
-cat << 'EOF' | claude -p "Perform architectural and code quality review. Return output in Korean markdown format."
+{
+  [ -f .context-map.md ] && { echo "=== [Context Map] ==="; cat .context-map.md; echo ""; }
+  echo "=== [Review Target] ==="
+  cat << 'EOF'
 <리뷰 대상 파일 경로 또는 Diff 내용 전체>
 EOF
+} | claude -p "Perform architectural and code quality review in Korean markdown format, referencing the provided Context Map for domain constraints and architectural rules."
 ```
 * 호출 실패 또는 타임아웃 시 즉시 Sentinel 메커니즘을 가동하여 AGY 로컬 자체 리뷰로 즉시 fallback을 수행합니다.
 

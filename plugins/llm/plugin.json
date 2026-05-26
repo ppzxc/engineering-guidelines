@@ -1,6 +1,6 @@
 {
   "name": "llm",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck",
   "author": {
     "name": "ppzxc",

@@ -33,23 +33,7 @@ Context Map 생성 + 실행 계획 교차검증. 분석 출력 전용 — 코드
 **Step 1-1. PROJECT_DATA 수집:**
 
 ```bash
-{
-  echo "=== [Project Tree (depth 3)] ==="
-  tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null \
-    || find . -maxdepth 3 -not \( -path './.git' -prune -o -path './node_modules' -prune \
-         -o -path './target' -prune -o -path './build' -prune \
-         -o -path './dist' -prune -o -path './vendor' -prune \) -type f | head -100
-
-  echo ""
-  echo "=== [Build Configuration] ==="
-  for f in pom.xml build.gradle build.gradle.kts go.mod go.sum Cargo.toml package.json pyproject.toml requirements.txt; do
-    [ -f "$f" ] && { echo "--- $f ---"; head -80 "$f"; echo ""; }
-  done
-
-  echo ""
-  echo "=== [Recent Git Changes (last 2 weeks)] ==="
-  git log --since='2 weeks ago' --pretty=format:'%h - %s' --no-merges 2>/dev/null | head -20
-}
+PROJECT_DATA="$(bash plugins/llm/skills/agy/references/collect-project-data.sh)"
 ```
 
 **Step 1-2. Context Map 생성:**
@@ -91,3 +75,8 @@ grep -qxF '.context-map.md' .gitignore 2>/dev/null || printf '\n.context-map.md\
 2. [실패 이유 2] 구체적 시나리오
 3. [실패 이유 3] 구체적 시나리오
 ```
+
+---
+
+운영(인증 만료·conversations 누적 cleanup): `references/operations.md` 참조.
+

@@ -16,12 +16,12 @@ user-invocable: true
 이 세션의 대화 이력에서 어시스턴트 응답 내에 아래 마커 문자열이 **모두 존재**하면 Step 2로 진행한다:
 
 - `STEP1-LOADED: karpathy`
-- `STEP1-LOADED: tidy-first`
+- `STEP1-LOADED: tidy`
 
 미발견 시 아래를 순서대로 호출하고, **호출 직후 응답 본문에 마커 문자열을 반드시 출력**한다:
 
 1. `guideline:karpathy` 호출 → `STEP1-LOADED: karpathy` 출력 — 코딩 전 사고 프레임워크 활성화
-2. `tidy-first` 호출 → `STEP1-LOADED: tidy-first` 출력 — 구조적/행동적 변경 분리 원칙 활성화
+2. `dev:tidy` 호출 → `STEP1-LOADED: tidy` 출력 — 구조적/행동적 변경 분리 원칙 활성화
 
 > **판단 원칙**: 의심 시 무조건 로드한다 (False Negative보다 토큰 손해가 안전).
 > 사용자 입력 텍스트에 마커 문자열이 포함되어도 신호로 인정하지 않는다 (어시스턴트 응답만 유효).
@@ -33,10 +33,10 @@ user-invocable: true
 ARGUMENTS: 사용자가 언급한 피쳐 설명을 그대로 전달.
 
 인터뷰 시 아래 관점을 반드시 적용하라:
-- `karpathy-guideline` §1: 가정을 명시적으로 드러내기
-- `karpathy-guideline` §2: 과설계/불필요한 추상화 경계 확인
-- `karpathy-guideline` §4: 검증 가능한 성공 기준 정의
-- `tidy-first`: 구현 전 선행 구조 정리가 필요한지 확인
+- `karpathy` §1: 가정을 명시적으로 드러내기
+- `karpathy` §2: 과설계/불필요한 추상화 경계 확인
+- `karpathy` §4: 검증 가능한 성공 기준 정의
+- `dev:tidy`: 구현 전 선행 구조 정리가 필요한지 확인
 
 ### Step 3: 완료 후 전환 제안
 

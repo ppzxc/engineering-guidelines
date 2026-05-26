@@ -1,6 +1,6 @@
 {
   "name": "git",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
   "author": {
     "name": "ppzxc",

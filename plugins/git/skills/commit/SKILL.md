@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Use when the user wants to commit changes — /git:commit, "커밋", "변경사항 커밋", or any request to stage and commit local changes
+description: Use when the user wants to stage and commit local changes. — /git:commit, "커밋", "변경사항 커밋"
 user-invocable: true
 ---
 

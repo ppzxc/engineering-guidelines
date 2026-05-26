@@ -1,6 +1,6 @@
 ---
 name: merge
-description: Use when the user wants to squash-merge a GitHub PR — /git:merge, "PR 머지", "squash merge", or any request to merge a pull request into main
+description: Use when the user wants to squash-merge a GitHub PR into the main branch. — /git:merge, "PR 머지", "squash merge"
 user-invocable: true
 ---
 

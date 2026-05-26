@@ -1,6 +1,6 @@
 ---
 name: madr
-description: "Use when creating a Markdown Architectural Decision Record — /docs:madr, \"MADR 작성\", \"결정 사항 기록\", or any request to document an architecture decision in MADR 4.0 format"
+description: "Use when creating a Markdown Architectural Decision Record in MADR 4.0 format. — /docs:madr, \"MADR 작성\", \"결정 사항 기록\""
 user-invocable: true
 ---
 

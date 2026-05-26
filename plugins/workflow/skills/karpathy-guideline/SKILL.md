@@ -1,6 +1,6 @@
 ---
 name: karpathy-guideline
-description: Load the original 11 Karpathy coding guidelines verbatim — do not paraphrase or summarize. User-invocable via /workflow:karpathy-guideline to load guidelines into context before any coding session.
+description: Load the original 11 Karpathy coding guidelines verbatim to load guidelines into context before any coding session (do not paraphrase or summarize). — /workflow:karpathy-guideline, "Karpathy 가이드라인", "코딩 가이드라인"
 user-invocable: true
 ---
 

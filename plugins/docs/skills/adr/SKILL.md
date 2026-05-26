@@ -1,6 +1,6 @@
 ---
 name: adr
-description: "Use when creating an Architecture Decision Record — /docs:adr, \"ADR 작성\", \"결정 사항 기록\", or any request to document an architecture decision in Nygard format"
+description: "Use when creating an Architecture Decision Record in Nygard format. — /docs:adr, \"ADR 작성\", \"결정 사항 기록\""
 user-invocable: true
 ---
 

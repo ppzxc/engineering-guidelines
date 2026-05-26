@@ -1,6 +1,6 @@
 ---
 name: pull-request
-description: Use when the user wants to push changes and create a GitHub PR — /git:pull-request, "PR 만들어", "PR 생성", "push하고 PR", or any request to open a pull request
+description: Use when the user wants to push changes and open a GitHub pull request. — /git:pull-request, "PR 만들어", "PR 생성", "push하고 PR"
 user-invocable: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: issue
-description: Use when the user wants to create a GitHub issue — /git:issue, "이슈 만들어", "이슈 생성", "버그 리포트", or any request to create a GitHub issue
+description: Use when the user wants to create a GitHub issue. — /git:issue, "이슈 만들어", "이슈 생성", "버그 리포트"
 user-invocable: true
 ---
 

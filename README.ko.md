@@ -8,12 +8,12 @@
 
 | 플러그인 | 버전 | 설명 |
 |--------|------|------|
-| [api](./plugins/api) | v0.2.3 | RESTful API 설계 가이드라인 — URL 구조, HTTP 메서드, 상태 코드, JSON 형식, 에러 응답, 버전 관리, 헤더, 비-CRUD action endpoint |
-| [docs](./plugins/docs) | v0.0.6 | 문서 결정 기록 — ADR (Nygard 포맷) 및 MADR (MADR 4.0) 아키텍처 결정 기록 |
-| [git](./plugins/git) | v0.0.15 | Git 워크플로우 스킬 — 안전한 커밋, 한글 PR 생성, 호스트 인지 peer 교차검증 PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
+| [api](./plugins/api) | v0.2.4 | RESTful API 설계 가이드라인 — URL 구조, HTTP 메서드, 상태 코드, JSON 형식, 에러 응답, 버전 관리, 헤더, 비-CRUD action endpoint |
+| [docs](./plugins/docs) | v0.0.7 | 문서 결정 기록 — ADR (Nygard 포맷) 및 MADR (MADR 4.0) 아키텍처 결정 기록 |
+| [git](./plugins/git) | v0.0.16 | Git 워크플로우 스킬 — 안전한 커밋, 한글 PR 생성, 호스트 인지 peer 교차검증 PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
 | [llm](./plugins/llm) | v0.1.2 | LLM 위임 스킬 — agy(Antigravity CLI) 컨텍스트 맵 생성 및 실행 계획 교차검증 |
-| [workflow](./plugins/workflow) | v0.2.2 | 워크플로우 스킬 — karpathy-guideline (Karpathy 11원칙 verbatim) |
-| [dev](./plugins/dev) | v0.0.3 | 개발 방법론 스킬 — Tidy First, TDD, 언어 무관 개발 프랙티스 |
+| [workflow](./plugins/workflow) | v0.2.3 | 워크플로우 스킬 — karpathy-guideline (Karpathy 11원칙 verbatim) |
+| [dev](./plugins/dev) | v0.0.4 | 개발 방법론 스킬 — Tidy First, TDD, 언어 무관 개발 프랙티스 |
 
 ## 마켓플레이스 등록
 

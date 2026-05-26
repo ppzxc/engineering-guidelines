@@ -101,7 +101,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 - `Location` header on 201 Created `[T1]`
 - `Total-Count` for collection size `[T2]`
 - RFC 8288 `Link` header for pagination `[T2]`
-- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`) retain their names for compatibility `[T1]`
+- **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`, `X-Content-Type-Options`, `X-Hub-Signature-256`) retain their names for compatibility `[T1]`
 - `Cache-Control` header specifies caching strategy `[T2]`
 - `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one `[T1]`
 - Propagate `Request-Id` across microservices for distributed tracing `[T1]`
@@ -194,8 +194,8 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
 - Clients SHOULD be able to specify resource ID (optional).
 - Duplicate creation MUST return `409 Conflict`.
 
-**PATCH (Update — default):** Only modify fields specified by `updateMask`; unlisted fields are unchanged. `[T1]`
-- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content`
+**PATCH (Update — default, AIP-134):** Only modify fields specified by `updateMask`; unlisted fields are unchanged. `[T1]`
+- `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content` (AIP-134 HTTP binding: resource in body, mask as query param)
 - Response MUST return the updated full resource.
 - `updateMask=*`: update all mutable fields present in the request body.
 - Empty mask → `400 Bad Request`; unknown field path → `400 Bad Request`
@@ -210,6 +210,7 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
 - Pass etag via `If-Match: {etag}` header on Update/Delete requests
 - Etag mismatch → return `412 Precondition Failed` (include current resource in response body)
 - If `If-Match` header is omitted → execute unconditionally (opt-in behavior)
+- **Sensitive resources** (inventory, permissions, financial transactions): `If-Match` MUST be required; omission MUST return `428 Precondition Required` `[T1]`
 
 **PUT (Content Replace — exceptional use only):** Use only when full content replacement is semantically required (file upload, binary content, configuration replacement). MUST NOT be used for resource attribute updates — use PATCH instead. `[T1]`
 
@@ -496,7 +497,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - Client polls `GET {Location}` to check progress `[T3]`
 - On failure: include error details in response body `[T3]`
 
-## Idempotency-Key
+## Idempotency-Key (AIP-155)
 
 - Support `Idempotency-Key` header for POST endpoints where duplicate execution is risky (payments, orders) `[T3]`
 - Client-generated UUID v4 `[T3]`

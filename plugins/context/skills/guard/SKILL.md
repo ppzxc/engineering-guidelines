@@ -38,6 +38,7 @@ user-invocable: true
 # Claude Code Stop hook — /context:update staleness reminder.
 # Non-blocking (exit 0 always). Prints JSON systemMessage when stale.
 # ADR-0028: plugin stays hook-free; host opts in via context:guard.
+# Known limitation: filenames with spaces may be mishandled (kebab-slug paths are safe).
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 [ -n "$GIT_ROOT" ] || exit 0
@@ -50,7 +51,8 @@ BEST_FILE=""
 BEST_TS=""
 for f in $(find "$CONTEXT_DIR" -maxdepth 2 -name "context.md" 2>/dev/null); do
   TS=$(grep -m1 '<!-- last_updated:' "$f" 2>/dev/null \
-       | sed 's/.*<!-- last_updated: *\([^ ]*\).*/\1/')
+       | sed 's/.*<!-- last_updated: *\([^ ]*\).*/\1/' \
+       | tr -d '\r')
   [ -z "$TS" ] && continue
   if [ -z "$BEST_TS" ] || [ "$TS" \> "$BEST_TS" ]; then
     BEST_TS="$TS"
@@ -83,6 +85,9 @@ for f in $(git -C "$GIT_ROOT" status --porcelain 2>/dev/null \
   [ "$MT" -gt "$NEWEST" ] && NEWEST=$MT
 done
 
+# If all changed files were deleted (no mtime available), treat as stale
+[ "$NEWEST" -eq 0 ] && NEWEST=$(date +%s 2>/dev/null || printf '%s' '9999999999')
+
 [ "$NEWEST" -gt "$LAST_EPOCH" ] || exit 0
 
 # Stale: emit non-blocking reminder
@@ -114,7 +119,7 @@ AskUserQuestion으로 확인을 받는다:
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c '[ -f .claude/hooks/context-staleness-check.sh ] && sh .claude/hooks/context-staleness-check.sh; exit 0'"
+            "command": "sh -c 'root=$(git rev-parse --show-toplevel 2>/dev/null) && sh \"$root/.claude/hooks/context-staleness-check.sh\" 2>/dev/null; true'"
           }
         ]
       }

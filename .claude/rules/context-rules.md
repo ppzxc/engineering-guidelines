@@ -1,0 +1,11 @@
+# Context 플러그인 규칙
+
+context 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약을 따른다.
+
+✓ 산출물은 `docs/context/{TASK_NAME}/`의 4파일(spec/plan/tasks/context.md)로 고정할 것 [ADR-0027]
+✓ TASK_NAME은 kebab slug으로 정규화하여 경로 traversal·특수문자를 제거할 것 [ADR-0027]
+✓ workflow 플러그인 산출물(`docs/superpowers/plans/`)과 context 산출물(`docs/context/{TASK}/`)의 경로 경계를 혼용하지 말 것 [ADR-0027]
+✓ 래핑 스킬명은 실제 등록명(`superpowers:brainstorming`/`grill-me`/`superpowers:writing-plans`)을 추론 없이 정확히 명시할 것 [ADR-0027]
+✓ brainstorming은 spec+User Review Gate까지만 진행시키고 writing-plans 자동 호출을 차단할 것 [ADR-0027]
+✓ 플랜모드 활성 시 파일 쓰기 직전 Shift+Tab 해제를 요청하고 ExitPlanMode 자체 호출을 금지할 것 [ADR-0016][ADR-0019]
+✓ `context.md` 최상단에 `<!-- last_updated: ISO-8601(UTC) -->` 라인을 두고 update 시 갱신할 것 [ADR-0027]

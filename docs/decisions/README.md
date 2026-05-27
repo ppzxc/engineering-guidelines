@@ -29,6 +29,7 @@
 | [ADR-0021](0021-migrate-llm-backend-from-gemini-cli-to-agy.md) | accepted | gemini-cli MCP 제거 및 agy 백엔드 교체 (feature-pipeline 제거, llm 플러그인 신설) |
 | [ADR-0022](0022-bidirectional-peer-cross-review.md) | accepted | `git:review` 양방향 peer cross-review (호스트별 라우팅, Claude↔agy↔Gemini) |
 | [ADR-0023](0023-git-clean-bidirectional-peer-cross-check.md) | accepted | `git:clean` 양방향 peer cross-check 도입 (호스트별 라우팅, Claude↔agy↔Gemini) |
+| [ADR-0027](0027-add-context-devdocs-plugin.md) | accepted | context Dev Docs 플러그인 추가 (4파일 자기완결 폴더, workflow와 공존) |
 
 ## 새 ADR 추가
 

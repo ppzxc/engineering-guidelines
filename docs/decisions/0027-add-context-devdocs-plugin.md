@@ -34,7 +34,7 @@ Chosen option: "옵션 B — 신규 context 플러그인", because 세션 무관
 * Good, because `<!-- last_updated: ISO-8601 -->` 마커로 `update`·`resume`가 최신 태스크를 자동 선택한다.
 * Bad, because grill-me는 파일을 쓰지 않는 대화형 전용 스킬이므로, 오케스트레이터가 합의 내용을 직접 캡처해야 한다 (취약점).
 * Bad, because brainstorming의 writing-plans 자동 체인 차단은 ARGUMENTS의 HARD-GATE 지시에 의존하며 100% 보장되지 않는다 (ADR-0016·ADR-0019 연계).
-* Neutral, because context 플러그인은 일반 markdown 파일을 산출하며 `ExitPlanMode`를 자체 호출하지 않는다 — 네이티브 플랜 승인 추적과 간섭하지 않는다 (ADR-0016 참조).
+* Neutral, because context 플러그인은 일반 markdown 파일을 산출하며 ExitPlanMode를 자체 호출하지 않는다 — 네이티브 플랜 승인 추적과 간섭하지 않는다 (ADR-0016 참조).
 
 ### Confirmation
 

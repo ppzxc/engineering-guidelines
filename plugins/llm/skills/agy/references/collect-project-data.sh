@@ -4,6 +4,8 @@
 
 set -u
 
+cd "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || true
+
 echo "=== [Project Tree (depth 3)] ==="
 tree -L 3 --dirsfirst -I 'node_modules|.git|target|build|dist|vendor|.idea|__pycache__' 2>/dev/null \
   || find . -maxdepth 3 -not \( -path './.git' -prune -o -path './node_modules' -prune \

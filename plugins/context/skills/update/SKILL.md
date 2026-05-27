@@ -18,7 +18,7 @@ user-invocable: true
 선택적 ARGUMENTS = TASK_NAME.
 
 TASK_NAME이 생략된 경우:
-1. `docs/context/*/context.md` 를 glob으로 수집한다.
+1. `docs/context/*/context.md`를 glob으로 수집한다.
 2. 각 파일에서 `<!-- last_updated:` 라인을 grep으로 추출한다.
 3. ISO-8601 문자열로 `sort -r` 정렬 → 가장 최신 폴더를 선택한다.
 4. 동일 최신 타임스탬프가 복수이면 AskUserQuestion으로 선택한다.

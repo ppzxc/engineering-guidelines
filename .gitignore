@@ -1,10 +1,10 @@
 .claude/*
 !.claude/rules/
+.antigravitycli/
+.claude-octopus/
 .worktrees/
 docs/*
 !docs/decisions/
 !docs/agy-import-guidelines.md
 plugins/api/docs/superpowers/
 .context-map.md
-.antigravitycli/
-.claude-octopus/

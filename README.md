@@ -14,7 +14,7 @@ A collection of engineering guidelines for software development, as a Claude Cod
 | [git](./plugins/git) | v0.0.16 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
 | [llm](./plugins/llm) | v0.2.0 | LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck |
 | [dev](./plugins/dev) | v0.0.4 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
-| [context](./plugins/context) | v0.1.0 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
+| [context](./plugins/context) | v0.2.0 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
 
 ## Marketplace Registration
 

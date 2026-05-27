@@ -8,7 +8,7 @@ A collection of engineering guidelines for software development, as a Claude Cod
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| [guideline](./plugins/guideline) | v0.1.2 | Software engineering guidelines and coding principles — including RESTful API guidelines and Andrej Karpathy's 11 coding principles |
+| [guideline](./plugins/guideline) | v0.2.0 | Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule |
 | [workflow](./plugins/workflow) | v0.1.1 | Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering |
 | [docs](./plugins/docs) | v0.0.7 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
 | [git](./plugins/git) | v0.0.16 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |

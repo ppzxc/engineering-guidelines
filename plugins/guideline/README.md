@@ -14,6 +14,11 @@ The **Guideline** plugin consolidates core engineering and design principles int
 * **Usage**: Execute this skill when designing new web APIs, generating endpoints, or performing architecture reviews on backend microservices.
 * **Keywords**: "REST API 설계", "REST API 리뷰", "API 가이드라인"
 
+### 3. `honest-judgment` (`/guideline:honest-judgment`)
+* **Description**: An anti-sycophancy behavioral rule that suppresses RLHF agreeableness for direct, calibrated, no-sugarcoating feedback — while avoiding the known failure modes of blunt "brutally honest" prompts (false confidence, miscalibration, manufactured criticism).
+* **Usage**: Load verbatim into context before code review, architecture review, or decision support. Scoped to verification tasks; not recommended always-on.
+* **Keywords**: "정직한 리뷰", "무보정 피드백", "가차없는 리뷰", "아첨 끄기"
+
 ---
 
 ## Installation & Configuration
@@ -24,4 +29,5 @@ No manual installation is required. The plugin is auto-discovered per `.claude-p
 # Example skill invocations (in Claude Code/Gemini CLI)
 /guideline:karpathy
 /guideline:restful-api
+/guideline:honest-judgment
 ```

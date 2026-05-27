@@ -63,7 +63,7 @@ done
 
 # Check for code changes outside docs/
 CHANGED=$(git -C "$GIT_ROOT" status --porcelain 2>/dev/null \
-          | awk '{print $NF}' | grep -v '^docs/' | head -1)
+          | awk '{print $NF}' | grep -vE '^(docs|\.claude)/' | head -1)
 [ -n "$CHANGED" ] || exit 0
 
 # Convert last_updated ISO-8601 to epoch (GNU date; BSD/macOS fallback)
@@ -76,7 +76,7 @@ fi
 # Find newest mtime among changed code files
 NEWEST=0
 for f in $(git -C "$GIT_ROOT" status --porcelain 2>/dev/null \
-           | awk '{print $NF}' | grep -v '^docs/'); do
+           | awk '{print $NF}' | grep -vE '^(docs|\.claude)/'); do
   fp="$GIT_ROOT/$f"
   [ -f "$fp" ] || continue
   MT=$(stat -c %Y "$fp" 2>/dev/null)
@@ -92,12 +92,12 @@ done
 
 # Stale: emit non-blocking reminder
 TASK=$(dirname "$BEST_FILE" | sed "s|$GIT_ROOT/||")
-printf '{"decision":"allow","systemMessage":"⚠️  %s/context.md 가 stale입니다. /context:update 로 진행상황을 기록하세요."}\n' "$TASK"
+printf '{"systemMessage":"⚠️  %s/context.md 가 stale입니다. /context:update 로 진행상황을 기록하세요."}\n' "$TASK"
 exit 0
 ```
 
-> **스키마 참고**: Stop hook 비차단 출력에 `{"decision":"allow","systemMessage":"..."}` 형식을 사용한다.
-> Claude Code 버전별로 `systemMessage` 지원 여부가 다를 수 있으므로 설치 후 동작을 반드시 검증한다.
+> **스키마 참고**: Stop hook 비차단 출력에 `{"systemMessage":"..."}` 형식을 사용한다.
+> `decision` 필드는 Stop hook에서 `block` 또는 생략만 유효하며, 비차단 reminder는 decision 없이 systemMessage 단독으로 emit한다.
 
 ### 4. 사용자 확인
 

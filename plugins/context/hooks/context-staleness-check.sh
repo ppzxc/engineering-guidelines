@@ -27,7 +27,7 @@ done
 
 # Check for code changes outside docs/
 CHANGED=$(git -C "$GIT_ROOT" status --porcelain 2>/dev/null \
-          | awk '{print $NF}' | grep -v '^docs/' | head -1)
+          | awk '{print $NF}' | grep -vE '^(docs|\.claude)/' | head -1)
 [ -n "$CHANGED" ] || exit 0
 
 # Convert last_updated ISO-8601 to epoch (GNU date; BSD/macOS fallback)
@@ -40,7 +40,7 @@ fi
 # Find newest mtime among changed code files
 NEWEST=0
 for f in $(git -C "$GIT_ROOT" status --porcelain 2>/dev/null \
-           | awk '{print $NF}' | grep -v '^docs/'); do
+           | awk '{print $NF}' | grep -vE '^(docs|\.claude)/'); do
   fp="$GIT_ROOT/$f"
   [ -f "$fp" ] || continue
   MT=$(stat -c %Y "$fp" 2>/dev/null)
@@ -56,5 +56,5 @@ done
 
 # Stale: emit non-blocking reminder
 TASK=$(dirname "$BEST_FILE" | sed "s|$GIT_ROOT/||")
-printf '{"decision":"allow","systemMessage":"⚠️  %s/context.md 가 stale입니다. /context:update 로 진행상황을 기록하세요."}\n' "$TASK"
+printf '{"systemMessage":"⚠️  %s/context.md 가 stale입니다. /context:update 로 진행상황을 기록하세요."}\n' "$TASK"
 exit 0

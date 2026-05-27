@@ -70,4 +70,4 @@ Chosen option: "옵션 2: 전용 설치 스킬로 호스트 옵트인 Stop hook 
 * [ADR-0014](0014-strengthen-feature-pipeline-evidence-based-gates.md) — hook 기반 강제를 검토했으나 플랫폼 의존성 이유로 거부한 결정. 본 ADR이 그 원칙을 유지하면서 옵트인 경로를 열어 refine.
 * [ADR-0027](0027-add-context-devdocs-plugin.md) — context 플러그인 도입 결정
 * `.claude/rules/context-rules.md` — context:guard 관련 규칙 (`[ADR-0028]` 태그)
-* Stop hook JSON 스키마: `{"decision":"allow","systemMessage":"..."}` — Claude Code 버전별 지원 여부 확인 필요
+* Stop hook JSON 스키마: `{"systemMessage":"..."}` — `decision` 필드는 Stop hook에서 `block`/생략만 유효하므로 비차단 reminder는 systemMessage 단독으로 emit한다.

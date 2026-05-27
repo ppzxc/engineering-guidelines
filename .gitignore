@@ -1,5 +1,7 @@
 .claude/*
 !.claude/rules/
+.antigravitycli/
+.claude-octopus/
 .worktrees/
 docs/*
 !docs/decisions/

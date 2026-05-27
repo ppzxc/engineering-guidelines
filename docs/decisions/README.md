@@ -31,7 +31,7 @@
 | [ADR-0023](0023-git-clean-bidirectional-peer-cross-check.md) | accepted | `git:clean` 양방향 peer cross-check 도입 (호스트별 라우팅, Claude↔agy↔Gemini) |
 | [ADR-0027](0027-add-context-devdocs-plugin.md) | accepted | context Dev Docs 플러그인 추가 (4파일 자기완결 폴더, workflow와 공존) |
 | [ADR-0028](0028-context-guard-opt-in-stop-hook.md) | accepted | context 플러그인 옵트인 Stop hook 도입 — context:guard 설치 스킬로 호스트 프로젝트에 staleness reminder 제공 |
-| [ADR-0029](0029-context-plan-tiered-verification.md) | accepted | context:plan 계층형 자가검증·리뷰 게이트 도입 — 스텝 4/6/7에 Tier 1 self-review + Tier 2 GAN cross-check(비-Claude CLI) 추가 |
+| [ADR-0029](0029-context-plan-tiered-verification.md) | accepted | context:plan 계층형 자가검증·리뷰 게이트 도입 (Tier 1 self-review + Tier 2 비-Claude CLI cross-check) |
 
 ## 새 ADR 추가
 

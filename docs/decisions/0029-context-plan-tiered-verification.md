@@ -33,7 +33,7 @@
 ## Decision Outcome
 
 Chosen option: "옵션 2: Tier 1 + Tier 2 CLI", because
-Tier 1(self-review: 저비용, 즉각)과 Tier 2(GAN cross-check: 독립 시각 확보) 계층이 상호 보완하여 self-contained 제약 내에서 최대 검증 깊이를 달성한다.
+Tier 1(self-review: 저비용, 즉각)과 Tier 2(GAN cross-check — plan을 비-Claude CLI에 적대적 discriminator로 전달하는 교차검증으로 독립 시각 확보) 계층이 상호 보완하여 self-contained 제약 내에서 최대 검증 깊이를 달성한다.
 
 ### Consequences
 

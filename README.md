@@ -8,13 +8,13 @@ A collection of engineering guidelines for software development, as a Claude Cod
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| [guideline](./plugins/guideline) | v0.1.2 | Software engineering guidelines and coding principles — including RESTful API guidelines and Andrej Karpathy's 11 coding principles |
+| [guideline](./plugins/guideline) | v0.2.0 | Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule |
 | [workflow](./plugins/workflow) | v0.1.1 | Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering |
 | [docs](./plugins/docs) | v0.0.7 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
 | [git](./plugins/git) | v0.0.16 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
 | [llm](./plugins/llm) | v0.2.0 | LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck |
 | [dev](./plugins/dev) | v0.0.4 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
-| [context](./plugins/context) | v0.2.0 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
+| [context](./plugins/context) | v0.3.0 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
 
 ## Marketplace Registration
 

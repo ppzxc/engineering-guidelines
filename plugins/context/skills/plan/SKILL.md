@@ -140,5 +140,8 @@ docs/context/{TASK_NAME}/ 폴더 생성 완료
 
 세션 단절 후 재개: /context:resume
 작업 상태 저장:    /context:update
+
+코딩 세션에서 /context:update 실행을 자동 리마인드하려면:
+  /context:guard  — Stop hook 옵트인 설치
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

@@ -10,6 +10,7 @@ A single folder `docs/context/{TASK_NAME}/` holds all 4 files needed to re-ancho
 | `plan` | `/context:plan` | Start a new task from a raw idea — creates the 4-file Dev Docs folder via brainstorming → grill → writing-plans pipeline |
 | `update` | `/context:update` | Persist current session state before context compaction |
 | `resume` | `/context:resume` | Re-anchor on a task after a session break by reading the 4-file folder |
+| `guard` | `/context:guard` | Install an opt-in Stop hook that reminds you to run `/context:update` when code is stale |
 
 ## Output Structure
 
@@ -24,6 +25,21 @@ docs/context/{TASK_NAME}/
 ```
 
 The `context.md` file carries a `<!-- last_updated: ISO-8601 -->` marker used by `update` and `resume` to auto-detect the most recent task.
+
+## Stop Hook (opt-in)
+
+`context:guard` installs a Claude Code Stop hook into the host project's `.claude/settings.json`.
+When a coding session ends and code has changed since the last `context:update`, a reminder message appears:
+
+```
+⚠️  docs/context/<task>/context.md 가 stale입니다. /context:update 로 진행상황을 기록하세요.
+```
+
+**Behavior**: non-blocking (reminder only, `decision:block` is never used).  
+**Install**: run `/context:guard` once per project (outside plan mode).  
+**Remove**: delete the Stop hook entry from `.claude/settings.json` and remove `.claude/hooks/context-staleness-check.sh`.
+
+The plugin itself stays hook-free (see ADR-0028). The Stop hook lives in the host project's settings, not inside the plugin.
 
 ## Portability Principle
 
@@ -42,4 +58,5 @@ claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.gi
 /context:plan  my raw idea here
 /context:update
 /context:resume
+/context:guard   # optional: install staleness reminder hook
 ```

@@ -64,6 +64,8 @@ ARGUMENTS:
 **체크포인트**: User Review Gate 승인 즉시 `spec.md`가 정본 경로에 디스크에 확정됨을 확인한다.
 이후 grill/writing-plans로 진행. 각 sub-skill 산출물은 다음 단계 진행 전 반드시 디스크에 확정되어야 한다.
 
+> 이 스텝 완료 후 `references/verification.md`의 **Step-4 Gate**를 실행하라.
+
 ### 5. grill-me 호출 (파일 미생성 보정)
 
 `grill-me` 스킬을 호출하라.  (네임스페이스 없음 — `grill-me` 그대로)
@@ -87,10 +89,16 @@ ARGUMENTS:
    `mv <found-path> docs/context/{TASK_NAME}/plan.md`
 3. 재확인 후 Step 7로 진행.
 
+> 이 스텝 완료 후 `references/verification.md`의 **Step-6 Gate**를 실행하라 (파일위치 검증 → Tier 2 GAN → 수정 → Tier 1 순서 고정).
+
 ### 7. 분할·합성 + plan.md 트림
 
-**tasks.md 추출**: plan.md의 `- [ ]` 체크리스트를 Phase별 그룹, `[P]` 병렬 마커,
+**tasks.md 추출**: 추출 전 트림 카운트를 먼저 캡처한다:
+`ORIG_COUNT=$(grep -c -- '- \[ \]' docs/context/{TASK_NAME}/plan.md)`
+그 후 plan.md의 `- [ ]` 체크리스트를 Phase별 그룹, `[P]` 병렬 마커,
 체크포인트 보존하여 `docs/context/{TASK_NAME}/tasks.md`에 저장한다.
+
+> 이 스텝 완료 후 `references/verification.md`의 **Step-7 Gate**를 실행하라 (카운트 검증 → context.md 생성 → plan.md 트림 순서 고정).
 
 **context.md 생성**: 아래 템플릿으로 `docs/context/{TASK_NAME}/context.md`를 만든다.
 - Current Status: 초기값 ("작업 폴더 생성 완료. tasks.md Step 1부터 시작.")
@@ -111,6 +119,7 @@ ARGUMENTS:
 
 ## Decision Log
 <!-- grill 합의 + 구현 중 추가 결정 (spec 초기 설계결정과 구분) -->
+<!-- provenance: plan reviewed by <agy|gemini|codex|Claude self-generate> (GAN mode) — N findings (H:x M:y L:z), M addressed -->
 
 ## Next Steps
 <!-- 바로 다음 할 일 -->
@@ -137,6 +146,7 @@ docs/context/{TASK_NAME}/ 폴더 생성 완료
   plan.md    — 목표·아키텍처·파일 구조 (tasks 제거됨)
   tasks.md   — 실행 체크리스트
   context.md — 동적 재개 앵커
+  [GAN review] — <agy|gemini|codex|Claude self-generate>, N findings, M addressed
 
 세션 단절 후 재개: /context:resume
 작업 상태 저장:    /context:update

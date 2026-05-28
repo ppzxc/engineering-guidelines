@@ -6,7 +6,6 @@
 docs/*
 !docs/adr/
 !docs/agents/
-!docs/context/
 !docs/agy-import-guidelines.md
 plugins/api/docs/superpowers/
 .context-map.md

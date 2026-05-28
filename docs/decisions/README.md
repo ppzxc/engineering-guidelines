@@ -34,6 +34,7 @@
 | [ADR-0029](0029-context-plan-tiered-verification.md) | superseded by ADR-0030 | context:plan 계층형 자가검증·리뷰 게이트 도입 (Tier 1 self-review + Tier 2 비-Claude CLI cross-check) |
 | [ADR-0030](0030-context-plan-pipeline-redesign.md) | accepted | context:plan 파이프라인 재설계 — grill 우선, spec 사람 리뷰 최우선(ExitPlanMode), GAN 단일 게이트 |
 | [ADR-0031](0031-context-guard-auto-run-via-block.md) | accepted | context:guard Stop hook — decision:block 자동 실행, IDE 아티팩트 필터, 관련 context 매칭 (ADR-0028 supersede) |
+| [ADR-0032](0032-context-plan-discipline-injection.md) | accepted | context:plan 디시플린 주입 — karpathy/tdd/tidy 원칙 디폴트 ON (설계 lens + [S]/[B] 검증 + GAN prompt 확장) |
 
 ## 새 ADR 추가
 

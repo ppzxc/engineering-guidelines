@@ -24,5 +24,5 @@
 | madr-W2 | 소스 문서 옵션 비교 감지 시 full 자동 선택 | Workflow | TC-madr-02 | COVERED |
 | madr-W3 | variant 인자 명시 시 우선 사용 | Workflow | TC-madr-03 | COVERED |
 | madr-S1 | 저장 전 사용자 확인 필수 | Safety | TC-madr-04 | COVERED |
-| madr-W4 | 저장 경로 docs/decisions/ | Workflow | TC-madr-05 | COVERED |
+| madr-W4 | 저장 경로 docs/adr/ | Workflow | TC-madr-05 | COVERED |
 | madr-S2 | 번호 충돌 시 사용자 확인 | Safety | TC-madr-06 | COVERED |

@@ -2,7 +2,7 @@
 
 ## ADR ↔ Rules 동기화 원칙
 
-ADR(`docs/decisions/NNNN-*.md`)을 새로 작성할 때:
+ADR(`docs/adr/NNNN-*.md`)을 새로 작성할 때:
 1. 결정에서 **제약 조건**을 추출하여 관련 `.claude/rules/` 파일에 추가
 2. 규칙 항목에 `[ADR-NNNN]` 태그 달기
 3. ADR에는 근거(why)를 유지, rules에는 제약(what)만 작성
@@ -44,18 +44,18 @@ rules 파일은 **스켈레톤 가드레일**이다. 구현자가 매번 직접 
 | 상태 | 대응 |
 |------|------|
 | 같은 규칙이 두 파일에 중복 | 한 파일로 통합, 나머지에서 참조 |
-| 6개월 이상 참조되지 않은 규칙 | 삭제 또는 `docs/decisions/`로 이동 |
+| 6개월 이상 참조되지 않은 규칙 | 삭제 또는 `docs/adr/`로 이동 |
 | 규칙이 서로 모순 | ADR 작성 후 한쪽 삭제 |
 | 규칙이 현재 코드와 불일치 | 코드 또는 규칙 중 하나를 맞춤 |
 
 ## MADR 작성 형식 [MADR 4.0]
 
-`docs/decisions/NNNN-<kebab-case-title>.md` 형식으로 저장.
+`docs/adr/NNNN-<kebab-case-title>.md` 형식으로 저장.
 번호는 앞에 있는 최대 번호 + 1.
 
 템플릿:
-- full: `docs/decisions/0000-template.md` — 대부분의 결정에 사용
-- minimal: `docs/decisions/0000-template-minimal.md` — 검토 옵션이 1~2개이고 트레이드오프가 경미한 결정 (단일 옵션 결정 포함)
+- full: `docs/adr/0000-template.md` — 대부분의 결정에 사용
+- minimal: `docs/adr/0000-template-minimal.md` — 검토 옵션이 1~2개이고 트레이드오프가 경미한 결정 (단일 옵션 결정 포함)
 
 frontmatter 필수 필드:
 - `status`: accepted / deprecated / superseded by ADR-NNNN
@@ -76,4 +76,5 @@ full 템플릿 필수 섹션:
 - 항상 50줄 이하로 유지
 - 세부 규칙은 CLAUDE.md에 쓰지 않고 `.claude/rules/`에 위임
 - rules 파일이 추가되면 CLAUDE.md의 규칙 파일 목록 테이블 업데이트
-- ADR 추가 시 `docs/decisions/README.md` 인덱스 테이블도 업데이트
+- ADR 추가 시 `docs/adr/README.md` 인덱스 테이블도 업데이트
+- matt pocock 스킬 컨벤션 변경 시 `docs/agents/*.md` 3파일과 AGENTS.md `## Agent skills` 블록 동기화 [ADR-0037]

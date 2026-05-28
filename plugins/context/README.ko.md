@@ -44,7 +44,7 @@ docs/context/{TASK_NAME}/
 ## 휴대성 원칙
 
 이 플러그인은 런타임에 호스트 프로젝트의 컨벤션을 상속한다.
-ADR 번호와 rules 파일 경로는 스킬 파일 안에 하드코딩하지 않는다 — 호스트의 `docs/decisions/`와 `.claude/rules/`에 둔다.
+ADR 번호와 rules 파일 경로는 스킬 파일 안에 하드코딩하지 않는다 — 호스트의 `docs/adr/`와 `.claude/rules/`에 둔다.
 
 ## 설치
 

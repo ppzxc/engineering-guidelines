@@ -63,8 +63,8 @@ grep -n 'harness\|plan mode 활성\|/root.*plans' plugins/workflow/skills/featur
 grep -c 'ADR-0019' .claude/rules/workflow-rules.md
 
 # 5. ADR-0019 파일 존재 + README 인덱스 확인
-test -f docs/decisions/0019-make-feature-pipeline-plan-mode-compatible.md && echo OK
-grep '0019' docs/decisions/README.md
+test -f docs/adr/0019-make-feature-pipeline-plan-mode-compatible.md && echo OK
+grep '0019' docs/adr/README.md
 ```
 
 ## Pros and Cons of the Options

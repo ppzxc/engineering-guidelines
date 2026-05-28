@@ -15,8 +15,8 @@ A collection of skills for Claude Code to create and track Architecture Decision
 
 | Skill | Path | Format |
 |-------|------|--------|
-| `docs:adr` | `docs/decisions/NNNN-<title>.md` | Nygard ADR |
-| `docs:madr` | `docs/decisions/NNNN-<title>.md` | MADR 4.0 |
+| `docs:adr` | `docs/adr/NNNN-<title>.md` | Nygard ADR |
+| `docs:madr` | `docs/adr/NNNN-<title>.md` | MADR 4.0 |
 
 ## Integration with Other Skills
 

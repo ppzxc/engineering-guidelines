@@ -15,7 +15,7 @@
       "name": "guideline",
       "source": "./plugins/guideline",
       "description": "Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "workflow",

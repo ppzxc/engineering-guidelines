@@ -1,6 +1,6 @@
 ---
 name: karpathy
-description: "Load the original 11 Karpathy coding guidelines verbatim to load guidelines into context before any coding session (do not paraphrase or summarize). — /guideline:karpathy, \"Karpathy 가이드라인\", \"코딩 가이드라인\""
+description: "Load the 4 Karpathy coding guidelines verbatim to load guidelines into context before any coding session (do not paraphrase or summarize). — /guideline:karpathy, \"Karpathy 가이드라인\", \"코딩 가이드라인\""
 user-invocable: true
 ---
 
@@ -65,26 +65,3 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## 5. Run Tests Before Marking Complete
-
-**If you touched code, run the tests before saying "done".**
-
-- `npm test`, `pytest`, `cargo test`, whatever the project uses — run it.
-- If tests pass, report results. If they fail, fix and re-run.
-- No test setup? At minimum, verify the project builds/compiles.
-- Run tests proactively, before the user signals "끝", "완료", "다 됐어" — not after.
-
-This is the step LLMs skip most often. Treat it as non-negotiable.
-
-## 6. Read Errors, Don't Guess
-
-**Read the actual error/log line. Don't pattern-match from memory.**
-
-When something fails:
-- Read the full error message and stack trace.
-- Check the actual log output, not what you assume it should say.
-- Don't apply a "common fix" before confirming the cause.
-- If unclear, add a print/log to verify state — then fix.
-
-This is the step LLMs skip most often after "run tests". They guess from error keywords and apply the most-recent-pattern fix. That's how a one-line bug becomes a three-file refactor.

@@ -1,60 +1,148 @@
 ---
 name: auto
-description: Use when performing automated cross-platform peer-reviews between Claude Code and Antigravity CLI without manual host routing.
+description: Use when performing automated cross-platform peer cross-check for plans, specs, and ideas using 4-way LLM fallback chain (agy, claude, gemini, codex). — /llm:auto, "교차검증", "cross-check", "peer check"
 user-invocable: true
 ---
 
 # llm:auto
 
-현재 구동 중인 AI 플랫폼 호스트(Claude Code 또는 Antigravity CLI)를 자동으로 판별하고, 자신이 아닌 **상대 플랫폼으로 위임(Delegation)하여 크로스 코드 리뷰 및 피어 체크**를 오케스트레이션합니다. 
+입력 분류(plan/spec/idea/diff) → 호스트 감지 → Self+Peer SUBAGENT 병렬 dispatch → severity-gated 병합.
 
-사용자가 개별 호스트의 환경을 수동으로 감지하여 명령어를 라우팅할 필요를 없애주는 마스터 오케스트레이터 스킬입니다.
+code diff는 `git:review`로 redirect. 라우팅·오케스트레이션 전담 스킬.
+
+## References
+
+- `references/check-categories.md` — 타입별 검증 항목, 출력 섹션 정의
+- `references/prompts.md` — 입력 타입별 프롬프트 4종
+- `references/peer-cli.md` — 4-way CLI 폴백 체인, sentinel 처리, host matrix
+
+## Execution Steps
+
+### Step 1. 입력 타입 분류
+
+사용자 인자 우선(`/llm:auto plan`, `/llm:auto spec`, `/llm:auto idea`), 없으면 휴리스틱:
+
+| 시그널 | 분류 |
+|--------|------|
+| `diff --git` / `--- a/` / `+++ b/` 헤더 포함 | **diff** |
+| `## Decision Outcome` / `status:` / MADR frontmatter | **spec** |
+| `## Considered Options` / "should we" / "what if" | **idea** |
+| 기타 (단계·체크리스트·실행 절차) | **plan** (default) |
+
+**diff 감지 시**: 즉시 redirect 메시지 표시 후 종료 (`references/prompts.md` Diff redirect 섹션).
+
+### Step 2. 호스트 감지
+
+`mcp__agy__*` MCP 도구 노출 → **Claude Code** 호스트 → Step 3A.  
+그 외 → **agy/비-Claude 호스트** → Step 3B.
+
+### Step 3A. Claude Code 호스트 — Self + Peer SUBAGENT 병렬 dispatch
+
+**Self-Review SUBAGENT와 Peer-Review Coordinator SUBAGENT를 동시에 dispatch한다.**
+
+---
+
+#### 3a-Self. Self-Review SUBAGENT
+
+Agent 툴로 review-capable agent dispatch (description에 "review"/"code"/"audit" 포함, 없으면 general-purpose + model=opus).
+
+Prompt:
+
+```
+You are an adversarial cross-checker. Review the content below using the appropriate prompt from references/prompts.md for input_type: {INPUT_TYPE}.
+
+Apply ALL required categories from references/check-categories.md for this input type.
+
+{PROMPT_TEMPLATE from references/prompts.md — {INPUT_TYPE} section}
+
+Replace {CONTENT} with the actual input content.
+```
+
+---
+
+#### 3a-Peer. Peer-Review Coordinator SUBAGENT
+
+Agent 툴로 general-purpose dispatch.
+
+Prompt:
+
+```
+You are a Peer Review Coordinator. Invoke an external LLM CLI to cross-check content.
+
+Host: Claude Code. Peer pool (in priority order): agy → gemini → codex.
+If all fail: return exactly "reviewer: claude-self-generate\ninput_type: {INPUT_TYPE}\n\nNo issues found."
+
+Follow references/peer-cli.md exactly:
+1. Pre-flight: timeout 3 <cli> --version for each CLI in pool order
+2. For agy: try mcp__agy__agy_cross_check first, then CLI
+3. For gemini: try Agent(subagent_type="gemini:gemini-rescue") first, then CLI
+4. For codex: try Agent(subagent_type="codex:codex-rescue") first, then CLI
+5. For claude CLI: pre-flight + stdin pipe
+6. On any sentinel (NOT_FOUND/TIMEOUT/ERROR): skip to next peer
+7. Return raw output from first successful peer
+
+Input type: {INPUT_TYPE}
+Prompt template: use references/prompts.md {INPUT_TYPE} section.
+Replace {CONTENT} with:
+--- CONTENT START ---
+{INPUT_CONTENT}
+--- CONTENT END ---
+```
+
+두 SUBAGENT 완료 대기 (동기 실행).
+
+---
+
+#### 3a-Merge. Findings 병합 (main thread)
+
+Self (3a-Self)와 Peer (3a-Peer) findings 수신 후 severity-gated hybrid 병합:
+
+| Severity | 병합 규칙 |
+|----------|----------|
+| `H` (high/blocking) | **Union** — 어느 한쪽이라도 발견 시 포함 |
+| `M`, `L` | **Intersection** — 양쪽 모두 발견 시에만 포함 |
+
+중복 제거: 동일 Tag + Item → 단일 항목으로 통합 (양 reviewer 언급).
+
+Peer unavailable (모든 sentinel): Self findings만 사용. User notify.  
+Self SUBAGENT 실패: Peer findings만 사용. User notify.
+
+### Step 3B. agy/비-Claude 호스트 — sequential (self inline + peer CLI)
+
+Self review: 호스트가 직접 `references/prompts.md` 해당 타입 프롬프트로 분석.
+
+Peer review: `references/peer-cli.md` 호스트별 peer pool 따라 CLI fallback 체인:
+- agy host: claude → gemini → codex
+
+Peer review 실패 시 (모든 sentinel): self-only. User notify.
+
+### Step 4. 출력
+
+병합 결과를 `references/check-categories.md` 출력 스키마 형식으로 표시:
+
+```
+## Cross-check Result
+input_type: {plan|spec|idea}
+self-reviewer: <agent>
+peer-reviewer: <agy|gemini|codex|claude-self-generate>
+
+## Cross-check
+| Tag | Item | Severity |
+| --- | --- | --- |
+
+[타입별 섹션 — check-categories.md 참조]
+
+## Provenance
+- self: <agent>
+- peer: <peer-id>
+- peer-chain: <시도 결과 예: agy→sentinel, gemini→success>
+- fallback-reason: <if any>
+```
 
 ## Sentinel 처리
 
-대상 플랫폼 위임 호출 중 실패(타임아웃, CLI 부재 등)가 발생하면, 프로세스의 무기한 대기나 중단을 방지하기 위해 즉시 **자체 플랫폼 로컬 리뷰(Self-Review)**로 Fallback 처리를 강제합니다.
+`references/peer-cli.md` Sentinel 처리 섹션 참조. 모든 sentinel → 다음 peer. 전부 실패 → self-only.
 
----
+## 자기-호출 금지
 
-## Step 1. 호스트 환경 자동 감지
-
-이 지침을 수신한 AI Agent는 자신이 구동되고 있는 로컬 호스트 터미널의 가용 시그널을 확인합니다.
-1. **CLAUDE (Claude Code)** 호스트 판별:
-   * 환경에서 `mcp__agy__agy_cross_check` 등 `mcp__agy__` MCP 도구가 발견되는 경우.
-2. **AGY (Antigravity CLI)** 호스트 판별:
-   * MCP 도구가 보이지 않고, `claude` CLI 혹은 `rtk` 환경이 가용하며 `GEMINI_` 혹은 `AGY` 환경 시그널이 우세한 경우.
-
----
-
-## Step 2. 플랫폼 양방향 위임 라우팅
-
-환경 감지 결과에 따라 즉시 상대방의 핵심 리뷰 스킬로 라우팅을 수행합니다.
-
-### 케이스 A. 현재 호스트가 CLAUDE (Claude Code)인 경우
-현재 플랫폼이 Claude이므로, 상대 플랫폼인 **Gemini/Antigravity (AGY)**의 강력한 컨텍스트 분석을 받아야 합니다.
-* **위임 행동**: **`llm:agy`** 스킬 지침을 전적으로 활성화하여 실행합니다.
-  * 1차적으로 `mcp__agy__agy_cross_check(plan=...)` MCP 도구를 사용해 리뷰 및 크로스체크를 수행합니다.
-  * MCP 도구가 부재할 경우, 로컬 쉘에서 `rtk proxy agy` 또는 `agy` 명령을 트리거하여 Gemini/Antigravity 분석을 획득합니다.
-
----
-
-### 케이스 B. 현재 호스트가 AGY (Antigravity CLI)인 경우
-현재 플랫폼이 Antigravity이므로, 상대 플랫폼인 **Claude Code (CLAUDE)**의 아키텍처 및 세부 추론 리뷰를 받아야 합니다.
-* **위임 행동**: **`llm:claude`** 스킬 지침을 전적으로 활성화하여 실행합니다.
-  * `llm:claude` 가이드에 명시된 3초 pre-flight `claude --version`을 거쳐, 안전하게 stdin 파이프 방식으로 `claude -p`를 트리거하여 리뷰를 위임합니다.
-
----
-
-## 예외 상황 및 Sentinel Fallback
-
-위임 처리 중 다음 예외 발생 시, 즉시 로컬 자체 모델을 통한 **자가 리뷰(Self-Review)**를 완수하여 결과를 반환합니다.
-* 상대 플랫폼 CLI 호출이 `CLAUDE_CLI_TIMEOUT` / `AGY_TIMEOUT` 등에 의해 타임아웃된 경우.
-* 위임할 툴체인(MCP 서버, CLI 바이너리)이 설치되어 있지 않아 `CLAUDE_CLI_NOT_FOUND` / `AGY_NOT_FOUND`가 발생한 경우.
-* 상대 진영 호출 시 에러 코드(Exit code > 0)가 반환된 경우.
-
-```markdown
-## Peer 위임 오류 - 로컬 자가 리뷰 (Fallback)
-[상대방 플랫폼 CLI/MCP 호출 중 감지된 예외 및 원인 요약]
-- 예외: CLAUDE_CLI_NOT_FOUND / AGY_TIMEOUT 등
-- 결과: 로컬 모델 추론 성능을 활용한 1차 자체 리뷰 리포트 생성 완료.
-```
+자기 자신 호스트와 동일한 peer 호출 금지 (ADR-0022/0023/0034). `references/peer-cli.md` Host Fallback Matrix 참조.

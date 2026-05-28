@@ -53,7 +53,7 @@ Assess current state and determine which steps are needed.
 
 | 자기가 누구인가 | peer reviewer 호출 |
 |----------------|-------------------|
-| Claude Code | Read `.context-map.md` if exists. `mcp__agy__agy_cross_check(plan=<Git 상태 및 clean 실행 계획>, context_map=<.context-map.md 내용 또는 "">)` |
+| Claude Code | `mcp__agy__agy_cross_check(plan=<Git 상태 및 clean 실행 계획>)` |
 | Gemini CLI | Bash (300s timeout): `printf '%s' "$CLEAN_PLAN" \| claude -p "<peer crosscheck 지시>"` — 계획 정보는 stdin pipe로 전달 |
 | Antigravity (agy host) | (Gemini CLI와 동일) |
 

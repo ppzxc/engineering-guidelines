@@ -13,6 +13,7 @@
 | ADR 작성 / 규칙 수정 | `.claude/rules/rules-maintenance.md` |
 | git 스킬 사용 / 수정 | `.claude/rules/git-rules.md` |
 | context 스킬 사용 / 수정 | `.claude/rules/context-rules.md` |
+| llm 스킬 사용 / 수정 | `.claude/rules/llm-rules.md` |
 
 ### 참조
 

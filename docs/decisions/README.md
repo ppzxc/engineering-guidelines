@@ -36,6 +36,7 @@
 | [ADR-0031](0031-context-guard-auto-run-via-block.md) | accepted | context:guard Stop hook — decision:block 자동 실행, IDE 아티팩트 필터, 관련 context 매칭 (ADR-0028 supersede) |
 | [ADR-0032](0032-context-plan-discipline-injection.md) | accepted | context:plan 디시플린 주입 — karpathy/tdd/tidy 원칙 디폴트 ON (설계 lens + [S]/[B] 검증 + GAN prompt 확장) |
 | [ADR-0033](0033-git-review-parallel-subagent-cross-review.md) | accepted | `git:review` 병렬 SUBAGENT 크로스 리뷰 — Self/Peer SUBAGENT 병렬 dispatch, 호스트별 폴백 체인, severity-gated 머지 |
+| [ADR-0034](0034-llm-plugin-4way-and-context-map-deprecation.md) | accepted | llm 플러그인 4-way 폴백 체인 확장 + context-map 전면 폐기 (ADR-0021/0022/0023 부분 supersede) |
 
 ## 새 ADR 추가
 

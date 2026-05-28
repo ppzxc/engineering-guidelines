@@ -46,19 +46,7 @@ Step 2에서 가져온 `files` 필드 사용 (추가 API 호출 불필요).
 
 고유 언어 집합 수집. Spring 감지 여부 확인: diff에 `@RestController`, `@Service`, `@Component`, `@Repository`, `@Controller`, `@Configuration`, 또는 `import org.springframework.` 포함 여부.
 
-### 4. Prepare Review Context
-
-#### 4a. Select Self-Review Agent (Claude Code host only)
-
-시스템 agent 목록에서 review-capable agent 필터링:
-- description에 "review", "code", "audit" 키워드 포함 agent
-- 최대 4개 후보 AskUserQuestion으로 노출
-
-후보 0개면 `general-purpose` + `model=opus` 강제.
-
-Gemini/agy/Codex host: 이 단계 skip.
-
-#### 4b. Build Peer Ruleset
+### 4. Build Peer Ruleset
 
 감지된 언어에 따라 peer prompt에 임베드할 ruleset 결정 (`peer-review-cli.md` Language Rulesets 섹션 참조):
 
@@ -82,25 +70,18 @@ gh pr diff <PR_NUMBER>
 
 **5a. Self-Review SUBAGENT**
 
-Agent 툴로 Step 4a에서 선택한 agent 타입 dispatch (model=opus).
+Agent 툴로 `pr-review-toolkit:code-reviewer` dispatch.
 
 Prompt:
 
 ```
-You are reviewing a GitHub PR. Analyze the diff and return all findings.
+You are reviewing a GitHub PR as a self-reviewer.
 
-Detected languages: {LANGUAGES}
-Spring detected: {yes|no}
+Review the following diff thoroughly for bugs, security issues, and CLAUDE.md compliance.
 
-Instructions for language-specific review:
-- .java files: invoke `java:reviewer` skill via Skill tool.
-  If Spring detected: also invoke `java:spring` skill via Skill tool.
-- .go files: invoke `golang:reviewer` skill via Skill tool.
-- Other languages: apply general review criteria.
+Output MUST follow subagent-output-schema exactly:
 
-Output schema — MUST follow exactly (see subagent-output-schema.md):
-
-reviewer: claude-opus
+reviewer: pr-review-toolkit:code-reviewer
 
 | severity | file:line | category | issue |
 | --- | --- | --- | --- |
@@ -111,8 +92,13 @@ Immediately after each row, add:
 + fixed line
 ```
 
+Confidence → severity mapping:
+- confidence 90-100 → severity: critical
+- confidence 80-89 → severity: high
+- below 80: do not report
+
 severity: critical=security/data-loss, high=bug/runtime-error, medium=logic-issue, low=style/naming
-If no issues: write "reviewer: claude-opus\n\nNo issues found."
+If no issues: write "reviewer: pr-review-toolkit:code-reviewer\n\nNo issues found."
 
 --- DIFF START ---
 {PR_DIFF}
@@ -140,7 +126,7 @@ Follow peer-review-cli.md exactly:
 Ruleset and diff for embedding in CLI prompt:
 
 <RULESET>
-{RULESET from Step 4b}
+{RULESET from Step 4}
 </RULESET>
 
 <DIFF>
@@ -205,10 +191,10 @@ finding 없으면 skip.
 
 ```bash
 # fix 적용 + peer available:
-gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (<self-agent> + <peer: agy|gemini|codex>). <N> issue(s) found and fixed. (critical:<c> high:<h> medium:<m> low:<l>)"
+gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (code-reviewer + <peer: agy|gemini|codex>). <N> issue(s) found and fixed. (critical:<c> high:<h> medium:<m> low:<l>)"
 
 # fix 적용 + peer unavailable:
-gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (self-only: <self-agent>). <N> issue(s) found and fixed."
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (self-only: code-reviewer). <N> issue(s) found and fixed."
 
 # fix 없음:
 gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
@@ -224,7 +210,6 @@ gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
 | PR already merged/closed | Abort, display current state |
 | CI failing | Include CI failure details in review |
 | Empty diff | Display "No changes found" and abort |
-| No reviewer skill found | Use general review criteria |
 | Peer reviewer unavailable | Proceed with self-only, notify user |
 | Self SUBAGENT failed | Proceed with peer findings only, notify user |
 | Both failed | Abort, display error |

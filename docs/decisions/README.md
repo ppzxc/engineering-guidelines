@@ -38,6 +38,7 @@
 | [ADR-0033](0033-git-review-parallel-subagent-cross-review.md) | accepted | `git:review` 병렬 SUBAGENT 크로스 리뷰 — Self/Peer SUBAGENT 병렬 dispatch, 호스트별 폴백 체인, severity-gated 머지 |
 | [ADR-0034](0034-llm-plugin-4way-and-context-map-deprecation.md) | accepted | llm 플러그인 4-way 폴백 체인 확장 + context-map 전면 폐기 (ADR-0021/0022/0023 부분 supersede) |
 | [ADR-0035](0035-deprecate-git-clean-peer-crosscheck.md) | accepted | `git:clean` entry peer crosscheck 폐지 — post-work pipeline 본질 재확인, ADR-0023 full supersede |
+| [ADR-0036](0036-git-review-self-reviewer-migration.md) | accepted | `git:review` Self-Review agent를 pr-review-toolkit:code-reviewer로 교체 (언어별 스킬 제거, Step 4a 제거) |
 
 ## 새 ADR 추가
 

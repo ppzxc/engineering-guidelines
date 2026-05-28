@@ -52,10 +52,20 @@ ADR numbers and rule file paths are **not** hardcoded inside skill files — the
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
 
+## Discipline (default ON)
+
+`/context:plan` injects karpathy/tdd/tidy discipline by default. Opt out with single-token flags:
+
+- `--no-karpathy=<reason>` — disable simplicity/surgical design lens
+- `--no-tdd-tidy=<reason>` — disable [S]/[B] tagging + RGR sub-steps in tasks.md
+
+Opt-out reason is mandatory and recorded as a blockquote at the top of `spec.md`. See [ADR-0032].
+
 ## Usage
 
 ```bash
 /context:plan  my raw idea here
+/context:plan --no-tdd-tidy=throwaway-prototype "quick spike"
 /context:update
 /context:resume
 /context:guard   # optional: install staleness reminder hook

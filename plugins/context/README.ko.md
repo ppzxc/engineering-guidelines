@@ -52,10 +52,20 @@ ADR 번호와 rules 파일 경로는 스킬 파일 안에 하드코딩하지 않
 claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.git
 ```
 
+## 디시플린 (디폴트 ON)
+
+`/context:plan` 은 karpathy/tdd/tidy 디시플린을 디폴트로 주입한다. 단일 토큰 플래그로 옵트아웃:
+
+- `--no-karpathy=<reason>` — simplicity/surgical 설계 lens 비활성
+- `--no-tdd-tidy=<reason>` — tasks.md 의 [S]/[B] 태그 + RGR sub-step 비활성
+
+옵트아웃 reason 은 필수이며 `spec.md` 최상단 blockquote 에 기록된다. [ADR-0032] 참조.
+
 ## 사용법
 
 ```bash
 /context:plan  raw 아이디어를 여기에
+/context:plan --no-tdd-tidy=throwaway-prototype "빠른 스파이크"
 /context:update
 /context:resume
 /context:guard   # 선택: staleness reminder hook 설치

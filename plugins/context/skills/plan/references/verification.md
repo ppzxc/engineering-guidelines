@@ -38,9 +38,16 @@ Do NOT validate or praise. Assume there are defects until proven otherwise.
 
 Output format:
 1. Cross-check table: | tag | finding | severity(H/M/L) |
-   tags: consistency, omission, ordering, risk, feasibility, version-compat
+   tags: consistency, omission, ordering, risk, feasibility, version-compat, discipline
 2. Test Scenarios (3): normal case, boundary case, failure case — with how to verify
 3. Pre-mortem (3): specific scenarios where this plan fails in production
+
+Additionally evaluate discipline injection in plan.md:
+- Karpathy lens reflected in scope (no speculative features, surgical changes only)?
+- Plan.md task plan intends [S]/[B] tagging and [S]-first ordering per phase?
+- Non-trivial behavioral tasks intended to decompose into RED→GREEN→REFACTOR?
+Note: final tasks.md is validated mechanically in Step 7; here, only the plan-level intent.
+Flag violations severity H only if discipline is enabled (no opt-out blockquote at top of spec).
 
 GAN MODE ACTIVE. Begin.
 
@@ -78,16 +85,23 @@ Do NOT validate or praise. Assume there are defects until proven otherwise.
 
 Output format:
 1. Cross-check table: | tag | finding | severity(H/M/L) |
-   tags: consistency, omission, ordering, risk, feasibility, version-compat
+   tags: consistency, omission, ordering, risk, feasibility, version-compat, discipline
 2. Test Scenarios (3): normal case, boundary case, failure case — with how to verify
 3. Pre-mortem (3): specific scenarios where this plan fails in production
+
+Additionally evaluate discipline injection in plan.md:
+- Karpathy lens reflected in scope (no speculative features, surgical changes only)?
+- Plan.md task plan intends [S]/[B] tagging and [S]-first ordering per phase?
+- Non-trivial behavioral tasks intended to decompose into RED→GREEN→REFACTOR?
+Note: final tasks.md is validated mechanically in Step 7; here, only the plan-level intent.
+Flag violations severity H only if discipline is enabled (no opt-out blockquote at top of spec).
 
 GAN MODE ACTIVE. Begin.
 
 --- PLAN START ---
 GANEOF
 printf '%s\n--- PLAN END ---\n' "$PLAN_CONTENT" >> "$TMPFILE"
-timeout 330 agy -p "$(cat "$TMPFILE")" --print-timeout 300
+timeout 330 agy -p "$(cat "$TMPFILE")" --print-timeout 300s
 rm "$TMPFILE"
 ```
 
@@ -107,9 +121,16 @@ Do NOT validate or praise. Assume there are defects until proven otherwise.
 
 Output format:
 1. Cross-check table: | tag | finding | severity(H/M/L) |
-   tags: consistency, omission, ordering, risk, feasibility, version-compat
+   tags: consistency, omission, ordering, risk, feasibility, version-compat, discipline
 2. Test Scenarios (3): normal case, boundary case, failure case — with how to verify
 3. Pre-mortem (3): specific scenarios where this plan fails in production
+
+Additionally evaluate discipline injection in plan.md:
+- Karpathy lens reflected in scope (no speculative features, surgical changes only)?
+- Plan.md task plan intends [S]/[B] tagging and [S]-first ordering per phase?
+- Non-trivial behavioral tasks intended to decompose into RED→GREEN→REFACTOR?
+Note: final tasks.md is validated mechanically in Step 7; here, only the plan-level intent.
+Flag violations severity H only if discipline is enabled (no opt-out blockquote at top of spec).
 
 GAN MODE ACTIVE. Begin.
 
@@ -136,9 +157,16 @@ Do NOT validate or praise. Assume there are defects until proven otherwise.
 
 Output format:
 1. Cross-check table: | tag | finding | severity(H/M/L) |
-   tags: consistency, omission, ordering, risk, feasibility, version-compat
+   tags: consistency, omission, ordering, risk, feasibility, version-compat, discipline
 2. Test Scenarios (3): normal case, boundary case, failure case — with how to verify
 3. Pre-mortem (3): specific scenarios where this plan fails in production
+
+Additionally evaluate discipline injection in plan.md:
+- Karpathy lens reflected in scope (no speculative features, surgical changes only)?
+- Plan.md task plan intends [S]/[B] tagging and [S]-first ordering per phase?
+- Non-trivial behavioral tasks intended to decompose into RED→GREEN→REFACTOR?
+Note: final tasks.md is validated mechanically in Step 7; here, only the plan-level intent.
+Flag violations severity H only if discipline is enabled (no opt-out blockquote at top of spec).
 
 GAN MODE ACTIVE. Begin.
 

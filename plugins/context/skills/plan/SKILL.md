@@ -224,7 +224,7 @@ Last Updated: YYYY-MM-DD
 
 ```bash
 TASKS="docs/context/${TASK_NAME}/tasks.md"
-untagged=$(grep -E '^- \[ \]' "$TASKS" | grep -vE '\[(S|B)\]' | wc -l)
+untagged=$(grep -E '^- \[ \]' "$TASKS" | grep -vE '^- \[ \] \[(S|B)\]' | wc -l)
 tagged=$(grep -cE '\[(S|B)\]' "$TASKS")
 if [ "$untagged" -gt 0 ] || [ "$tagged" -eq 0 ]; then
     # 디시플린 검증 실패 → 사용자 결정 (대화 모드)

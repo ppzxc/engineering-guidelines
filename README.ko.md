@@ -11,7 +11,7 @@
 | [guideline](./plugins/guideline) | v0.2.1 | 소프트웨어 엔지니어링 가이드라인 및 코딩 원칙 — RESTful API 가이드라인, Andrej Karpathy의 11가지 코딩 행동 지침, Honest Judgment 안티-sycophancy 리뷰 규칙 포함 |
 | [workflow](./plugins/workflow) | v0.1.1 | 오케스트레이션된 개발 프로세스 워크플로우 스킬 — 고강도 개발 기율 강제를 위한 init, idea, feature, develop, planning 스킬 포함 |
 | [docs](./plugins/docs) | v0.0.7 | 문서 결정 기록 — ADR (Nygard 포맷) 및 MADR (MADR 4.0) 아키텍처 결정 기록 |
-| [git](./plugins/git) | v0.0.16 | Git 워크플로우 스킬 — 안전한 커밋, 한글 PR 생성, 호스트 인지 peer 교차검증 PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
+| [git](./plugins/git) | v0.0.17 | Git 워크플로우 스킬 — 안전한 커밋, 한글 PR 생성, 호스트 인지 peer 교차검증 PR 리뷰, squash merge, 이슈 생성, PR 전체 흐름, worktree 정리 |
 | [llm](./plugins/llm) | v0.2.0 | LLM 위임 스킬 — agy (Antigravity CLI) 컨텍스트 맵 생성, claude 정밀 분석 및 auto 양방향 교차검증 |
 | [dev](./plugins/dev) | v0.0.4 | 개발 방법론 스킬 — Tidy First, TDD, 언어 무관 개발 프랙티스 |
 | [context](./plugins/context) | v0.5.0 | Dev Docs 시스템 스킬 — 세션 단절에도 재개 가능한 4파일 자기완결 작업 폴더 |

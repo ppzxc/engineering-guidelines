@@ -43,7 +43,7 @@ user-invocable: true
 # 1. LOOP GUARD — stdin must be read first to prevent re-block on auto-run turn
 # [ -t 0 ]: skip cat when stdin is a TTY (manual debug run), avoids hang
 [ -t 0 ] && INPUT='' || INPUT=$(cat 2>/dev/null)
-printf '%s' "$INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true' && exit 0
+printf '%s' "$INPUT" | grep -qE '"stop_hook_active"[[:space:]]*:[[:space:]]*true|"stopHookActive"[[:space:]]*:[[:space:]]*true' && exit 0
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 [ -n "$GIT_ROOT" ] || exit 0
@@ -113,7 +113,16 @@ done
 # 4. Convert last_updated ISO-8601 to epoch (GNU date; BSD/macOS fallback)
 LAST_EPOCH=$(date -d "$BEST_TS" +%s 2>/dev/null)
 if [ -z "$LAST_EPOCH" ]; then
-  LAST_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$BEST_TS" +%s 2>/dev/null)
+  # Normalize for BSD date: strip subseconds, trailing Z, timezone offset; re-add Z
+  TS_NORM=$(printf '%s' "$BEST_TS" \
+    | sed 's/\.[0-9]*//' \
+    | sed 's/Z$//' \
+    | sed 's/[+-][0-9][0-9]:[0-9][0-9]$//')
+  case "$TS_NORM" in
+    *T*) TS_NORM="${TS_NORM}Z" ;;
+    *)   TS_NORM="${TS_NORM}T00:00:00Z" ;;
+  esac
+  LAST_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$TS_NORM" +%s 2>/dev/null)
 fi
 [ -n "$LAST_EPOCH" ] || exit 0
 
@@ -128,8 +137,8 @@ for f in $CHANGED; do
   [ "$MT" -gt "$NEWEST" ] && NEWEST=$MT
 done
 
-# If all changed files were deleted (no mtime), treat as stale
-[ "$NEWEST" -eq 0 ] && NEWEST=$(date +%s 2>/dev/null || printf '%s' '9999999999')
+# If all changed files were deleted (no mtime), nothing to check against
+[ "$NEWEST" -eq 0 ] && exit 0
 
 [ "$NEWEST" -gt "$LAST_EPOCH" ] || exit 0
 

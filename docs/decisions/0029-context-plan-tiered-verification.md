@@ -1,6 +1,6 @@
 # context:plan 계층형 자가검증·리뷰 게이트 도입
 
-* Status: accepted
+* Status: superseded by ADR-0030
 * Date: 2026-05-27
 * Decision Makers: ppzxc
 * Consulted: Claude Opus (brainstorming, grill-me)

@@ -7,7 +7,8 @@ git 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약
 ✓ `.java` 파일 변경 시 항상 `java:reviewer`를 로드하고, PR diff에 Spring 어노테이션(@RestController/@Service/@Component/@Repository/@Controller/@Configuration) 또는 `import org.springframework.`가 보이면 `java:spring`을 추가 로드할 것
 ✓ `.go` 파일 변경 시 `golang:reviewer`를 로드할 것
 ✓ PR 제목과 본문은 한글로 작성할 것 (기술 용어·코드·커맨드 제외)
-✓ git:review와 git:clean의 peer crosscheck는 자기 호스트와 다른 LLM에게 위임할 것. 자기 자신에게 cross-check를 보내는 호출 금지 [ADR-0022][ADR-0023]
+✓ git:review의 peer crosscheck는 자기 호스트와 다른 LLM에게 위임할 것. 자기 자신에게 cross-check를 보내는 호출 금지 [ADR-0022][ADR-0033]
+✓ git:clean entry에서 별도 peer crosscheck를 추가하지 말 것 (post-work pipeline이므로 plan 검토 대상 없음) [ADR-0035]
 ✓ git:review의 cross-review는 Self/Peer 두 SUBAGENT 병렬 dispatch로 수행할 것 (Claude Code host) [ADR-0033]
 ✓ peer 폴백 체인은 자기 호스트를 제외한 풀에서 우선순위대로 시도하고 모든 sentinel(NOT_FOUND/TIMEOUT/ERROR)에서 다음 peer로 이동할 것 [ADR-0033]
 ✓ Self SUBAGENT 선택은 실행 시 AskUserQuestion으로 동적 노출하고 review-capable agent(description에 review/code/audit 키워드)를 필터링할 것 [ADR-0033]

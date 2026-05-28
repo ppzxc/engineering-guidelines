@@ -5,7 +5,8 @@
 # Known limitation: paths containing spaces may parse incorrectly (kebab-slug paths safe).
 
 # 1. LOOP GUARD — stdin must be read first to prevent re-block on auto-run turn
-INPUT=$(cat 2>/dev/null)
+# [ -t 0 ]: skip cat when stdin is a TTY (manual debug run), avoids hang
+[ -t 0 ] && INPUT='' || INPUT=$(cat 2>/dev/null)
 printf '%s' "$INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true' && exit 0
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
@@ -49,7 +50,7 @@ for CTX_MD in $(find "$CONTEXT_DIR" -maxdepth 2 -name "context.md" 2>/dev/null);
       for prefix in $SCOPE; do
         [ -z "$prefix" ] && continue
         case "$cf" in
-          "$prefix"*) MATCHED=1; break 2 ;;
+          "$prefix" | "$prefix"/*) MATCHED=1; break 2 ;;
         esac
       done
     done

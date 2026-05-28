@@ -29,9 +29,10 @@
 | [ADR-0021](0021-migrate-llm-backend-from-gemini-cli-to-agy.md) | accepted | gemini-cli MCP 제거 및 agy 백엔드 교체 (feature-pipeline 제거, llm 플러그인 신설) |
 | [ADR-0022](0022-bidirectional-peer-cross-review.md) | accepted | `git:review` 양방향 peer cross-review (호스트별 라우팅, Claude↔agy↔Gemini) |
 | [ADR-0023](0023-git-clean-bidirectional-peer-cross-check.md) | accepted | `git:clean` 양방향 peer cross-check 도입 (호스트별 라우팅, Claude↔agy↔Gemini) |
-| [ADR-0027](0027-add-context-devdocs-plugin.md) | accepted | context Dev Docs 플러그인 추가 (4파일 자기완결 폴더, workflow와 공존) |
+| [ADR-0027](0027-add-context-devdocs-plugin.md) | superseded by ADR-0030 (HARD-GATE 부분) | context Dev Docs 플러그인 추가 (4파일 자기완결 폴더, workflow와 공존) |
 | [ADR-0028](0028-context-guard-opt-in-stop-hook.md) | accepted | context 플러그인 옵트인 Stop hook 도입 — context:guard 설치 스킬로 호스트 프로젝트에 staleness reminder 제공 |
-| [ADR-0029](0029-context-plan-tiered-verification.md) | accepted | context:plan 계층형 자가검증·리뷰 게이트 도입 (Tier 1 self-review + Tier 2 비-Claude CLI cross-check) |
+| [ADR-0029](0029-context-plan-tiered-verification.md) | superseded by ADR-0030 | context:plan 계층형 자가검증·리뷰 게이트 도입 (Tier 1 self-review + Tier 2 비-Claude CLI cross-check) |
+| [ADR-0030](0030-context-plan-pipeline-redesign.md) | accepted | context:plan 파이프라인 재설계 — grill 우선, spec 사람 리뷰 최우선(ExitPlanMode), GAN 단일 게이트 |
 
 ## 새 ADR 추가
 

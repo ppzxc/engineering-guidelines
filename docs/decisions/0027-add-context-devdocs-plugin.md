@@ -1,6 +1,6 @@
 # Add Context Dev Docs Plugin — 4파일 자기완결 폴더로 세션 재개성 확보
 
-* Status: accepted
+* Status: superseded by ADR-0030 (brainstorming HARD-GATE 규칙 부분)
 * Date: 2026-05-27
 * Decision Makers: ppzxc
 

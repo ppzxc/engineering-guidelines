@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Engineering guidelines and best practices for software development",
-    "version": "0.2.2"
+    "version": "0.2.3"
   },
   "plugins": [
     {
@@ -51,7 +51,7 @@
       "name": "context",
       "source": "./plugins/context",
       "description": "Dev Docs System skills — self-contained 4-file task folders (spec/plan/tasks/context) for resumable development",
-      "version": "0.3.1"
+      "version": "0.4.0"
     }
   ]
 }

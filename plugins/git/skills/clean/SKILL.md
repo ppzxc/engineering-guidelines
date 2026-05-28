@@ -36,52 +36,11 @@ git branch --show-current
 gh repo view --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null || echo "main"
 ```
 
-Assess current state.
 **CRITICAL:** If `git branch --show-current` equals the default branch:
 1. Generate a new feature branch name (e.g., `feat/clean-$(date +%Y%m%d-%H%M)`).
 2. Create and checkout the new branch: `git checkout -b <NEW_BRANCH>`
 
 Assess current state and determine which steps are needed.
-
-### Step 0a. Peer Crosscheck (host-aware)
-
-자기 호스트를 식별하고 peer reviewer에게 현재 Git 상태와 `/git:clean` 실행 계획에 대한 크로스체크를 위임한다. 자기 자신에게 cross-check를 보내는 호출은 금지 [ADR-0023].
-
-현재 Git 상태 및 계획 정보 획득:
-- 브랜치명, 미커밋 파일 목록, 기존 PR 번호(있다면), 원격/로컬 브랜치 커밋 차이.
-- 계획 정보: 수행 예정인 단계 (예: Step 1 Commit 여부, Step 2 PR 여부, Step 3 Review 여부, Step 4 Merge 여부, Step 5 Cleanup 여부).
-
-| 자기가 누구인가 | peer reviewer 호출 |
-|----------------|-------------------|
-| Claude Code | `mcp__agy__agy_cross_check(plan=<Git 상태 및 clean 실행 계획>)` |
-| Gemini CLI | Bash (300s timeout): `printf '%s' "$CLEAN_PLAN" \| claude -p "<peer crosscheck 지시>"` — 계획 정보는 stdin pipe로 전달 |
-| Antigravity (agy host) | (Gemini CLI와 동일) |
-
-**Pre-flight** — `claude -p` 분기 진입 전 `timeout 3 claude --version` 실행. exit ≠ 0이면 즉시 `CLAUDE_CLI_NOT_FOUND:` sentinel 발동 (미인증/오프라인 상태로 300s hang 방지).
-
-**Safety** — 계획 정보는 반드시 stdin pipe 또는 임시 파일로 전달한다. CLI 인자에 직접 보간하지 않는다 — shell metacharacter (백틱·`$()`) injection 및 `ARG_MAX` 초과 위험을 차단한다.
-
-자기 호스트 식별: LLM 자기 인지(Claude는 자기가 Claude임을 안다). 보조 시그널 (강한 시그널 우선 적용):
-- `mcp__agy__agy_cross_check` 도구가 호출 가능 → Claude Code
-- `mcp__agy__` 도구가 보이지 않으나 `claude` CLI는 PATH에 있음 → Gemini CLI 또는 Antigravity
-- 두 시그널 모두 없으면 self-only check로 fallback
-
-**동기 실행** — 결과를 받기 전 Step 1로 넘어가지 않는다.
-
-**Peer 검토 관점:** consistency·omissions·ordering·risk·feasibility·version-compat (아키텍처 관점). 정리 대상 브랜치/작업공간이 안전하고 유실될 변경사항이 없는지 검토.
-
-**Sentinel 처리** — 다음 prefix로 시작하면 즉시 Step 1로 진행. 동일 인자 재호출 금지:
-
-| Sentinel | 트리거 호스트 | 의미 |
-|----------|-------------|------|
-| `AGY_TIMEOUT:` | Claude Code | agy 300s 초과 |
-| `AGY_ERROR(exit=...)` | Claude Code | agy 비정상 종료 |
-| `AGY_NOT_FOUND:` | Claude Code | agy 바이너리 부재 |
-| `CLAUDE_CLI_NOT_FOUND:` | Gemini / agy host | `claude` 바이너리 부재 |
-| `CLAUDE_CLI_TIMEOUT:` | Gemini / agy host | `claude -p` 300s 초과 |
-| `CLAUDE_CLI_ERROR(exit=N):` | Gemini / agy host | `claude -p` 비정상 종료 |
-
-Sentinel 발생 시: notify user "⚠️ peer reviewer unavailable, self-only check".
 
 ### Step 1. Commit (if uncommitted changes exist)
 

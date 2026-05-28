@@ -2,7 +2,7 @@
 
 Claude Code, Cursor, GitHub Copilot 등 모든 AI 도구에 공통으로 적용되는 프로젝트 규칙이다.
 
-설계, 아키텍처, 프로젝트 컨벤션에 대한 새로운 결정이 발생하면, 반드시 `docs/decisions/0000-template.md` (또는 minimal)를 참고하여 ADR 문서를 작성하고, 강제할 규칙은 `.claude/rules/`의 관련 파일에 `[ADR-NNNN]` 태그와 함께 추가하여 동기화할 것.
+설계, 아키텍처, 프로젝트 컨벤션에 대한 새로운 결정이 발생하면, 반드시 `docs/adr/0000-template.md` (또는 minimal)를 참고하여 ADR 문서를 작성하고, 강제할 규칙은 `.claude/rules/`의 관련 파일에 `[ADR-NNNN]` 태그와 함께 추가하여 동기화할 것.
 
 ## 프로젝트 정체성
 
@@ -17,14 +17,14 @@ plugins/api/        # RESTful API 설계 가이드라인
 plugins/docs/       # 문서 결정 기록 스킬
 plugins/git/        # Git 워크플로우 스킬
 plugins/workflow/   # 멀티 LLM 크로스체크 워크플로우 스킬
-docs/decisions/     # ADR (MADR 4.0)
+docs/adr/     # ADR (MADR 4.0)
 .claude/rules/      # 프로젝트 규칙
 ```
 
 ## 컨벤션
 
 - **문서 언어**: 한국어
-- **ADR 형식**: MADR 4.0 (`docs/decisions/0000-template.md` 참조)
+- **ADR 형식**: MADR 4.0 (`docs/adr/0000-template.md` 참조)
 - **버전 동기화**: 플러그인 버전 변경 시 세 곳을 동시에 업데이트한다
   - `.claude-plugin/marketplace.json`
   - `plugins/<name>/.claude-plugin/plugin.json`
@@ -33,8 +33,24 @@ docs/decisions/     # ADR (MADR 4.0)
 
 ## 정본 규칙 소스
 
-규칙의 정본은 아래 세 경로뿐이다. 이 외의 위치에 규칙을 작성하지 않는다.
+규칙의 정본은 아래 다섯 경로뿐이다. 이 외의 위치에 규칙을 작성하지 않는다.
 
 1. `AGENTS.md` — 공통 프로젝트 규칙
 2. `.claude/rules/*` — 작업별 세부 규칙
-3. `docs/decisions/*` — 결정의 근거 (ADR)
+3. `docs/adr/*` — 결정의 근거 (ADR)
+4. `docs/agents/*` — matt pocock 스킬 컨벤션 (issue tracker / triage labels / domain docs)
+5. `CONTEXT.md` — 도메인 용어집
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues, repo `ppzxc/engineering-guidelines`. `gh` CLI 사용. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+matt pocock canonical 5종 + `ready` legacy alias (ready-for-agent). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context. `CONTEXT.md` (root) + `docs/adr/`. See `docs/agents/domain.md`.

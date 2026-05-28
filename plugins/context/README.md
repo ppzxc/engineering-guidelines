@@ -44,7 +44,7 @@ The plugin itself stays hook-free (see ADR-0028). The Stop hook lives in the hos
 ## Portability Principle
 
 This plugin inherits the host project's conventions at runtime.
-ADR numbers and rule file paths are **not** hardcoded inside skill files — they stay in the host project's `docs/decisions/` and `.claude/rules/`.
+ADR numbers and rule file paths are **not** hardcoded inside skill files — they stay in the host project's `docs/adr/` and `.claude/rules/`.
 
 ## Installation
 

@@ -10,7 +10,7 @@ A collection of engineering guidelines for software development, as a Claude Cod
 |--------|---------|-------------|
 | [guideline](./plugins/guideline) | v0.2.1 | Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule |
 | [workflow](./plugins/workflow) | v0.1.1 | Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering |
-| [docs](./plugins/docs) | v0.0.7 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
+| [docs](./plugins/docs) | v0.0.8 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
 | [git](./plugins/git) | v0.2.0 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup |
 | [llm](./plugins/llm) | v0.3.0 | LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain |
 | [dev](./plugins/dev) | v0.0.4 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |

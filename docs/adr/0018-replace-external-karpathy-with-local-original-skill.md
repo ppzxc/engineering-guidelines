@@ -67,7 +67,7 @@ grep 'drift 금지.*ADR-0018' .claude/rules/workflow-rules.md
 ## More Information
 
 * §5(한국어 콜론 금지)는 원문 자체에 "When the user writes in Korean" 조건이 명시되어 있어 영어 작업 subagent에서 자동으로 비활성화된다.
-* §7(Plan + Checklist + Context Storage)의 "designated directories"는 본 프로젝트에서 `docs/plans/<slug>.md`(ADR-0011/0015), `.claude/rules/*.md`(rules-maintenance.md), `docs/decisions/*.md`(rules-maintenance.md)로 매핑된다.
+* §7(Plan + Checklist + Context Storage)의 "designated directories"는 본 프로젝트에서 `docs/plans/<slug>.md`(ADR-0011/0015), `.claude/rules/*.md`(rules-maintenance.md), `docs/adr/*.md`(rules-maintenance.md)로 매핑된다.
 * 향후 개선 검토: 스킬 본문에서 자동 추출해 S6 prompt에 주입하는 빌드 스크립트 (현 PR 범위 밖).
 * 관련 ADR: [ADR-0011](0011-add-feature-pipeline-orchestrator.md), [ADR-0014](0014-strengthen-feature-pipeline-evidence-based-gates.md), [ADR-0015](0015-remove-writing-plans-from-feature-pipeline.md), [ADR-0016](0016-avoid-plan-mode-in-feature-pipeline.md)
 * 규칙 파일: [`.claude/rules/workflow-rules.md`](../../.claude/rules/workflow-rules.md)

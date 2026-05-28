@@ -1,6 +1,6 @@
 # context 플러그인 옵트인 Stop hook 도입 (context:guard)
 
-* Status: accepted
+* Status: superseded by ADR-0031
 * Date: 2026-05-27
 * Decision Makers: ppzxc
 * Consulted: Claude Opus (brainstorming)

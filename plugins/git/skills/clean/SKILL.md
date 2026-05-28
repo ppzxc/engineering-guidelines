@@ -36,7 +36,6 @@ git branch --show-current
 gh repo view --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null || echo "main"
 ```
 
-Assess current state.
 **CRITICAL:** If `git branch --show-current` equals the default branch:
 1. Generate a new feature branch name (e.g., `feat/clean-$(date +%Y%m%d-%H%M)`).
 2. Create and checkout the new branch: `git checkout -b <NEW_BRANCH>`

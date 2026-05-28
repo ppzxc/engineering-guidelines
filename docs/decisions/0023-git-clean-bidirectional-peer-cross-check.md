@@ -1,6 +1,6 @@
 # `git:clean` 양방향 peer cross-check 도입 (호스트별 라우팅)
 
-* Status: accepted
+* Status: superseded by ADR-0035
 * Date: 2026-05-22
 * Decision Makers: ppzxc
 

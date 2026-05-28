@@ -6,21 +6,21 @@ user-invocable: true
 
 # review — PR Code Review & Auto-Fix
 
-Analyze PR diff → detect languages → load language-specific reviewer skills → display review results → apply fixes → submit review comment via `gh pr review` after user confirmation (or automatically if --fix is provided).
+PR diff 분석 → 언어 감지 → Self/Peer SUBAGENT 병렬 dispatch → severity-gated 병합 → 수정 적용 → PR 코멘트 제출.
 
 ## Execution Steps
 
 ### 1. Find PR Number
 
-If a PR number is provided as an argument, use it.
-Otherwise detect from current branch:
+PR 번호가 인자로 제공된 경우 사용.
+없으면 현재 브랜치에서 감지:
 
 ```bash
 git branch --show-current
 gh pr view <FEATURE_BRANCH> --json number,title,state
 ```
 
-If no PR is found, ask the user for the PR number directly.
+PR이 없으면 사용자에게 직접 PR 번호 요청.
 
 ### 2. Fetch PR Info
 
@@ -31,9 +31,9 @@ gh pr checks <PR_NUMBER>
 
 ### 3. Detect Languages
 
-Use the `files` field already retrieved in Step 2 (no additional API call needed).
+Step 2에서 가져온 `files` 필드 사용 (추가 API 호출 불필요).
 
-Inspect the changed file extensions and map to languages:
+변경된 파일 확장자 → 언어 매핑:
 
 | Extension | Language |
 |-----------|----------|
@@ -44,91 +44,149 @@ Inspect the changed file extensions and map to languages:
 | `.py` | python |
 | `.rs` | rust |
 
-Collect the unique set of detected languages.
+고유 언어 집합 수집. Spring 감지 여부 확인: diff에 `@RestController`, `@Service`, `@Component`, `@Repository`, `@Controller`, `@Configuration`, 또는 `import org.springframework.` 포함 여부.
 
-### 4. Load Reviewer Skills
+### 4. Prepare Review Context
 
-Map detected languages to reviewer skills using the table below. **Do not infer skill names from descriptions or partial matches** — use the exact names listed.
+#### 4a. Select Self-Review Agent (Claude Code host only)
 
-| Detected language | Required skill | Conditional skill |
-|-------------------|----------------|-------------------|
-| `go` | `golang:reviewer` | — |
-| `java` | `java:reviewer` | `java:spring` if PR diff contains any of `@RestController`, `@Service`, `@Component`, `@Repository`, `@Controller`, `@Configuration`, or `import org.springframework.` |
+시스템 agent 목록에서 review-capable agent 필터링:
+- description에 "review", "code", "audit" 키워드 포함 agent
+- 최대 4개 후보 AskUserQuestion으로 노출
 
-Process **all** rows whose language was detected — do not stop after the first match.
+후보 0개면 `general-purpose` + `model=opus` 강제.
 
-For each row that matches the detected languages:
-1. Invoke the required skill via the `Skill` tool.
-2. If the conditional skill's trigger is present in the diff: if you have not yet fetched the full diff, run `gh pr diff <PR_NUMBER>` now, then check for the trigger strings before invoking the conditional skill.
+Gemini/agy/Codex host: 이 단계 skip.
 
-Languages not listed in the table → skip skill loading and fall back to the general review criteria for that language's files. **Do not guess a skill name** (e.g., `<lang>:reviewer`) for unlisted languages — only invoke skills that appear in the table.
+#### 4b. Build Peer Ruleset
 
-### 5. Code Review & Generate Fixes
+감지된 언어에 따라 peer prompt에 임베드할 ruleset 결정 (`peer-review-cli.md` Language Rulesets 섹션 참조):
 
+| 감지 언어 | Ruleset 섹션 포함 |
+|-----------|------------------|
+| java (Spring 없음) | Java Ruleset |
+| java (Spring 감지) | Java Ruleset + Java + Spring Ruleset |
+| go | Go Ruleset |
+| 기타 / 없음 | `<RULESET>` 비움 |
+
+### 5. Cross-Review (parallel, host-aware)
+
+PR diff 획득:
 ```bash
 gh pr diff <PR_NUMBER>
 ```
 
-Analyze the diff using a two-tier approach (Language-specific reviewer skills or General criteria).
-Instead of just listing the issues, **generate the exact code modifications required to fix all identified issues.**
+---
 
-### 5a. Peer Cross-Review (host-aware)
+#### Claude Code host — 두 SUBAGENT 병렬 dispatch
 
-자기 호스트를 식별하고 peer reviewer에게 PR diff 크로스체크를 위임한다. 자기 자신에게 cross-check를 보내는 호출은 금지 [ADR-0022].
+**5a. Self-Review SUBAGENT**
 
-PR diff 획득: `gh pr diff <PR_NUMBER>`.
+Agent 툴로 Step 4a에서 선택한 agent 타입 dispatch (model=opus).
 
-| 자기가 누구인가 | peer reviewer 호출 |
-|----------------|-------------------|
-| Claude Code | Read `.context-map.md` if exists. `mcp__agy__agy_cross_check(plan=<PR diff 전문>, context_map=<.context-map.md 내용 또는 "">)` |
-| Gemini CLI | Bash (300s timeout): `printf '%s' "$PR_DIFF" \| claude -p "<peer review 지시>"` — diff는 stdin pipe로 전달 |
-| Antigravity (agy host) | (Gemini CLI와 동일) |
+Prompt:
 
-**Pre-flight** — `claude -p` 분기 진입 전 `timeout 3 claude --version` 실행. exit ≠ 0이면 즉시 `CLAUDE_CLI_NOT_FOUND:` sentinel 발동 (미인증/오프라인 상태로 300s hang 방지).
+```
+You are reviewing a GitHub PR. Analyze the diff and return all findings.
 
-**Safety** — PR diff는 반드시 stdin pipe 또는 임시 파일로 전달한다. CLI 인자에 직접 보간하지 않는다 — shell metacharacter (백틱·`$()`) injection 및 `ARG_MAX` 초과 위험을 차단한다.
+Detected languages: {LANGUAGES}
+Spring detected: {yes|no}
 
-자기 호스트 식별: LLM 자기 인지(Claude는 자기가 Claude임을 안다). 보조 시그널 (강한 시그널 우선 적용):
-- `mcp__agy__agy_cross_check` 도구가 호출 가능 → Claude Code
-- `mcp__agy__` 도구가 보이지 않으나 `claude` CLI는 PATH에 있음 → Gemini CLI 또는 Antigravity
-- 두 시그널 모두 없으면 self-only review로 fallback
+Instructions for language-specific review:
+- .java files: invoke `java:reviewer` skill via Skill tool.
+  If Spring detected: also invoke `java:spring` skill via Skill tool.
+- .go files: invoke `golang:reviewer` skill via Skill tool.
+- Other languages: apply general review criteria.
 
-**동기 실행** — 결과를 받기 전 Step 5b로 넘어가지 않는다.
+Output schema — MUST follow exactly (see subagent-output-schema.md):
 
-**Peer 검토 관점:** consistency·omissions·ordering·risk·feasibility·version-compat (아키텍처 관점). Step 5의 코드 레벨 검토(버그·보안·스타일)와 보완 관계.
+reviewer: claude-opus
 
-**Sentinel 처리** — 다음 prefix로 시작하면 즉시 Step 5b를 스킵하고 Step 5 결과만으로 진행. 동일 인자 재호출 금지:
+| severity | file:line | category | issue |
+| --- | --- | --- | --- |
 
-| Sentinel | 트리거 호스트 | 의미 |
-|----------|-------------|------|
-| `AGY_TIMEOUT:` | Claude Code | agy 300s 초과 |
-| `AGY_ERROR(exit=...)` | Claude Code | agy 비정상 종료 |
-| `AGY_NOT_FOUND:` | Claude Code | agy 바이너리 부재 |
-| `CLAUDE_CLI_NOT_FOUND:` | Gemini / agy host | `claude` 바이너리 부재 |
-| `CLAUDE_CLI_TIMEOUT:` | Gemini / agy host | `claude -p` 300s 초과 |
-| `CLAUDE_CLI_ERROR(exit=N):` | Gemini / agy host | `claude -p` 비정상 종료 |
+Immediately after each row, add:
+```diff
+- old line
++ fixed line
+```
 
-Sentinel 발생 시: notify user "⚠️ peer reviewer unavailable, self-only review".
+severity: critical=security/data-loss, high=bug/runtime-error, medium=logic-issue, low=style/naming
+If no issues: write "reviewer: claude-opus\n\nNo issues found."
 
-### 5b. Synthesize Findings
+--- DIFF START ---
+{PR_DIFF}
+--- DIFF END ---
+```
 
-**Skip this step if Step 5a was skipped (peer reviewer unavailable).** In that case, proceed directly with Step 5 findings.
+**5b. Peer-Review Coordinator SUBAGENT**
 
-Merge Step 5 (local host self-review) and Step 5a (peer reviewer) results into a single unified review:
+Agent 툴로 general-purpose dispatch.
 
-| Case | Action |
-|------|--------|
-| Both found the same issue | Merge into one entry; note high confidence |
-| Local-only finding | Include as-is |
-| Peer-only finding | Tag with `[peer]`; include if local host judges it valid after checking source |
-| Disagreement | Local host makes final call; record the conflict briefly |
+Prompt:
 
-Result: a single list of issues with exact code modifications for all included findings.
+```
+You are a Peer Review Coordinator. Invoke an external LLM CLI to review a PR diff.
+
+Host: Claude Code. Peer pool (in priority order): agy → gemini → codex.
+If all fail: return exactly "reviewer: claude-self-generate\n\nNo issues found."
+
+Follow peer-review-cli.md exactly:
+1. Pre-flight: timeout 3 <cli> --version for each CLI in pool order
+2. Try each available CLI with the review prompt
+3. On any sentinel (NOT_FOUND/TIMEOUT/ERROR): skip to next CLI
+4. Return raw output from first successful CLI
+
+Ruleset and diff for embedding in CLI prompt:
+
+<RULESET>
+{RULESET from Step 4b}
+</RULESET>
+
+<DIFF>
+{PR_DIFF}
+</DIFF>
+
+Output must match subagent-output-schema.md format.
+```
+
+두 SUBAGENT 완료 대기 (동기 실행).
+
+---
+
+#### Gemini/agy/Codex host — sequential (self inline + peer CLI)
+
+Self review: host가 diff를 직접 분석 (general review criteria). subagent-output-schema.md 포맷으로 출력.
+
+Peer review: peer-review-cli.md의 호스트별 peer pool 따라 CLI fallback 체인 실행:
+- Gemini host: claude → agy → codex
+- agy host: claude → gemini → codex
+- Codex host: claude → agy → gemini
+
+Peer review 실패 시 (모든 sentinel): self-only로 진행. User notify.
+
+---
+
+#### 5c. Merge Findings (main thread)
+
+Self (5a)와 Peer (5b) findings 수신 후 severity-gated hybrid 머지:
+
+| Severity | 머지 규칙 |
+|----------|----------|
+| `critical`, `high` | **Union** — 어느 한쪽이라도 발견하면 포함 |
+| `medium`, `low` | **Intersection** — 양쪽 모두 발견 시에만 포함 |
+
+중복 제거: 동일 `file:line` + `category` → 단일 항목으로 통합 (양 reviewer 언급).
+
+Peer unavailable: Self findings만 사용.
+Self SUBAGENT 실패: Peer findings만 사용. User notify.
+
+결과: 정확한 fix patch가 포함된 단일 unified findings 목록.
 
 ### 6. Apply Fixes & Push (Auto-Fix)
 
-If the `--fix` argument is provided (or if running in auto-fix mode), apply all fixes from the unified findings (Step 5b):
-1. **Apply Changes:** Directly modify the source files with the generated fixes.
+`--fix` 인자 제공 시 또는 auto-fix 모드: 5c unified findings 기반 수정 적용 (main thread):
+1. **Apply Changes:** source 파일 직접 수정 (Edit 툴)
 2. **Commit:**
 ```bash
 git add .
@@ -139,28 +197,24 @@ git commit -m "fix: address review comments"
 git push origin <HEAD_REF_NAME>
 ```
 
-If no issues were found, skip this step.
+finding 없으면 skip.
 
 ### 7. Submit Review Comment
 
-Once fixes are pushed (or if no fixes were needed), submit a review comment on the PR.
+수정 후 (또는 수정 없는 경우) PR에 review comment 제출:
 
-If fixes were applied and peer reviewer was available:
 ```bash
-gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (local + peer). <N> issue(s) found and fixed."
-```
+# fix 적용 + peer available:
+gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (<self-agent> + <peer: agy|gemini|codex>). <N> issue(s) found and fixed. (critical:<c> high:<h> medium:<m> low:<l>)"
 
-If fixes were applied and peer reviewer was unavailable:
-```bash
-gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (local only). <N> issue(s) found and fixed."
-```
+# fix 적용 + peer unavailable:
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (self-only: <self-agent>). <N> issue(s) found and fixed."
 
-If no issues were found:
-```bash
+# fix 없음:
 gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
 ```
 
-*Note: Comment is used instead of approve, as GitHub does not allow PR authors to approve their own PRs.*
+*Note: author는 자신의 PR을 approve할 수 없으므로 comment 사용.*
 
 ## Error Handling
 
@@ -170,8 +224,15 @@ gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
 | PR already merged/closed | Abort, display current state |
 | CI failing | Include CI failure details in review |
 | Empty diff | Display "No changes found" and abort |
-| No reviewer skill found | Use general review criteria, note it in results |
-| Peer reviewer unavailable | Proceed with local-only self-review, notify user |
+| No reviewer skill found | Use general review criteria |
+| Peer reviewer unavailable | Proceed with self-only, notify user |
+| Self SUBAGENT failed | Proceed with peer findings only, notify user |
+| Both failed | Abort, display error |
+
+## References
+
+- `references/subagent-output-schema.md` — Self/Peer SUBAGENT 공통 출력 스키마
+- `references/peer-review-cli.md` — CLI 폴백 체인, language rulesets, host fallback matrix
 
 ## Usage
 

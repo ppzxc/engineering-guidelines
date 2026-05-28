@@ -33,13 +33,13 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check, squash merge, issue creation, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.0.16"
+      "version": "0.0.17"
     },
     {
       "name": "llm",
       "source": "./plugins/llm",
-      "description": "LLM delegation skills — agy (Antigravity CLI) context map, claude advanced reasoning, and auto bidirectional crosscheck",
-      "version": "0.2.0"
+      "description": "LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain",
+      "version": "0.3.0"
     },
     {
       "name": "dev",

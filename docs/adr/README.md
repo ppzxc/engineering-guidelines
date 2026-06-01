@@ -40,6 +40,7 @@
 | [ADR-0035](0035-deprecate-git-clean-peer-crosscheck.md) | accepted | `git:clean` entry peer crosscheck 폐지 — post-work pipeline 본질 재확인, ADR-0023 full supersede |
 | [ADR-0036](0036-git-review-self-reviewer-migration.md) | accepted | `git:review` Self-Review agent를 pr-review-toolkit:code-reviewer로 교체 (언어별 스킬 제거, Step 4a 제거) |
 | [ADR-0037](0037-adopt-matt-pocock-skill-conventions.md) | accepted | matt pocock 스킬 컨벤션 채택 — ADR 경로 `docs/adr/` 이동, CONTEXT.md, docs/agents/, triage labels 5종 |
+| [ADR-0038](0038-git-pr-issue-linkage.md) | accepted | PR 본문 `Closes #N` 네이티브 이슈 연결 — 레이어드 탐지, confirm 게이트, GitHub 자동 close |
 
 ## 새 ADR 추가
 

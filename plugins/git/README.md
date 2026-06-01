@@ -33,9 +33,8 @@ All skills enforce:
 ```
 clean
   ├─ Step 1: commit       (if uncommitted changes exist)
-  ├─ Step 2: pull-request (if no open PR exists)
+  ├─ Step 2: pull-request (if no open PR exists, includes issue detection)
   ├─ Step 3: review
-  ├─ Step 3.5: issue      (if review items exist)
   ├─ Step 4: merge        (always requires confirmation)
   └─ Step 5: Cleanup      (always requires confirmation, inline)
 ```
@@ -47,11 +46,11 @@ Steps 4 and 5 always require explicit confirmation regardless of auto mode.
 Skills automatically adapt to project conventions:
 
 - **commit** — reads `git log` history to match the project's existing commit style
-- **pull-request** — detects the repository's default branch via `gh repo view` instead of hardcoding `main`
+- **pull-request** — detects the repository's default branch via `gh repo view` instead of hardcoding `main`; detects related issues from branch name, commit messages, and session context, then inserts `Closes #N` in the PR body after user confirmation (GitHub auto-closes issue on merge)
 - **review** — detects languages in the PR diff, loads matching language-specific reviewer skills, and falls back to general best practices when no reviewer skill is available
-- **merge** — detects the default branch dynamically
-- **issue** — supports 5 issue types (bug, feature, chore, docs, review) with type-specific body templates; review mode is used by `clean` to convert review items into tracked issues
-- **clean** — full PR lifecycle orchestrator; preserves Claude Code local settings (`.claude/settings.local.json`) during worktree removal; delegates review item issue creation to `issue` skill
+- **merge** — detects the default branch dynamically; deletes remote and local branch after squash merge
+- **issue** — supports 4 issue types (bug, feature, chore, docs) with type-specific body templates
+- **clean** — full PR lifecycle orchestrator; delegates to pull-request (with issue-PR linkage) and merge (with branch deletion)
 
 ## Installation
 

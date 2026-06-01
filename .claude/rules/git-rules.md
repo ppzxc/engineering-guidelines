@@ -14,3 +14,4 @@ git 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약
 ✓ Auto-fix는 severity-gated hybrid(high/critical=union, medium/low=intersection)로 적용할 것 [ADR-0033]
 ✓ Self-Review SUBAGENT는 언어별 스킬 대신 pr-review-toolkit:code-reviewer (opus)를 단독 사용할 것 [ADR-0036]
 ✓ Self-Review SUBAGENT prompt에 gh pr diff 결과를 직접 주입할 것 (checkout 불필요) [ADR-0036]
+✓ PR 본문에 세션이 처리한 이슈를 `Closes #N`으로 연결하되, 탐지 결과는 PR confirm 게이트에서 사용자 승인 후에만 삽입할 것 [ADR-0038]

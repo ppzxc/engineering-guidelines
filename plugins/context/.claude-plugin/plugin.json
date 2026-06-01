@@ -1,6 +1,6 @@
 {
   "name": "context",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Dev Docs System skills — self-contained 4-file task folders (spec/plan/tasks/context) for resumable, context-preserving development across sessions",
   "author": {
     "name": "ppzxc",

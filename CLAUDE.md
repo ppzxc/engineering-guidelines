@@ -3,6 +3,7 @@
 ## 스킬 라우팅
 
 사용자가 `/context:plan`을 입력하면 다른 행동 이전에 `Skill` 도구로 `context:plan`을 호출할 것.
+사용자가 `/resume`을 정확히 입력하면 Claude Code 내장 명령으로 처리하고 `Skill` 도구를 호출하지 말 것.
 
 ## Claude Code 전용
 

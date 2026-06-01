@@ -6,6 +6,11 @@ user-invocable: true
 
 # Context Resume — 세션 재개
 
+<ACTIVATION>
+ONLY activate for: `/context:resume`, "컨텍스트 재개", "이어서", "어디까지 했지"
+Do NOT activate for: `/resume` — Claude Code built-in command, pass through
+</ACTIVATION>
+
 세션 단절 후 `docs/context/{TASK_NAME}/`의 4파일을 읽어 작업을 정확히 재개한다.
 
 ---

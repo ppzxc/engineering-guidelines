@@ -1,6 +1,6 @@
 # git:review 병렬 SUBAGENT 크로스 리뷰 도입
 
-* Status: accepted
+* Status: accepted (머지 규칙 부분 superseded by [ADR-0040](0040-git-review-union-merge-redesign.md) — 병렬 dispatch 구조는 유지)
 * Date: 2026-05-28
 * Decision Makers: ppzxc
 * Consulted: —

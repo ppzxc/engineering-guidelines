@@ -6,7 +6,26 @@ user-invocable: true
 
 # review — PR Code Review & Auto-Fix
 
-PR diff 분석 → 언어 감지 → Self/Peer SUBAGENT 병렬 dispatch → severity-gated 병합 → 수정 적용 → PR 코멘트 제출.
+PR diff 분석 → 언어 감지 → Self/Peer SUBAGENT 병렬 dispatch → union+agreement 태그 머지 → severity×agreement fix-gate → PR 코멘트 제출.
+
+## Argument Parsing
+
+실행 전 인자 파싱:
+
+| Argument | Description |
+|----------|-------------|
+| `<PR number>` | 리뷰할 PR 번호 (없으면 현재 브랜치에서 감지) |
+| `--fix` | Auto-fix 모드 (git:clean 내부 호출 시 전달됨) |
+| `--fast` | tier = fast (5a: haiku, 5b: fast 모델) |
+| `--balanced` | tier = balanced (5a: sonnet, 5b: balanced 모델) |
+| `--deep` | tier = deep (5a: opus, 5b: deep 모델) — **기본값** |
+
+**tier 검증:** `--fast` / `--balanced` / `--deep` 세 값만 허용. 그 외 tier 단어 입력 시 즉시 에러 후 중단:
+```
+Error: 알 수 없는 tier '...' — 유효값: --fast | --balanced | --deep
+```
+
+인자들은 직교(독립): PR 번호 · `--fix` · tier 세 종류를 임의 조합 가능.
 
 ## Execution Steps
 
@@ -70,7 +89,13 @@ gh pr diff <PR_NUMBER>
 
 **5a. Self-Review SUBAGENT**
 
-Agent 툴로 `pr-review-toolkit:code-reviewer` dispatch.
+Agent 툴로 `pr-review-toolkit:code-reviewer` dispatch. `model` 파라미터에 tier 매핑 적용:
+
+| tier | model 파라미터 |
+|------|--------------|
+| fast | haiku |
+| balanced | sonnet |
+| deep (기본) | opus |
 
 Prompt:
 
@@ -117,9 +142,11 @@ You are a Peer Review Coordinator. Invoke an external LLM CLI to review a PR dif
 Host: Claude Code. Peer pool (in priority order): agy → gemini → codex.
 If all fail: return exactly "reviewer: claude-self-generate\n\nNo issues found."
 
+Tier: {TIER} — use the "Tier × CLI 모델 매핑" table in peer-review-cli.md to select the correct model flag and reasoning_effort for each CLI.
+
 Follow peer-review-cli.md exactly:
 1. Pre-flight: timeout 3 <cli> --version for each CLI in pool order
-2. Try each available CLI with the review prompt
+2. Try each available CLI with the review prompt and tier-matched model
 3. On any sentinel (NOT_FOUND/TIMEOUT/ERROR): skip to next CLI
 4. Return raw output from first successful CLI
 
@@ -155,23 +182,33 @@ Peer review 실패 시 (모든 sentinel): self-only로 진행. User notify.
 
 #### 5c. Merge Findings (main thread)
 
-Self (5a)와 Peer (5b) findings 수신 후 severity-gated hybrid 머지:
+Self (5a)와 Peer (5b) findings 수신 후 union + agreement 태그 머지:
 
-| Severity | 머지 규칙 |
-|----------|----------|
-| `critical`, `high` | **Union** — 어느 한쪽이라도 발견하면 포함 |
-| `medium`, `low` | **Intersection** — 양쪽 모두 발견 시에만 포함 |
+1. **Union 수집**: Self와 Peer 양쪽 findings를 모두 포함 (버리지 않음).
+2. **퍼지 dedup**: `(file:line ±2줄, category)` 기준 중복 제거. 양쪽에서 발견 시 단일 항목으로 통합 (양 reviewer 언급).
+3. **Agreement 태그 부여** (main thread 계산):
+   - `both`: Self와 Peer 양쪽에서 발견
+   - `single`: 어느 한쪽만 발견
 
-중복 제거: 동일 `file:line` + `category` → 단일 항목으로 통합 (양 reviewer 언급).
+| 상황 | 처리 |
+|------|------|
+| Peer unavailable | Self findings만 사용. 전 항목 → `single` 태그. |
+| Self SUBAGENT 실패 | Peer findings만 사용. 전 항목 → `single` 태그. User notify. |
+| 양쪽 모두 실패 | Abort, display error. |
 
-Peer unavailable: Self findings만 사용.
-Self SUBAGENT 실패: Peer findings만 사용. User notify.
-
-결과: 정확한 fix patch가 포함된 단일 unified findings 목록.
+결과: agreement 태그(`both`/`single`)가 포함된 단일 unified findings 목록.
 
 ### 6. Apply Fixes & Push (Auto-Fix)
 
-`--fix` 인자 제공 시 또는 auto-fix 모드: 5c unified findings 기반 수정 적용 (main thread):
+`--fix` 인자 제공 시 또는 auto-fix 모드: 5c unified findings 기반 **severity × agreement fix-gate** 적용 (main thread):
+
+| severity | agreement | 처리 |
+|----------|-----------|------|
+| `critical`, `high` | `both` 또는 `single` | **자동수정** |
+| `medium`, `low` | `both` | **자동수정** |
+| `medium`, `low` | `single` | **코멘트 보고만** (수정 안 함) |
+
+자동수정 대상 finding이 있을 경우:
 1. **Apply Changes:** source 파일 직접 수정 (Edit 툴)
 2. **Commit:**
 ```bash
@@ -191,14 +228,17 @@ finding 없으면 skip.
 
 ```bash
 # fix 적용 + peer available:
-gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (code-reviewer + <peer: agy|gemini|codex>). <N> issue(s) found and fixed. (critical:<c> high:<h> medium:<m> low:<l>)"
+gh pr review <PR_NUMBER> --comment --body "Cross-reviewed (code-reviewer[<TIER>/<MODEL>] + <peer: agy|gemini|codex>). <N> issue(s) found and fixed. (critical:<c> high:<h> medium:<m> low:<l>) | agreement: both:<b> single:<s>(코멘트만)"
 
 # fix 적용 + peer unavailable:
-gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (self-only: code-reviewer). <N> issue(s) found and fixed."
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed (self-only: code-reviewer[<TIER>/<MODEL>]). <N> issue(s) found and fixed."
 
 # fix 없음:
-gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
+gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found. (tier: <TIER>)"
 ```
+
+`<TIER>/<MODEL>`: 사용한 tier와 실제 모델명 (예: `deep/opus`, `fast/haiku`, `balanced/sonnet`).
+`<b>`: both 합의 finding 수. `<s>`: single 발견 finding 수 (코멘트 보고, 자동수정 제외).
 
 *Note: author는 자신의 PR을 approve할 수 없으므로 comment 사용.*
 
@@ -224,6 +264,8 @@ gh pr review <PR_NUMBER> --comment --body "Auto-reviewed. No issues found."
 ```
 /git:review
 /git:review 42
+/git:review --fast
+/git:review 42 --balanced
 PR 리뷰해줘
 코드 리뷰
 ```

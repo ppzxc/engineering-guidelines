@@ -41,6 +41,8 @@
 | [ADR-0036](0036-git-review-self-reviewer-migration.md) | accepted | `git:review` Self-Review agent를 pr-review-toolkit:code-reviewer로 교체 (언어별 스킬 제거, Step 4a 제거) |
 | [ADR-0037](0037-adopt-matt-pocock-skill-conventions.md) | accepted | matt pocock 스킬 컨벤션 채택 — ADR 경로 `docs/adr/` 이동, CONTEXT.md, docs/agents/, triage labels 5종 |
 | [ADR-0038](0038-git-pr-issue-linkage.md) | accepted | PR 본문 `Closes #N` 네이티브 이슈 연결 — 레이어드 탐지, confirm 게이트, GitHub 자동 close |
+| [ADR-0039](0039-git-review-tier-selectable-models.md) | accepted | `git:review` 리뷰 tier 모델 선택 — fast/balanced/deep 추상 tier, 5a/5b 중앙집중 매핑, 기본 deep |
+| [ADR-0040](0040-git-review-union-merge-redesign.md) | accepted | `git:review` 5c 머지 재설계 — union+agreement 태그, severity×agreement fix-gate, intersection 폐기 |
 
 ## 새 ADR 추가
 

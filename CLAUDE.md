@@ -1,5 +1,9 @@
 @AGENTS.md
 
+## 스킬 라우팅
+
+사용자가 `/context:plan`을 입력하면 다른 행동 이전에 `Skill` 도구로 `context:plan`을 호출할 것.
+
 ## Claude Code 전용
 
 설계, 아키텍처, 프로젝트 컨벤션에 대한 새로운 결정이 발생하면, 반드시 `docs/adr/0000-template.md` (또는 minimal)를 참고하여 ADR 문서를 작성하고, 강제할 규칙은 `.claude/rules/`의 관련 파일에 `[ADR-NNNN]` 태그와 함께 추가하여 동기화할 것.

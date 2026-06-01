@@ -1,6 +1,6 @@
 # context:plan 파이프라인 재설계 — grill 우선, spec 사람 리뷰 최우선, GAN 단일 게이트
 
-* Status: accepted
+* Status: accepted (partially superseded by ADR-0041 — 게이트 배치·plan/tasks/GAN 실행 위치 변경)
 * Date: 2026-05-28
 * Decision Makers: ppzxc
 * Consulted: Gemini CLI (GAN cross-check)

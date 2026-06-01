@@ -243,8 +243,8 @@ tagged=$(grep -cE '^[[:space:]]*- \[ \].*\[(S|B)\]' "$TASKS")
 if [ "$untagged" -gt 0 ] || [ "$tagged" -eq 0 ]; then
     # 디시플린 검증 실패 → 사용자 결정 (대화 모드)
     # AskUserQuestion 으로 3 옵션 제시:
-    # (1) "재시도" — writing-plans 재호출, 미분류 항목에 [S]/[B] 보강 지시
-    # (2) "수동 수정" — tasks.md 직접 편집 후 재검증 실행
+    # (1) "직접 태그 추가" — tasks.md 직접 편집([S]/[B] 추가). writing-plans 재호출 금지 (터미널 계약 — ExitPlanMode 이후 design 금지)
+    # (2) "수동 수정" — tasks.md 전체 검토 후 직접 편집 재검증 실행
     # (3) "post-hoc opt-out" — spec.md 상단에 "> Discipline opt-out: post-hoc (discipline check failed, N untagged items)" blockquote 자동 추가 후 진행
     # 비대화 모드: 에러 메시지 출력 후 종료
 fi

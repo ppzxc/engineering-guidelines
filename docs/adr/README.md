@@ -32,7 +32,7 @@
 | [ADR-0027](0027-add-context-devdocs-plugin.md) | superseded by ADR-0030 (HARD-GATE 부분) | context Dev Docs 플러그인 추가 (4파일 자기완결 폴더, workflow와 공존) |
 | [ADR-0028](0028-context-guard-opt-in-stop-hook.md) | superseded by ADR-0031 | context 플러그인 옵트인 Stop hook 도입 — context:guard 설치 스킬로 호스트 프로젝트에 staleness reminder 제공 |
 | [ADR-0029](0029-context-plan-tiered-verification.md) | superseded by ADR-0030 | context:plan 계층형 자가검증·리뷰 게이트 도입 (Tier 1 self-review + Tier 2 비-Claude CLI cross-check) |
-| [ADR-0030](0030-context-plan-pipeline-redesign.md) | accepted | context:plan 파이프라인 재설계 — grill 우선, spec 사람 리뷰 최우선(ExitPlanMode), GAN 단일 게이트 |
+| [ADR-0030](0030-context-plan-pipeline-redesign.md) | partially superseded by ADR-0041 | context:plan 파이프라인 재설계 — grill 우선, spec 사람 리뷰(AskUserQuestion으로 교체됨), GAN 단일 게이트 |
 | [ADR-0031](0031-context-guard-auto-run-via-block.md) | accepted | context:guard Stop hook — decision:block 자동 실행, IDE 아티팩트 필터, 관련 context 매칭 (ADR-0028 supersede) |
 | [ADR-0032](0032-context-plan-discipline-injection.md) | accepted | context:plan 디시플린 주입 — karpathy/tdd/tidy 원칙 디폴트 ON (설계 lens + [S]/[B] 검증 + GAN prompt 확장) |
 | [ADR-0033](0033-git-review-parallel-subagent-cross-review.md) | accepted | `git:review` 병렬 SUBAGENT 크로스 리뷰 — Self/Peer SUBAGENT 병렬 dispatch, 호스트별 폴백 체인, severity-gated 머지 |

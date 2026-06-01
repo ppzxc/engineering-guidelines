@@ -3,22 +3,24 @@
 context:plan Step 6에 적용되는 Tier 2 GAN 검증 게이트.
 
 **게이트 설계 (2개):**
-- spec → 사람 리뷰 (ExitPlanMode, Step 5) [의도 검증 — 최우선]
-- plan → GAN cross-check (Step 6) [실행가능성 검증]
+- spec → 사람 리뷰 (AskUserQuestion, Step 5) [의도 검증 — 최우선]
+- plan → GAN cross-check (Step 6, 플랜모드 내 Opus) [실행가능성 검증]
 
 self-review(Tier 1) 게이트는 제거됨. 근거: 모델이 자기 출력을 자기검증하는 것은 약하며,
 사람(spec) + 다른 모델(plan)의 적대적 리뷰가 각기 다른 실패모드를 커버해 self-review와 중복된다.
 
 ---
 
-## Step-6 Gate (plan.md)
+## Step-6 Gate (플랜 파일 내 plan 내용)
+
+> **중요**: Step 6은 플랜모드 내(Opus)에서 실행된다. `docs/context/{TASK_NAME}/plan.md`는 Step 8 이전에 존재하지 않는다. GAN 검증 대상은 **플랜 파일에 기록된 plan 섹션 내용**이다. TMPFILE은 플랜 파일에서 plan 내용을 추출하여 빌드한다.
 
 실행 순서 (이 순서를 반드시 지킬 것):
 
-1. `test -f docs/context/{TASK_NAME}/plan.md` → exit 0 확인
+1. 플랜 파일(플랜모드 파일)에서 plan 섹션 내용 추출 → TMPFILE 빌드
 2. Tier 2 GAN cross-check (아래 CLI 섹션 참조)
-3. H-severity 항목 → plan.md 본문 직접 편집 (AI 수행, 1회 한정)
-4. 미해결 H-severity → context.md Blockers 이관
+3. H-severity 항목 → **플랜 파일** plan 섹션 직접 보정 (Opus 수행, 1회 한정)
+4. 미해결 H-severity → Step 8 context.md Blockers 이관
 
 ---
 
@@ -42,9 +44,10 @@ timeout 3 codex --version  2>/dev/null || echo "CLI_NOT_FOUND:codex"
 
 **TMPFILE 빌드 (세 CLI 공통 — 호출 전 실행):**
 ```bash
-TASK_NAME="<task-name>"
-test -f "docs/context/${TASK_NAME}/plan.md" || { echo "CLI_ERROR: plan.md not found"; exit 1; }
-PLAN_CONTENT=$(cat "docs/context/${TASK_NAME}/plan.md")
+# PLAN_CONTENT = 플랜 파일(플랜모드 파일)에서 plan 섹션 내용 추출
+# (docs/context/{TASK_NAME}/plan.md는 아직 존재하지 않음 — Step 8에서 생성됨)
+# 오케스트레이터가 플랜 파일 내 plan 내용을 문자열로 전달한다.
+PLAN_CONTENT="<플랜 파일에서 추출한 plan 섹션 내용>"
 TMPFILE=$(mktemp)
 trap 'rm -f "$TMPFILE"' EXIT
 cat > "$TMPFILE" << 'GANEOF'

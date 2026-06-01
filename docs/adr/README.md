@@ -43,6 +43,7 @@
 | [ADR-0038](0038-git-pr-issue-linkage.md) | accepted | PR 본문 `Closes #N` 네이티브 이슈 연결 — 레이어드 탐지, confirm 게이트, GitHub 자동 close |
 | [ADR-0039](0039-git-review-tier-selectable-models.md) | accepted | `git:review` 리뷰 tier 모델 선택 — fast/balanced/deep 추상 tier, 5a/5b 중앙집중 매핑, 기본 deep |
 | [ADR-0040](0040-git-review-union-merge-redesign.md) | accepted | `git:review` 5c 머지 재설계 — union+agreement 태그, severity×agreement fix-gate, intersection 폐기 |
+| [ADR-0041](0041-context-plan-opusplan-design-relocation.md) | accepted | context:plan opusplan 호환 — 전체 설계를 플랜모드(Opus)로 이동, spec 게이트→AskUserQuestion, ExitPlanMode→릴리스 게이트, 터미널 계약 명문화 |
 
 ## 새 ADR 추가
 

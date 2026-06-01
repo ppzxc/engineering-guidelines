@@ -1,6 +1,6 @@
 # git:review Self-Review agent를 pr-review-toolkit:code-reviewer로 교체
 
-* Status: accepted
+* Status: accepted (opus 고정 부분 partially superseded by [ADR-0039](0039-git-review-tier-selectable-models.md) — code-reviewer 사용 자체는 유지)
 * Date: 2026-05-28
 * Decision Makers: ppzxc
 * Consulted: —

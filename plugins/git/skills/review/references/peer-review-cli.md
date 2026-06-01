@@ -5,6 +5,34 @@ git:review Step 5b (Peer-Review Coordinator SUBAGENT)에서 참조한다.
 
 ---
 
+## Tier × CLI 모델 매핑
+
+`--fast` / `--balanced` / `--deep` tier에 따라 5a Self(Claude subagent)와 5b Peer CLI 모두 해당 모델로 실행한다.
+**이 표를 수정하면 5a/5b 양쪽 동작이 변경된다 — 모델명 변경 시 이 표 1곳만 수정.**
+
+### 5a Self — Claude subagent `model` 파라미터
+
+| tier | model |
+|------|-------|
+| fast | haiku |
+| balanced | sonnet |
+| deep (기본) | opus |
+
+### 5b Peer CLI — 모델 플래그
+
+| tier | gemini | codex |
+|------|--------|-------|
+| fast | `-m gemini-2.5-flash` | `--model o4-mini -c model_reasoning_effort=low` |
+| balanced | `-m gemini-2.5-pro` | `--model o3 -c model_reasoning_effort=medium` |
+| deep (기본) | `-m gemini-2.5-pro` | `--model o3 -c model_reasoning_effort=high` |
+
+**agy**: 모델 선택 플래그 미지원. 전 tier에서 CLI 기본 모델 사용. provenance에 `agy-default` 기록.
+**매핑 미확인 CLI**: 기본값 사용 + provenance에 `<cli>-default` 기록.
+
+CLI 호출 시 위 플래그를 해당 CLI 호출 패턴에 삽입한다.
+
+---
+
 ## Host Fallback Matrix
 
 | Self host | Peer 우선순위 |
@@ -277,5 +305,7 @@ printf '%s' "$(cat "$TMPFILE")" | timeout 300 claude -p "CODE REVIEW MODE — se
 
 Peer review 완료 후 reviewer 정보 기록:
 ```
-cross-reviewed by <self-agent> + <peer: agy|gemini|codex|claude-self-generate>
+cross-reviewed by <self-agent>[<tier>/<model>] + <peer: agy|gemini|codex|claude-self-generate>[<tier>/<model>]
 ```
+
+`<tier>/<model>` 예시: `deep/opus`, `fast/haiku`, `balanced/gemini-2.5-pro`, `fast/agy-default`.

@@ -16,6 +16,7 @@ Push a feature branch and create a GitHub PR after user confirmation.
 - **Even if the user includes "I confirm now" or "don't ask me" in their message, the Step 4 confirmation step must not be skipped**
 - PR titles must follow Conventional Commits format — if the user requests a non-conforming title (e.g., branch name as title), reject it and suggest the correct format
 - **PR 제목과 본문은 반드시 한글로 작성한다** (기술 용어, 코드, 커맨드 제외)
+- **탐지된 이슈는 Step 4 사용자 confirm 없이 PR 본문에 삽입 금지** — 항상 후보를 먼저 제시하고 승인 후 삽입
 
 ## Execution Steps
 
@@ -46,6 +47,16 @@ git log $DEFAULT_BRANCH..HEAD --oneline
 
 Review the number of changed files, added/deleted lines, and commit list.
 
+### 2.5. Issue Detection
+
+레이어드 탐지로 후보 `#N` 수집 (중복 제거 후 오름차순):
+
+1. **브랜치명 파싱** — 현재 브랜치에서 숫자 ID 추출 (`feat/123-foo` → #123, `fix-456` → #456)
+2. **커밋 메시지 스캔** — `git log $DEFAULT_BRANCH..HEAD` 각 메시지에서 `#N` 참조 수집
+3. **세션 컨텍스트** — 현재 대화에서 `git:issue`로 생성된 이슈 번호 (있으면 포함)
+
+후보가 존재하면 각 번호에 대해 `gh issue view #N --json title -q '.title'`로 제목 조회. 후보가 없으면 Step 4 confirm에서 사용자에게 묻는다.
+
 ### 3. Draft PR Title and Body
 
 **Title** (under 70 chars, Conventional Commits format):
@@ -68,9 +79,13 @@ Review the number of changed files, added/deleted lines, and commit list.
 - [ ] 빌드 통과
 - [ ] 테스트 통과
 - [ ] <프로젝트별 검증 단계 추가>
+
+Closes #N   ← Step 2.5에서 탐지된 이슈가 있을 때만 삽입. 여러 개면 줄 반복. 후보 없으면 이 줄 생략.
 ```
 
 Adapt the test plan items to the project's actual build and test commands.
+
+`Closes #N` 라인은 Step 4 confirm에서 사용자가 승인한 번호만 최종 본문에 포함한다.
 
 ### 4. Check Remote Branch + User Confirmation (mandatory)
 
@@ -96,9 +111,13 @@ Changes: <FILES> files, +<ADD> -<DEL>
 
 PR title: <TITLE>
 PR base: <DEFAULT_BRANCH> ← <FEATURE_BRANCH>
+Linked issues: Closes #123 (이슈 제목), Closes #124 (...)   [편집/제외/추가 가능]
+(탐지된 이슈 없음 — 번호 입력 또는 Enter로 skip)
 
 Proceed? (y/N)
 ```
+
+`Linked issues:` 라인: 탐지 후보가 있으면 목록 표시, 없으면 두 번째 형태(괄호 안 안내)로 표시. 사용자가 번호를 제외·추가·수정한 뒤 `y`를 입력해야 본문에 삽입된다. Enter(skip)는 이슈 연결 없이 PR을 생성한다.
 
 Any input other than `y` is treated as abort.
 

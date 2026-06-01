@@ -49,7 +49,7 @@ GitHub Issues, repo `ppzxc/engineering-guidelines`. `gh` CLI 사용. See `docs/a
 
 ### Triage labels
 
-matt pocock canonical 5종 + `ready` legacy alias (ready-for-agent). See `docs/agents/triage-labels.md`.
+matt pocock canonical 5종. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

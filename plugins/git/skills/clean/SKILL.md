@@ -23,8 +23,24 @@ Parse arguments before executing any step:
 | `auto` | Run Steps 1–3 without confirmation. Steps 4+ always require confirmation. |
 | `<PR number>` | Use an existing PR (skip Step 2) |
 | `auto <PR number>` | auto mode + existing PR number |
+| `--no-review` | Step 3 review 완전 생략 (commit → PR → merge → cleanup만 실행) |
+| `--fast` | tier = fast (review 모델 경량, 토큰 절약) |
+| `--balanced` | tier = balanced (review 모델 중간) |
+| `--deep` | tier = deep (review 모델 최고 품질) — **기본값** |
 
 **auto mode is active when:** the `auto` argument is present
+
+**tier 검증:** `--fast` / `--balanced` / `--deep` 세 값만 허용. 그 외 tier 단어 입력 시 즉시 에러 후 중단:
+```
+Error: 알 수 없는 tier '...' — 유효값: --fast | --balanced | --deep
+```
+
+**충돌 검증:** `--no-review`와 `--fast`/`--balanced`/`--deep` 동시 사용 시 즉시 에러 후 중단:
+```
+Error: --no-review와 tier 플래그를 동시에 지정할 수 없다
+```
+
+`--no-review` 및 tier 플래그는 Step 3 review에만 적용된다 (commit/PR/merge/cleanup은 모델 무관).
 
 ## Execution Steps
 
@@ -75,7 +91,12 @@ Skip this step if a PR already exists.
 
 ### Step 3. PR Review & Fix
 
-Execute the **git:review** skill with the `--fix` argument (internal use).
+**`--no-review` 지정 시:** Step 3 완전 생략.
+```
+[3/5] Skipping review step (--no-review)
+```
+
+그 외: **git:review** skill을 `--fix` + tier 플래그로 호출 (internal use). 예: `--fix --fast`, `--fix --balanced`, `--fix` (tier 미지정 시 deep 기본).
 
 - **Normal mode:** confirm before proceeding
   ```
@@ -131,7 +152,7 @@ PR workflow complete
 
   Commit:  <COMMIT_HASH> (<message>)
   PR:      #<NUMBER> — <TITLE>
-  Review:  <N> issues found and fixed (or "no issues found")
+  Review:  <N> issues found and fixed (or "no issues found" or "skipped (--no-review)")
   Merged:  squash merge at <TIMESTAMP>
   Cleanup: worktree <PATH> removed, branch <BRANCH> deleted
 ```
@@ -156,6 +177,11 @@ PR workflow complete
 /git:clean 42
 /git:clean auto
 /git:clean auto 42
+/git:clean --no-review
+/git:clean auto --no-review
+/git:clean --fast
+/git:clean auto --balanced
+/git:clean auto 42 --fast
 PR 완료해줘
 PR 전체 흐름 실행
 worktree 정리해줘

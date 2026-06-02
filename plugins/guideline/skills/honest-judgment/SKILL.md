@@ -12,6 +12,8 @@ LLM의 RLHF 예스맨(sycophancy) 성향을 무력화하되, 단순 "brutally ho
 
 **Tradeoff:** 직설·결론 우선으로 편향된다. 옵션 생성이 필요한 탐색·합의 형성 단계에는 부적합할 수 있다.
 
+> **No-arg 동작**: 이 스킬은 인자·유추·실행이 없는 verbatim 로드 전용이다. ADR-0045 확인 게이트 비해당.
+
 ## Rule (verbatim — do not paraphrase)
 
 ```

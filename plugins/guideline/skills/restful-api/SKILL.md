@@ -24,6 +24,10 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 **사용 예시:** "Essential 프로필로 이 API를 리뷰해줘" → T1 규칙만 체크한다.
 
+**No-arg 동작 (ADR-0045):**
+- **Interactive 세션**: 프로필이 지정되지 않은 경우, AskUserQuestion으로 "어떤 프로필로 검토할까요?" (Essential [T1] / Standard [T1+T2] / Full [T1+T2+T3, 권장]) 확인 후 진행.
+- **Non-interactive 세션**: Full 프로필(T1+T2+T3)로 진행.
+
 **Tier 분류 기준 [ADR-0010]:**
 - **T1 (Essential):** 후행 도입 시 하위 호환성 파괴 위험 / 보안 필수 / HTTP 표준 / API 계약 근간
 - **T2 (Standard):** 프로덕션 운영 편의, 후행 도입 가능

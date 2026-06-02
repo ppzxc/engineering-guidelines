@@ -81,6 +81,16 @@ AI is strictly prohibited from doing the following during a structural change:
 
 ## WORKFLOW
 
+### 🔍 NO-ARG 유추 확인 게이트 (interactive 전용)
+
+리팩토링 대상이 명시적 인자 또는 지시 없이 세션 컨텍스트에서 유추된 경우, STRUCTURAL phase 진입 전 AskUserQuestion으로 확인한다:
+
+- **제시 내용**: 유추한 대상 파일/모듈/scope, 적용할 tidy 패턴 (Extract Method, Rename 등)
+- **질문**: "다음 대상으로 Tidy First 리팩토링을 시작할까요? [대상] — [scope]"
+- **거부 시**: 대상/scope를 사용자에게 직접 요청하고 STOP.
+- **non-interactive 세션**: 이 게이트를 건너뛰고 유추한 대상으로 진행.
+- **대상이 명시적으로 지정된 경우**: 이 게이트 건너뜀.
+
 ### [PHASE: STRUCTURAL] (Always First)
 You must follow this exact output structure for EVERY structural change. Determine the appropriate `<TEST_COMMAND>` for the project. If uncertain, ASK.
 

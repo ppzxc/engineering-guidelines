@@ -3,6 +3,8 @@
 git:review Step 5b (Peer-Review Coordinator SUBAGENT)에서 참조한다.
 `context:plan/references/verification.md`의 CLI 패턴을 코드 리뷰용으로 fork.
 
+공통 인프라(host matrix, pre-flight, 호출 골격, sentinel): → [`peer-fallback-core.md`](../../../../_shared/references/peer-fallback-core.md)
+
 ---
 
 ## Tier × CLI 모델 매핑
@@ -30,34 +32,6 @@ git:review Step 5b (Peer-Review Coordinator SUBAGENT)에서 참조한다.
 **매핑 미확인 CLI**: 기본값 사용 + provenance에 `<cli>-default` 기록.
 
 CLI 호출 시 위 플래그를 해당 CLI 호출 패턴에 삽입한다.
-
----
-
-## Host Fallback Matrix
-
-| Self host | Peer 우선순위 |
-|-----------|---------------|
-| Claude Code | agy → gemini → codex |
-| Gemini CLI | claude → agy → codex |
-| Antigravity (agy) | claude → gemini → codex |
-| Codex | claude → agy → gemini |
-
-자기 자신은 풀에서 제외 (ADR-0022/0023). 전부 실패 시 `reviewer: claude-self-generate\n\nNo issues found.` 반환 후 notify user.
-
----
-
-## Pre-flight 순서
-
-CLI 시도 전 반드시 version 확인:
-
-```bash
-timeout 3 agy --version    2>/dev/null || echo "AGY_NOT_FOUND:"
-timeout 3 gemini --version 2>/dev/null || echo "CLI_NOT_FOUND:gemini"
-timeout 3 codex --version  2>/dev/null || echo "CLI_NOT_FOUND:codex"
-timeout 3 claude --version 2>/dev/null || echo "CLAUDE_CLI_NOT_FOUND:"
-```
-
-exit ≠ 0이면 해당 sentinel 발동 → 다음 CLI로 skip. 확인된 CLI만 시도.
 
 ---
 
@@ -187,117 +161,10 @@ Low:
 
 ## CLI 호출 패턴
 
-입력은 반드시 stdin pipe 또는 임시파일로 전달. CLI 인자 직접 보간 금지 (shell injection / ARG_MAX 초과 방지).
+→ 호출 골격(mktemp+trap+timeout, sentinel 처리): [`peer-fallback-core.md`](../../../../_shared/references/peer-fallback-core.md#cli-호출-골격)
 
-### AGY
-
-```bash
-TMPFILE=$(mktemp)
-trap 'rm -f "$TMPFILE"' EXIT
-
-# Write prompt to tmpfile (heredoc + diff append)
-cat > "$TMPFILE" << 'REVIEWEOF'
-You are an adversarial code reviewer. The diff below was written by a different model.
-Your mission: identify ALL defects — bugs, security issues, logic errors, style violations.
-
-Output format (STRICT):
-
-reviewer: agy
-
-| severity | file:line | category | issue |
-| --- | --- | --- | --- |
-
-Immediately after each row, add a fix block:
-```diff
-- old line
-+ fixed line
-```
-
-severity: critical=security/data-loss, high=bug/runtime-error, medium=logic-issue, low=style/naming
-
-If no issues found: output exactly:
-reviewer: agy
-
-No issues found.
-
-REVIEWEOF
-
-# Append ruleset + diff
-printf '<RULESET>\n%s\n</RULESET>\n\n--- DIFF START ---\n%s\n--- DIFF END ---\n' \
-  "$RULESET_CONTENT" "$DIFF_CONTENT" >> "$TMPFILE"
-
-timeout 330 agy -p "$(cat "$TMPFILE")" --print-timeout 300s
-```
-
-### Gemini
-
-```bash
-TMPFILE=$(mktemp)
-trap 'rm -f "$TMPFILE"' EXIT
-
-cat > "$TMPFILE" << 'REVIEWEOF'
-[동일 프롬프트, reviewer: gemini]
-REVIEWEOF
-
-printf '<RULESET>\n%s\n</RULESET>\n\n--- DIFF START ---\n%s\n--- DIFF END ---\n' \
-  "$RULESET_CONTENT" "$DIFF_CONTENT" >> "$TMPFILE"
-
-printf '%s' "$(cat "$TMPFILE")" | timeout 300 gemini -p "CODE REVIEW MODE — see stdin"
-```
-
-### Codex
-
-```bash
-TMPFILE=$(mktemp)
-trap 'rm -f "$TMPFILE"' EXIT
-
-cat > "$TMPFILE" << 'REVIEWEOF'
-[동일 프롬프트, reviewer: codex]
-REVIEWEOF
-
-printf '<RULESET>\n%s\n</RULESET>\n\n--- DIFF START ---\n%s\n--- DIFF END ---\n' \
-  "$RULESET_CONTENT" "$DIFF_CONTENT" >> "$TMPFILE"
-
-cat "$TMPFILE" | timeout 300 codex exec -
-```
-
-### Claude CLI (비-Claude 호스트용)
-
-```bash
-# Pre-flight
-timeout 3 claude --version || { echo "CLAUDE_CLI_NOT_FOUND:"; exit 1; }
-
-TMPFILE=$(mktemp)
-trap 'rm -f "$TMPFILE"' EXIT
-
-cat > "$TMPFILE" << 'REVIEWEOF'
-[동일 프롬프트, reviewer: claude]
-REVIEWEOF
-
-printf '<RULESET>\n%s\n</RULESET>\n\n--- DIFF START ---\n%s\n--- DIFF END ---\n' \
-  "$RULESET_CONTENT" "$DIFF_CONTENT" >> "$TMPFILE"
-
-printf '%s' "$(cat "$TMPFILE")" | timeout 300 claude -p "CODE REVIEW MODE — see stdin"
-```
-
----
-
-## Sentinel 처리
-
-모든 sentinel → 다음 peer로 시도. 동일 인자 재호출 금지.
-
-| Sentinel prefix | 의미 | 처리 |
-|----------------|------|------|
-| `AGY_NOT_FOUND:` | agy 부재 | 다음 peer |
-| `AGY_TIMEOUT:` | 300s 초과 | 다음 peer |
-| `AGY_ERROR(exit=N):` | 비정상 종료 | 다음 peer |
-| `CLI_NOT_FOUND:` | gemini/codex 부재 | 다음 peer |
-| `CLI_TIMEOUT:` | 300s 초과 | 다음 peer |
-| `CLI_ERROR(exit=N):` | 비정상 종료 | 다음 peer |
-| `CLAUDE_CLI_NOT_FOUND:` | claude CLI 부재 | 다음 peer |
-| `CLAUDE_CLI_TIMEOUT:` | claude CLI 300s 초과 | 다음 peer |
-| `CLAUDE_CLI_ERROR(exit=N):` | claude CLI 비정상 종료 | 다음 peer |
-| (모두 실패) | — | self-only로 fallback, user notify |
+각 CLI 호출 시 Review Prompt를 tmpfile에 작성 후 `{RULESET_BLOCK}`과 `{DIFF_CONTENT}`를 주입하여 실행.
+tier별 모델 플래그는 위 Tier × CLI 모델 매핑 표에서 선택.
 
 ---
 

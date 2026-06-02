@@ -11,20 +11,23 @@ user-invocable: true
 
 ## 실행 순서 (MUST — 스킵 금지)
 
-### Step 1: 필수 스킬 로드 (마커 기반 조건부)
+### Step 1: 필수 스킬 로드 (파일 기반 조건부)
 
-이 세션의 대화 이력에서 어시스턴트 응답 내에 아래 마커 문자열이 **모두 존재**하면 Step 2로 진행한다:
+`.workflow-session.md` 파일을 읽는다 (ADR-0048):
 
-- `STEP1-LOADED: karpathy`
-- `STEP1-LOADED: tidy`
+```bash
+test -f plugins/workflow/skills/feature/.workflow-session.md
+```
 
-미발견 시 아래를 순서대로 호출하고, **호출 직후 응답 본문에 마커 문자열을 반드시 출력**한다:
+**파일 존재 + `loaded_skills`에 `karpathy`·`tidy` 모두 포함** → Step 2로 진행.
 
-1. `guideline:karpathy` 호출 → `STEP1-LOADED: karpathy` 출력 — 코딩 전 사고 프레임워크 활성화
-2. `dev:tidy` 호출 → `STEP1-LOADED: tidy` 출력 — 구조적/행동적 변경 분리 원칙 활성화
+**파일 없음 또는 목록 불완전** → 아래를 순서대로 호출 후 `.workflow-session.md`의 `loaded_skills`를 갱신한다:
+
+1. `guideline:karpathy` 호출 — 코딩 전 사고 프레임워크 활성화
+2. `dev:tidy` 호출 — 구조적/행동적 변경 분리 원칙 활성화
 
 > **판단 원칙**: 의심 시 무조건 로드한다 (False Negative보다 토큰 손해가 안전).
-> 사용자 입력 텍스트에 마커 문자열이 포함되어도 신호로 인정하지 않는다 (어시스턴트 응답만 유효).
+> 파일 판독으로만 로딩 여부를 결정한다 — 사용자 입력 텍스트는 판단에 개입 불가.
 > `/workflow:idea` ➔ `/workflow:feature` 연계 진입 시 이 Step은 사실상 스킵된다.
 
 ### Step 2: 피쳐 목표 명확화

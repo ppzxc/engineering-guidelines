@@ -21,7 +21,7 @@
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering",
-      "version": "0.1.1"
+      "version": "0.2.0"
     },
     {
       "name": "docs",

@@ -9,7 +9,7 @@ A single folder `docs/context/{TASK_NAME}/` holds all 4 files needed to re-ancho
 |-------|---------|-------------|
 | `plan` | `/context:plan` | Start a new task — classifies input (idea/spec/plan/diff) and creates the 4-file Dev Docs folder. idea: brainstorming → grill-me → writing-plans; spec: grill-me → writing-plans; plan: grill-me → tasks normalization; diff: redirects to /git:review |
 | `update` | `/context:update` | Persist current session state before context compaction |
-| `resume` | `/context:resume` | Re-anchor on a task after a session break by reading the 4-file folder |
+| `recall` | `/context:recall` | Re-anchor on a task after a session break by reading the 4-file folder |
 | `guard` | `/context:guard` | Install an opt-in Stop hook that reminds you to run `/context:update` when code is stale |
 
 ## Output Structure
@@ -24,7 +24,7 @@ docs/context/{TASK_NAME}/
   context.md   — dynamic resume anchor (Current Status / Decision Log / Next Steps / Blockers)
 ```
 
-The `context.md` file carries a `<!-- last_updated: ISO-8601 -->` marker used by `update` and `resume` to auto-detect the most recent task.
+The `context.md` file carries a `<!-- last_updated: ISO-8601 -->` marker used by `update` and `recall` to auto-detect the most recent task.
 
 ## Stop Hook (opt-in)
 
@@ -67,6 +67,6 @@ Opt-out reason is mandatory and recorded as a blockquote at the top of `spec.md`
 /context:plan  my raw idea here
 /context:plan --no-tdd-tidy=throwaway-prototype "quick spike"
 /context:update
-/context:resume
+/context:recall
 /context:guard   # optional: install staleness reminder hook
 ```

@@ -14,7 +14,7 @@
 | [git](./plugins/git) | v0.4.1 | Git 워크플로우 스킬 — 안전한 커밋, 한글 PR 생성, 호스트 인지 peer 교차검증 PR 리뷰(fast/balanced/deep tier 선택), union 머지+agreement 태그 자동수정, squash merge, 이슈 생성, Closes #N 이슈 연결, PR 전체 흐름, worktree 정리 |
 | [llm](./plugins/llm) | v0.3.0 | LLM 위임 스킬 — 4-way peer 교차검증 (agy, claude, gemini, codex), 호스트 인지 폴백 체인 |
 | [dev](./plugins/dev) | v0.0.4 | 개발 방법론 스킬 — Tidy First, TDD, 언어 무관 개발 프랙티스 |
-| [context](./plugins/context) | v0.6.0 | Dev Docs 시스템 스킬 — 세션 단절에도 재개 가능한 4파일 자기완결 작업 폴더 |
+| [context](./plugins/context) | v0.7.0 | Dev Docs 시스템 스킬 — 세션 단절에도 재개 가능한 4파일 자기완결 작업 폴더 |
 
 ## 마켓플레이스 등록
 

@@ -1,6 +1,6 @@
 # context:resume explicit-only invocation — disable model auto-invocation
 
-* Status: accepted
+* Status: superseded by ADR-0044
 * Date: 2026-06-01
 * Decision Makers: ppzxc
 

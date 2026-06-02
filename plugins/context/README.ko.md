@@ -9,7 +9,7 @@
 |------|--------|------|
 | `plan` | `/context:plan` | 입력을 분류(idea/spec/plan/diff)하여 4파일 Dev Docs 폴더를 생성. idea: brainstorming → grill-me → writing-plans; spec: grill-me → writing-plans; plan: grill-me → tasks 정규화; diff: /git:review로 redirect |
 | `update` | `/context:update` | 컨텍스트 압축 직전 현재 세션 상태를 폴더에 저장 |
-| `resume` | `/context:resume` | 세션 단절 후 4파일을 읽어 작업을 재개 |
+| `recall` | `/context:recall` | 세션 단절 후 4파일을 읽어 작업을 재개 |
 | `guard` | `/context:guard` | 코드가 stale일 때 `/context:update` 실행을 리마인드하는 옵트인 Stop hook 설치 |
 
 ## 산출물 구조
@@ -24,7 +24,7 @@ docs/context/{TASK_NAME}/
   context.md   — 동적 재개 앵커 (현재 상태 / 결정 로그 / 다음 할 일 / 블로커)
 ```
 
-`context.md` 최상단의 `<!-- last_updated: ISO-8601 -->` 마커를 `update`·`resume`가 grep하여 최신 태스크를 자동 선택한다.
+`context.md` 최상단의 `<!-- last_updated: ISO-8601 -->` 마커를 `update`·`recall`가 grep하여 최신 태스크를 자동 선택한다.
 
 ## Stop hook (옵트인)
 
@@ -67,6 +67,6 @@ claude plugin marketplace add https://github.com/ppzxc/engineering-guidelines.gi
 /context:plan  raw 아이디어를 여기에
 /context:plan --no-tdd-tidy=throwaway-prototype "빠른 스파이크"
 /context:update
-/context:resume
+/context:recall
 /context:guard   # 선택: staleness reminder hook 설치
 ```

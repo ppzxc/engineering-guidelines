@@ -47,6 +47,7 @@
 | [ADR-0042](0042-context-resume-explicit-only.md) | superseded by ADR-0044 | context:resume 명시 호출 전환 — disable-model-invocation으로 자동발동 차단, 3c8057f 본문 가드 접근 무효 판정 |
 | [ADR-0043](0043-context-plan-input-maturity-routing.md) | accepted | context:plan 입력 성숙도 분류 — 4-way 분류(idea/spec/plan/diff) + idea 브랜치 brainstorm→grill 정순 복원, ADR-0030 부분 supersede |
 | [ADR-0044](0044-context-recall-rename.md) | accepted | context:resume → context:recall 리네임 — 토큰 레벨 /resume suffix-match 제거, ADR-0042 supersede |
+| [ADR-0045](0045-skill-no-arg-inference-confirm-gate.md) | accepted | 스킬 no-arg 유추 시 실행 전 확인 게이트 도입 — interactive 세션에서 유추 결과 제시 후 AskUserQuestion 확인 (context:recall/update, dev:tidy, guideline:restful-api 적용) |
 
 ## 새 ADR 추가
 

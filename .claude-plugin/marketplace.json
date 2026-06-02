@@ -15,7 +15,7 @@
       "name": "guideline",
       "source": "./plugins/guideline",
       "description": "Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule",
-      "version": "0.2.1"
+      "version": "0.3.0"
     },
     {
       "name": "workflow",
@@ -45,13 +45,13 @@
       "name": "dev",
       "source": "./plugins/dev",
       "description": "Development methodology skills — Tidy First, TDD, and language-agnostic development practices",
-      "version": "0.0.4"
+      "version": "0.1.0"
     },
     {
       "name": "context",
       "source": "./plugins/context",
       "description": "Dev Docs System skills — self-contained 4-file task folders (spec/plan/tasks/context) for resumable development",
-      "version": "0.8.0"
+      "version": "0.9.0"
     }
   ]
 }

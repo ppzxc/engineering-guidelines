@@ -10,6 +10,8 @@ Behavioral guidelines to reduce common LLM coding mistakes, derived from [Andrej
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+> **No-arg 동작**: 이 스킬은 인자·유추·실행이 없는 verbatim 로드 전용이다. ADR-0045 확인 게이트 비해당.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

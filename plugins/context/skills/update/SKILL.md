@@ -22,6 +22,7 @@ TASK_NAME이 생략된 경우:
 2. 각 파일에서 `<!-- last_updated:` 라인을 grep으로 추출한다.
 3. ISO-8601 문자열로 `sort -r` 정렬 → 가장 최신 폴더를 선택한다.
 4. 동일 최신 타임스탬프가 복수이면 AskUserQuestion으로 선택한다.
+5. **유추 결과 확인 게이트 (interactive 전용)**: AskUserQuestion으로 선택된 폴더와 `last_updated` 타임스탬프를 제시하며 "최신 task `{TASK_NAME}` (마지막 업데이트: {last_updated}) 상태를 저장할까요?" 확인. 사용자가 거부하면 목록을 보여주고 재선택. non-interactive 세션은 이 게이트를 건너뛰고 선택된 폴더로 진행한다.
 
 ### 2. 파일 갱신 규칙
 

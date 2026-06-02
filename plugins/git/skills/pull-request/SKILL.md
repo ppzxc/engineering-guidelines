@@ -143,11 +143,12 @@ Output the PR URL.
 
 ## Error Handling
 
+공통 에러(gh auth / network / hook failure): → [`references/error-common.md`](../../references/error-common.md)
+
 | Situation | Action |
 |-----------|--------|
 | Push conflict | Abort, suggest `git pull --rebase` |
 | PR already exists | Display PR URL and abort |
-| gh authentication error | Guide user to run `gh auth status` |
 | Unclear branch name pattern | Ask user for the feature branch name |
 
 ## Usage

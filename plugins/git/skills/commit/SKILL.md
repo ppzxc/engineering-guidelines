@@ -78,10 +78,11 @@ EOF
 
 ## Error Handling
 
+공통 에러(gh auth / network / hook failure): → [`references/error-common.md`](../../references/error-common.md)
+
 | Situation | Action |
 |-----------|--------|
 | No changes to commit | Abort with "No changes found" message |
-| pre-commit hook fails | Show error output, guide user to fix and retry |
 | Only sensitive files changed | Guide user to handle them manually |
 
 ## Usage

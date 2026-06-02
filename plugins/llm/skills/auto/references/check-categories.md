@@ -2,6 +2,8 @@
 
 `llm:auto` 입력 분류 후 타입별 필수/선택 카테고리를 이 문서에서 결정한다.
 
+severity H/M/L alias: → [`severity-taxonomy.md`](../../../../_shared/references/severity-taxonomy.md) — H=high, M=medium, L=low.
+
 ---
 
 ## 카테고리 태그

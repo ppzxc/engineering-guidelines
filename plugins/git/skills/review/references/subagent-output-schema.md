@@ -27,12 +27,7 @@ reviewer: <pr-review-toolkit:code-reviewer|agy|gemini|codex|claude-self-generate
 
 ## Severity 분류 기준
 
-| Severity | 정의 |
-|----------|------|
-| `critical` | 보안 취약점 / 데이터 손실 |
-| `high` | 버그 / 런타임 에러 |
-| `medium` | 오작동 가능성 / 로직 이슈 |
-| `low` | 스타일 / 네이밍 |
+→ [`severity-taxonomy.md`](../../../../_shared/references/severity-taxonomy.md) — 4-level 표준 및 H/M/L alias 참조.
 
 ## 규칙
 

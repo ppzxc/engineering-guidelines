@@ -49,6 +49,7 @@
 | [ADR-0044](0044-context-recall-rename.md) | accepted | context:resume → context:recall 리네임 — 토큰 레벨 /resume suffix-match 제거, ADR-0042 supersede |
 | [ADR-0045](0045-skill-no-arg-inference-confirm-gate.md) | accepted | 스킬 no-arg 유추 시 실행 전 확인 게이트 도입 — interactive 세션에서 유추 결과 제시 후 AskUserQuestion 확인 (context:recall/update, dev:tidy, guideline:restful-api 적용) |
 | [ADR-0046](0046-shared-peer-fallback-core.md) | accepted | Peer-CLI 공통 인프라를 `_shared/references/peer-fallback-core.md`로 추출 — pre-flight/host-matrix/호출골격/sentinel 단일 SOT, CLI_NOT_FOUND:<cli> 통합 prefix |
+| [ADR-0047](0047-severity-taxonomy.md) | accepted | Severity taxonomy 통합 — `_shared/references/severity-taxonomy.md` 단일 SOT, 4-level(critical/high/medium/low) + H/M/L alias 매핑 |
 
 ## 새 ADR 추가
 

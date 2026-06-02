@@ -122,7 +122,7 @@ Confidence → severity mapping:
 - confidence 80-89 → severity: high
 - below 80: do not report
 
-severity: critical=security/data-loss, high=bug/runtime-error, medium=logic-issue, low=style/naming
+severity: → `plugins/_shared/references/severity-taxonomy.md` 4-level 표준 참조
 If no issues: write "reviewer: pr-review-toolkit:code-reviewer\n\nNo issues found."
 
 --- DIFF START ---

@@ -18,3 +18,4 @@ git 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약
 ✓ 5b Peer CLI 모델 매핑은 `peer-review-cli.md` "Tier × CLI 모델 매핑" 표에 중앙집중 관리. 모델명 변경 시 표 1곳만 수정 [ADR-0039]
 ✓ PR 본문에 세션이 처리한 이슈를 `Closes #N`으로 연결하되, 탐지 결과는 PR confirm 게이트에서 사용자 승인 후에만 삽입할 것 [ADR-0038]
 ✓ peer-cli 공통 인프라(pre-flight/host-matrix/호출골격/sentinel)는 `plugins/_shared/references/peer-fallback-core.md`를 SOT로 사용할 것 [ADR-0046]
+✓ severity 어휘(critical/high/medium/low 및 H/M/L alias)는 `plugins/_shared/references/severity-taxonomy.md`를 SOT로 사용할 것 [ADR-0047]

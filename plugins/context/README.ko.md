@@ -7,7 +7,7 @@
 
 | 스킬 | 트리거 | 설명 |
 |------|--------|------|
-| `plan` | `/context:plan` | raw 아이디어에서 4파일 Dev Docs 폴더를 생성 — brainstorming → grill → writing-plans 인라인 파이프라인 |
+| `plan` | `/context:plan` | 입력을 분류(idea/spec/plan/diff)하여 4파일 Dev Docs 폴더를 생성. idea: brainstorming → grill-me → writing-plans; spec: grill-me → writing-plans; plan: grill-me → tasks 정규화; diff: /git:review로 redirect |
 | `update` | `/context:update` | 컨텍스트 압축 직전 현재 세션 상태를 폴더에 저장 |
 | `resume` | `/context:resume` | 세션 단절 후 4파일을 읽어 작업을 재개 |
 | `guard` | `/context:guard` | 코드가 stale일 때 `/context:update` 실행을 리마인드하는 옵트인 Stop hook 설치 |

@@ -7,7 +7,7 @@ A single folder `docs/context/{TASK_NAME}/` holds all 4 files needed to re-ancho
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| `plan` | `/context:plan` | Start a new task from a raw idea — creates the 4-file Dev Docs folder via brainstorming → grill → writing-plans pipeline |
+| `plan` | `/context:plan` | Start a new task — classifies input (idea/spec/plan/diff) and creates the 4-file Dev Docs folder. idea: brainstorming → grill-me → writing-plans; spec: grill-me → writing-plans; plan: grill-me → tasks normalization; diff: redirects to /git:review |
 | `update` | `/context:update` | Persist current session state before context compaction |
 | `resume` | `/context:resume` | Re-anchor on a task after a session break by reading the 4-file folder |
 | `guard` | `/context:guard` | Install an opt-in Stop hook that reminds you to run `/context:update` when code is stale |

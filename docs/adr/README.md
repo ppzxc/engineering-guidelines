@@ -45,6 +45,7 @@
 | [ADR-0040](0040-git-review-union-merge-redesign.md) | accepted | `git:review` 5c 머지 재설계 — union+agreement 태그, severity×agreement fix-gate, intersection 폐기 |
 | [ADR-0041](0041-context-plan-opusplan-design-relocation.md) | accepted | context:plan opusplan 호환 — 전체 설계를 플랜모드(Opus)로 이동, spec 게이트→AskUserQuestion, ExitPlanMode→릴리스 게이트, 터미널 계약 명문화 |
 | [ADR-0042](0042-context-resume-explicit-only.md) | accepted | context:resume 명시 호출 전환 — disable-model-invocation으로 자동발동 차단, 3c8057f 본문 가드 접근 무효 판정 |
+| [ADR-0043](0043-context-plan-input-maturity-routing.md) | accepted | context:plan 입력 성숙도 분류 — 4-way 분류(idea/spec/plan/diff) + idea 브랜치 brainstorm→grill 정순 복원, ADR-0030 부분 supersede |
 
 ## 새 ADR 추가
 

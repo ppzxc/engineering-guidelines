@@ -29,7 +29,7 @@ input_type: <plan|spec|idea>
 
 Tag: consistency / omission / ordering / feasibility / risk / fact-check / trade-off / doc-sync / version-compat
 
-Severity: → [`severity-taxonomy.md`](../../../../_shared/references/severity-taxonomy.md) H/M/L alias 참조
+Severity: H=high(blocking), M=medium(should-fix), L=low(note)
 
 ## <Type-specific sections per prompts.md>
 

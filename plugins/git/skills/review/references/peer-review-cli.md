@@ -54,7 +54,7 @@ Immediately after each row, add a fix block:
 + fixed line
 ```
 
-severity: → [`severity-taxonomy.md`](../../../../_shared/references/severity-taxonomy.md) 4-level 표준 참조
+severity: critical=security/data-loss, high=bug/runtime-error, medium=logic-issue, low=style/naming
 
 If no issues found: output exactly:
 reviewer: <your-id>

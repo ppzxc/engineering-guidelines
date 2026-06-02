@@ -3,7 +3,7 @@
 git:review Step 5b (Peer-Review Coordinator SUBAGENT)에서 참조한다.
 `context:plan/references/verification.md`의 CLI 패턴을 코드 리뷰용으로 fork.
 
-공통 인프라(host matrix, pre-flight, 호출 골격, sentinel): → [`peer-fallback-core.md`](../../../../../_shared/references/peer-fallback-core.md)
+공통 인프라(host matrix, pre-flight, 호출 골격, sentinel): → [`peer-fallback-core.md`](../../../../_shared/references/peer-fallback-core.md)
 
 ---
 
@@ -161,7 +161,7 @@ Low:
 
 ## CLI 호출 패턴
 
-→ 호출 골격(mktemp+trap+timeout, sentinel 처리): [`peer-fallback-core.md`](../../../../../_shared/references/peer-fallback-core.md#cli-호출-골격)
+→ 호출 골격(mktemp+trap+timeout, sentinel 처리): [`peer-fallback-core.md`](../../../../_shared/references/peer-fallback-core.md#cli-호출-골격)
 
 각 CLI 호출 시 Review Prompt를 tmpfile에 작성 후 `{RULESET_BLOCK}`과 `{DIFF_CONTENT}`를 주입하여 실행.
 tier별 모델 플래그는 위 Tier × CLI 모델 매핑 표에서 선택.

@@ -8,3 +8,4 @@
 ✓ wrapper 우선순위는 MCP/스킬/SubAgent 1순위 → stdin CLI fallback 2순위 [ADR-0034]
 ✓ self+peer 병렬 SUBAGENT dispatch 수행 (ADR-0033 패턴 차용) [ADR-0034]
 ✓ 입력 분류 4종(plan/spec/idea/diff). diff 입력은 git:review로 redirect [ADR-0034]
+✓ peer-cli 공통 인프라(pre-flight/host-matrix/호출골격/sentinel)는 `plugins/_shared/references/peer-fallback-core.md`를 SOT로 사용할 것 [ADR-0046]

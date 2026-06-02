@@ -33,7 +33,7 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.6.0"
+      "version": "0.7.0"
     },
     {
       "name": "llm",

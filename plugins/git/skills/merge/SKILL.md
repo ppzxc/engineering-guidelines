@@ -96,6 +96,8 @@ git branch -d <FEATURE_BRANCH> 2>/dev/null || true
 
 ## Error Handling
 
+공통 에러(gh auth / network / hook pre-push): → [`references/error-common.md`](../../references/error-common.md)
+
 | Situation | Action |
 |-----------|--------|
 | PR not found | Abort, ask user for PR number |

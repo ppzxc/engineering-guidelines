@@ -78,6 +78,8 @@ EOF
 
 ## Error Handling
 
+공통 에러(gh auth / network): → [`references/error-common.md`](../../references/error-common.md)
+
 | Situation | Action |
 |-----------|--------|
 | No changes to commit | Abort with "No changes found" message |

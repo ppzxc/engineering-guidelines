@@ -19,7 +19,7 @@ Each task produces a self-contained folder:
 ```
 docs/context/{TASK_NAME}/
   spec.md      — brainstorming design output (preserved)
-  plan.md      — goal, architecture, file structure (tasks trimmed)
+  plan.md      — goal, architecture, file structure, verification command (tasks trimmed)
   tasks.md     — extracted checkbox checklist
   context.md   — dynamic resume anchor (Current Status / Decision Log / Next Steps / Blockers)
 ```

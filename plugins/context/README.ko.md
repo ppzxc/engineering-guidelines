@@ -19,7 +19,7 @@
 ```
 docs/context/{TASK_NAME}/
   spec.md      — brainstorming 설계 산출물 (보존)
-  plan.md      — 목표·아키텍처·파일 구조 (tasks 제거됨)
+  plan.md      — 목표·아키텍처·파일 구조·검증 커맨드 (tasks 제거됨)
   tasks.md     — 추출된 체크리스트
   context.md   — 동적 재개 앵커 (현재 상태 / 결정 로그 / 다음 할 일 / 블로커)
 ```

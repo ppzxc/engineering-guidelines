@@ -51,6 +51,7 @@
 | [ADR-0046](0046-shared-peer-fallback-core.md) | accepted | Peer-CLI 공통 인프라를 `_shared/references/peer-fallback-core.md`로 추출 — pre-flight/host-matrix/호출골격/sentinel 단일 SOT, CLI_NOT_FOUND:<cli> 통합 prefix |
 | [ADR-0047](0047-severity-taxonomy.md) | accepted | Severity taxonomy 통합 — `_shared/references/severity-taxonomy.md` 단일 SOT, 4-level(critical/high/medium/low) + H/M/L alias 매핑 |
 | [ADR-0048](0048-workflow-session-state.md) | accepted | workflow:feature 스킬 로딩 감지 — STEP1-LOADED: string match → `.workflow-session.md` frontmatter YAML structured read |
+| [ADR-0049](0049-subagent-wait-schedule-loop.md) | accepted | subagent 완료 대기 시 schedule + manage_subagents 폴링 루프 도입 |
 
 ## 새 ADR 추가
 

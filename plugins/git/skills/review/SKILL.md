@@ -83,6 +83,18 @@ PR diff 획득:
 gh pr diff <PR_NUMBER>
 ```
 
+#### 5-pre. Peer CLI Warm-up (main thread)
+
+서브에이전트 병렬 기동 시 백그라운드 `run_command` 실행 승인 팝업이 메인 터미널 UI와 충돌하여 무한 대기(hang)가 발생하는 현상을 방지하기 위해, 메인 스레드에서 먼저 CLI 사용 승인을 선제적으로 획득(Warm-up)한다.
+
+```bash
+timeout 3 agy --version || true
+timeout 3 gemini --version || true
+timeout 3 codex --version || true
+```
+
+사용자는 이 단계에서 터미널 승인 프롬프트가 나타나면 즉시 승인(`y`)한다.
+
 ---
 
 #### Claude Code host — 두 SUBAGENT 병렬 dispatch

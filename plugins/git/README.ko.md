@@ -47,7 +47,7 @@ Step 4, 5는 auto 모드에서도 반드시 사용자 확인이 필요합니다.
 
 - **commit** — `git log` 히스토리를 참조하여 프로젝트의 커밋 스타일에 맞춤
 - **pull-request** — `main` 하드코딩 대신 `gh repo view`로 기본 브랜치 동적 감지; 브랜치명·커밋 메시지·세션 컨텍스트에서 연관 이슈를 탐지하여 사용자 confirm 후 PR 본문에 `Closes #N` 삽입 (머지 시 GitHub 자동 이슈 close)
-- **review** — PR diff에서 언어를 감지하여 해당 언어별 리뷰어 스킬을 로딩; 매칭되는 리뷰어가 없으면 일반 모범 사례 기준으로 리뷰
+- **review** — PR diff에서 언어를 감지하고, 일반 모범 사례 기준 및 peer 크로스 체크를 통해 코드 리뷰를 제출
 - **merge** — 기본 브랜치 동적 감지; squash merge 후 원격·로컬 브랜치 삭제
 - **issue** — 4가지 이슈 타입(bug, feature, chore, docs) 지원, 타입별 본문 템플릿 자동 적용
 - **clean** — PR 전체 흐름 오케스트레이터; pull-request(이슈-PR 연결 포함)·merge(브랜치 삭제 포함) 위임

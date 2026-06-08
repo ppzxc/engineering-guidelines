@@ -163,7 +163,10 @@ Ruleset and diff for embedding in CLI prompt:
 Output must match subagent-output-schema.md format.
 ```
 
-두 SUBAGENT 완료 대기 (동기 실행).
+두 SUBAGENT 완료 대기 (동기 실행):
+1. `invoke_subagent` 호출 직후 추가적인 텍스트 응답을 출력하지 않고 즉시 턴을 종료(stop calling tools)하여 백그라운드 완료 알림(notification)을 받도록 대기한다.
+2. 대기 과정에서 데드락을 방지하고 상태 갱신을 강제하기 위해, 1회 호출 후 `schedule` 툴을 사용하여 30초 뒤에 `Peer review status check` 알림을 설정한다. [ADR-0049]
+3. 알림을 받아 깨어나거나 subagent notification을 받으면 `manage_subagents` `list`를 호출하여 두 subagent의 status가 모두 Done인지 확인한다. 둘 다 Done이 아니라면 2번 단계(schedule 예약 및 턴 종료)를 반복하여 대기한다. [ADR-0049]
 
 ---
 

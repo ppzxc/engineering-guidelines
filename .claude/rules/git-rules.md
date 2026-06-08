@@ -8,6 +8,7 @@ git 플러그인 스킬을 사용하거나 수정할 때 반드시 다음 제약
 ✓ git:review의 peer crosscheck는 자기 호스트와 다른 LLM에게 위임할 것. 자기 자신에게 cross-check를 보내는 호출 금지 [ADR-0022][ADR-0033]
 ✓ git:clean entry에서 별도 peer crosscheck를 추가하지 말 것 (post-work pipeline이므로 plan 검토 대상 없음) [ADR-0035]
 ✓ git:review의 cross-review는 Self/Peer 두 SUBAGENT 병렬 dispatch로 수행할 것 (Claude Code host) [ADR-0033]
+✓ 두 SUBAGENT 완료 대기 시 `schedule`로 주기적인 wakeup 타이머(30초)를 설정하고, 깨어날 때마다 `manage_subagents` `list` 툴로 두 subagent가 모두 Done인지 능동적으로 확인하고 루프를 돌 것 [ADR-0049]
 ✓ peer 폴백 체인은 자기 호스트를 제외한 풀에서 우선순위대로 시도하고 모든 sentinel(NOT_FOUND/TIMEOUT/ERROR)에서 다음 peer로 이동할 것 [ADR-0033]
 ✓ Auto-fix는 union+agreement 태그 기반 fix-gate로 적용할 것: critical/high는 both/single 무관 자동수정, medium/low는 both 합의 시만 자동수정·single은 코멘트 보고만 [ADR-0040]
 ✓ Self-Review SUBAGENT는 언어별 스킬 대신 pr-review-toolkit:code-reviewer를 tier별 모델(fast=haiku/balanced=sonnet/deep=opus, 기본 deep)로 사용할 것 [ADR-0036][ADR-0039]

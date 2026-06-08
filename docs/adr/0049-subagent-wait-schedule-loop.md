@@ -10,6 +10,8 @@
 
 ## Decision Outcome
 
-Chosen option: "`schedule` 툴을 이용한 1회성 타이머 알림 설정 + `manage_subagents` `list` 툴을 활용한 능동적 폴링 지침 구체화", because 메인 에이전트가 턴을 완전히 종료하고 notification을 마냥 기다리는 대신, 주기적인 타이머 트리거로 강제 wakeup을 유도하고 `manage_subagents` `list`를 통해 직접 subagent 상태를 비교 검증함으로써 UI 대기 데드락 현상을 원천 차단할 수 있다.
+Chosen option: "`schedule` 툴을 이용한 1회성 타이머 알림 설정 + `manage_subagents` `list` 툴을 활용한 능동적 폴링 지침 구체화 + 턴 종료 전 대기 텍스트 출력 필수화", because 메인 에이전트가 턴을 완전히 종료하고 notification을 마냥 기다리는 대신, 주기적인 타이머 트리거로 강제 wakeup을 유도하고 `manage_subagents` `list`를 통해 직접 subagent 상태를 비교 검증함으로써 UI 대기 데드락 현상을 원천 차단할 수 있다. 
+
+특히, 턴 종료 시(stop calling tools) 텍스트 출력이 전혀 없으면 실행 엔진의 이벤트 루프가 완전히 유휴(idle)로 전환되어 백그라운드 이벤트 수신 및 대기 해제가 불가능해지는 현상이 발생한다. 따라서 **매 대기 턴 종료 직전에는 반드시 서브에이전트 완료를 기다리고 있다는 대기 메시지(예: "Self/Peer 서브에이전트 완료 대기 중...")를 명시적으로 출력**해야 한다.
 
 범위는 병렬 subagent 완료를 대기하는 `git:review`와 `llm:auto` 스킬에 적용하며, 규칙에도 반영한다.

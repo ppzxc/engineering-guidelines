@@ -67,7 +67,7 @@ Additionally evaluate discipline injection in plan.md:
 - Karpathy lens reflected in scope (no speculative features, surgical changes only)?
 - Plan.md task plan intends [S]/[B] tagging and [S]-first ordering per phase?
 - Non-trivial behavioral tasks intended to decompose into RED→GREEN→REFACTOR?
-Note: final tasks.md is validated mechanically in Step 8; here, only the plan-level intent.
+Note: final tasks.md is validated mechanically for syntax/tag syntax in Step 8 (no runtime verification); here, only the plan-level intent.
 Flag violations severity H only if discipline is enabled (see DISCIPLINE token above).
 
 DISCIPLINE: {DISCIPLINE_STATE}

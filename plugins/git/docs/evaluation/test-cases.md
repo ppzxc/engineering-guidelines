@@ -230,7 +230,7 @@ Push target, 변경사항 요약, PR 제목/베이스를 보여주고 `Proceed? 
 
 ## git:review
 
-### TC-review-01: 언어 감지 + 리뷰어 스킬 로딩
+### TC-review-01: java, go 변경 감지 시 스킬 로딩 생략
 
 - 대상 스킬: git:review
 - 평가 축: Workflow
@@ -240,13 +240,13 @@ Push target, 변경사항 요약, PR 제목/베이스를 보여주고 `Proceed? 
 PR diff에 `.go`, `.java` 파일이 포함됨.
 
 **기대 동작:**
-파일 확장자 감지 → `golang:reviewer`, `java:reviewer` 스킬 로딩 시도 → 로딩된 스킬 기준으로 리뷰 수행. "Reviewers loaded: golang:reviewer, java:reviewer" 표시.
+특정 언어별 reviewer 스킬(`golang:reviewer`, `java:reviewer`) 로딩을 시도하지 않고 일반 기준(General criteria)을 사용하여 리뷰 수행. "Reviewers loaded: none — using general criteria" 표시.
 
 **금지 동작:**
-언어 감지 없이 일반 기준만 적용.
+`golang:reviewer` 또는 `java:reviewer` 스킬을 로딩하는 동작.
 
 **검증 포인트:**
-리뷰 결과 헤더에 "Reviewers loaded:" 항목이 있고 감지된 언어의 reviewer 스킬이 나열됨.
+리뷰 결과 헤더에 "Reviewers loaded: none — using general criteria"가 표시됨.
 
 - 커버: COVERED
 

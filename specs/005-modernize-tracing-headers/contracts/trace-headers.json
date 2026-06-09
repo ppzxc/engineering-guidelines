@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Distributed Tracing Headers Contract",
+  "description": "API Gateway 및 개별 마이크로서비스 간 분산 추적 데이터 전파를 위해 HTTP Header에 지정되는 데이터 명세 계약입니다.",
+  "type": "object",
+  "properties": {
+    "traceparent": {
+      "type": "string",
+      "description": "W3C Trace Context 규격에 따른 기본 분산 추적 식별 헤더",
+      "pattern": "^00-[a-f0-9]{32}-[a-f0-9]{16}-0[0-1]$",
+      "examples": ["00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"],
+      "maxLength": 55,
+      "minLength": 55
+    },
+    "tracestate": {
+      "type": "string",
+      "description": "W3C Trace Context 규격에 따른 벤더별 모니터링 메타데이터 전송 헤더 (선택)",
+      "pattern": "^[a-z0-9_\\-/\\*@]{1,256}=[ -~&&[^,=\\\]]{1,256}(?:,[a-z0-9_\\-/\\*@]{1,256}=[ -~&&[^,=\\\]]{1,256})*$",
+      "maxLength": 512,
+      "examples": ["rojo=1,congo=2"]
+    },
+    "Request-Id": {
+      "type": "string",
+      "description": "하위 호환성 유지를 위해 병행 전파하는 기존의 고유 요청 식별자",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+      "examples": ["9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"],
+      "maxLength": 36,
+      "minLength": 36
+    }
+  },
+  "required": [
+    "traceparent",
+    "Request-Id"
+  ]
+}

@@ -1,6 +1,6 @@
 # workflow:feature 스킬 로딩 감지 — 파일 기반 structured state
 
-* Status: accepted
+* Status: deprecated (superseded/removed by [ADR-0050](0050-deprecate-workflow-plugin.md))
 * Date: 2026-06-03
 * Decision Makers: ppzxc
 

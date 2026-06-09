@@ -1,6 +1,6 @@
 {
   "name": "guideline",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "description": "Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule",
   "author": {
     "name": "ppzxc",

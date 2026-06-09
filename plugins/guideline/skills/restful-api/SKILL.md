@@ -266,10 +266,13 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 
 ## Collections & Pagination
 
-- Collections return **top-level JSON array** `[]` — never wrapped in an envelope object `[T1]`
-- **Empty collections**: return `200 OK` + `[]` — never `404`; include `Total-Count: 0` `[T1]`
-- Use `Link` header (RFC 8288) with `rel="next"`, `prev`, `first`, `last` for navigation `[T2]`
-- `Total-Count` header for total item count `[T2]`
+- **JSON HAL Standard (Recommended)**: Collections SHOULD return a JSON HAL object envelope with `application/hal+json` Content-Type to prevent JSON Hijacking and allow embedded pagination metadata. `[T1]`
+- **Envelope Structure**:
+  - `_links` (hypermedia links: `self`, `next`, `prev`, `first`, `last`) `[T1]`
+  - `_embedded` (wrapping the array of resources under a resource-specific key, e.g., `"articles"`) `[T1]`
+  - Top-level attributes are used for custom page/total count metadata (e.g., `totalCount`, `pageSize`). `[T1]`
+- **Legacy Array Support**: Backwards-compatible implementations may return a top-level JSON array `[]` alongside `Link` (RFC 8288) and `Total-Count` headers. `[T1]`
+- **Empty collections**: return `200 OK` with an empty collection representation (e.g., `_embedded: { "articles": [] }` and `totalCount: 0`) — never `404`. `[T1]`
 
 ### API 표면 계약 — 페이지네이션 방식
 
@@ -281,16 +284,37 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - `pageSize` — 페이지당 항목 수 (기본값 20, 최대 100)
 - `pageToken` — 이전 응답의 `nextPageToken` 값 (첫 페이지는 생략)
 
-**요청/응답 흐름:**
+**요청/응답 흐름 (JSON HAL 표준):**
 
 ```
 # 첫 페이지
 GET /articles?pageSize=20
 
 200 OK
-Total-Count: 58
-Link: <https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6MjB9>; rel="next"
-[ { "id": "1", ... }, ..., { "id": "20", ... } ]
+Content-Type: application/hal+json
+
+{
+  "_links": {
+    "self": { "href": "https://api.example.com/articles?pageSize=20" },
+    "next": { "href": "https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6MjB9" }
+  },
+  "_embedded": {
+    "articles": [
+      {
+        "id": "1",
+        "_links": { "self": { "href": "/articles/1" } },
+        "title": "Article 1"
+      },
+      {
+        "id": "2",
+        "_links": { "self": { "href": "/articles/2" } },
+        "title": "Article 2"
+      }
+    ]
+  },
+  "totalCount": 58,
+  "pageSize": 20
+}
 ```
 
 ```
@@ -298,26 +322,58 @@ Link: <https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6MjB9>; rel
 GET /articles?pageSize=20&pageToken=eyJpZCI6MjB9
 
 200 OK
-Total-Count: 58
-Link: <https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6NDB9>; rel="next",
-      <https://api.example.com/articles?pageSize=20>; rel="first"
-[ { "id": "21", ... }, ..., { "id": "40", ... } ]
+Content-Type: application/hal+json
+
+{
+  "_links": {
+    "self": { "href": "https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6MjB9" },
+    "next": { "href": "https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6NDB9" },
+    "first": { "href": "https://api.example.com/articles?pageSize=20" }
+  },
+  "_embedded": {
+    "articles": [
+      {
+        "id": "21",
+        "_links": { "self": { "href": "/articles/21" } },
+        "title": "Article 21"
+      }
+    ]
+  },
+  "totalCount": 58,
+  "pageSize": 20
+}
 ```
 
 ```
-# 마지막 페이지 — rel="next" 없음
+# 마지막 페이지 — next 링크 없음
 GET /articles?pageSize=20&pageToken=eyJpZCI6NDB9
 
 200 OK
-Total-Count: 58
-Link: <https://api.example.com/articles?pageSize=20>; rel="first"
-[ { "id": "41", ... }, ..., { "id": "58", ... } ]
+Content-Type: application/hal+json
+
+{
+  "_links": {
+    "self": { "href": "https://api.example.com/articles?pageSize=20&pageToken=eyJpZCI6NDB9" },
+    "first": { "href": "https://api.example.com/articles?pageSize=20" }
+  },
+  "_embedded": {
+    "articles": [
+      {
+        "id": "41",
+        "_links": { "self": { "href": "/articles/41" } },
+        "title": "Article 41"
+      }
+    ]
+  },
+  "totalCount": 58,
+  "pageSize": 20
+}
 ```
 
 **규칙:**
 - `pageToken` 클라이언트 파싱/직접 생성 금지 — 반드시 서버가 반환한 값만 사용 `[T2]`
 - `pageSize < 1` → `400 Bad Request`; `pageSize > max` → max로 cap (에러 없음) `[T2]`
-- 다음 페이지가 없으면 `rel="next"` 생략 `[T2]`
+- 다음 페이지가 없으면 `_links.next` 생략 `[T2]`
 
 **서버 구현 참고 (클라이언트에 노출 금지):**
 

@@ -1,6 +1,6 @@
 # Gatekeeper 개발 워크플로우 스킬들의 workflow 플러그인 통합 및 연계 무결성 확보
 
-* Status: "accepted"
+* Status: "deprecated" (superseded/removed by [ADR-0050](0050-deprecate-workflow-plugin.md))
 * Date: 2026-05-26
 * Decision Makers: ppzxc (USER), Antigravity (AI)
 * Consulted: ppzxc

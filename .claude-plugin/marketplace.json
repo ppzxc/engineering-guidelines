@@ -18,12 +18,6 @@
       "version": "0.5.0"
     },
     {
-      "name": "workflow",
-      "source": "./plugins/workflow",
-      "description": "Orchestrated developer workflow skills — including init, idea, feature, develop, and planning for rigorous software engineering",
-      "version": "0.2.0"
-    },
-    {
       "name": "docs",
       "source": "./plugins/docs",
       "description": "Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions",

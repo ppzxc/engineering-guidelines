@@ -203,8 +203,15 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
 - `updateMask` query parameter is REQUIRED: comma-separated field paths — `?updateMask=title,content` (AIP-134 HTTP binding: resource in body, mask as query param)
 - Response MUST return the updated full resource.
 - `updateMask=*`: update all mutable fields present in the request body.
-- Empty mask → `400 Bad Request`; unknown field path → `400 Bad Request`
-- Nested fields use dot notation: `?updateMask=address.city`
+- Empty mask → `400 Bad Request`.
+- **Field Clearing (Data Nulling):**
+  - If a field is specified in `updateMask` and the client sends `"field": null` in the Request Body, the server MUST clear that field (set to null/empty).
+  - If a field is specified in `updateMask` but is missing (omitted) from the Request Body JSON payload, the server MUST clear that field (set to its default value or null/empty).
+- **Nested fields and Dot Notation:**
+  - Nested fields use dot notation: `?updateMask=profile.bio`
+  - Sub-fields within a nested object can be individually updated or cleared using dot notation (e.g., clearing `profile.bio` while leaving `profile.website` unchanged).
+- **Invalid Mask Paths:**
+  - If the `updateMask` contains any invalid path (paths that do not exist or map to the resource schema), the server MUST reject the request with `400 Bad Request` (INVALID_ARGUMENT).
 - Field Behavior interactions with mask:
   - `OUTPUT_ONLY` in mask → silently ignored (not an error)
   - `IMMUTABLE` in mask + value changed → `400 Bad Request`

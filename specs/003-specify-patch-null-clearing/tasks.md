@@ -25,8 +25,8 @@
 
 **Purpose**: Initialize the evaluation framework for the guideline plugin to support TDD check gates
 
-- [ ] T001 Create docs evaluation directory for guideline plugin at `plugins/guideline/docs/evaluation/`
-- [ ] T002 Initialize evaluation files at `plugins/guideline/docs/evaluation/test-cases.md`, `plugins/guideline/docs/evaluation/coverage-map.md`, and `plugins/guideline/docs/evaluation/report.md`
+- [x] T001 Create docs evaluation directory for guideline plugin at `plugins/guideline/docs/evaluation/`
+- [x] T002 Initialize evaluation files at `plugins/guideline/docs/evaluation/test-cases.md`, `plugins/guideline/docs/evaluation/coverage-map.md`, and `plugins/guideline/docs/evaluation/report.md`
 
 ---
 
@@ -40,15 +40,15 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T003 [P] [US1] Write failing test cases in `plugins/guideline/docs/evaluation/test-cases.md` for implicit clearing, dot notation, and invalid paths
-- [ ] T004 [P] [US1] Set initial status to FAILED in `plugins/guideline/docs/evaluation/coverage-map.md` and `plugins/guideline/docs/evaluation/report.md`
+- [x] T003 [P] [US1] Write failing test cases in `plugins/guideline/docs/evaluation/test-cases.md` for implicit clearing, dot notation, and invalid paths
+- [x] T004 [P] [US1] Set initial status to FAILED in `plugins/guideline/docs/evaluation/coverage-map.md` and `plugins/guideline/docs/evaluation/report.md`
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Document explicit & implicit null-clearing rules under PATCH section in `plugins/guideline/skills/restful-api/SKILL.md`
-- [ ] T006 [US1] Document dot notation support for nested objects under PATCH section in `plugins/guideline/skills/restful-api/SKILL.md`
-- [ ] T007 [US1] Document 400 Bad Request error behavior for invalid mask paths in `plugins/guideline/skills/restful-api/SKILL.md`
-- [ ] T008 [US1] Update evaluation status to COVERED/PASS in `plugins/guideline/docs/evaluation/coverage-map.md` and `plugins/guideline/docs/evaluation/report.md`
+- [x] T005 [US1] Document explicit & implicit null-clearing rules under PATCH section in `plugins/guideline/skills/restful-api/SKILL.md`
+- [x] T006 [US1] Document dot notation support for nested objects under PATCH section in `plugins/guideline/skills/restful-api/SKILL.md`
+- [x] T007 [US1] Document 400 Bad Request error behavior for invalid mask paths in `plugins/guideline/skills/restful-api/SKILL.md`
+- [x] T008 [US1] Update evaluation status to COVERED/PASS in `plugins/guideline/docs/evaluation/coverage-map.md` and `plugins/guideline/docs/evaluation/report.md`
 
 **Checkpoint**: At this point, PATCH updateMask null-clearing behavior is fully documented and passes the evaluation checks.
 
@@ -58,8 +58,8 @@
 
 **Purpose**: Metadata synchronization and final validation
 
-- [ ] T009 [P] Bump versions to 0.5.1 in `plugins/guideline/plugin.json`, `README.md`, `README.ko.md`, and `.claude-plugin/marketplace.json` to synchronize versions
-- [ ] T010 Run final validation per `specs/003-specify-patch-null-clearing/quickstart.md`
+- [x] T009 [P] Bump versions to 0.5.1 in `plugins/guideline/plugin.json`, `README.md`, `README.ko.md`, and `.claude-plugin/marketplace.json` to synchronize versions
+- [x] T010 Run final validation per `specs/003-specify-patch-null-clearing/quickstart.md`
 
 ---
 

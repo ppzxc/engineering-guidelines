@@ -107,9 +107,12 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 - RFC 8288 `Link` header for pagination `[T2]`
 - **No `X-` prefix on custom headers** (RFC 6648/BCP 178) — `X-` was intended for experimental headers but causes naming conflicts when they become standards. All new APIs MUST define custom headers without this prefix. Exception: legacy headers already standardized with `X-` (e.g., `X-Forwarded-For`, `X-Content-Type-Options`, `X-Hub-Signature-256`) retain their names for compatibility `[T1]`
 - `Cache-Control` header specifies caching strategy `[T2]`
-- `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one `[T1]`
-- Propagate `Request-Id` across microservices for distributed tracing `[T1]`
-- Log `Request-Id` in all service logs for debugging correlation `[T1]`
+- `traceparent` header — W3C Trace Context standard for distributed tracing. Must format as `version-trace_id-parent_id-trace_flags` (e.g., `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01`) `[T1]`
+- `tracestate` header — vendor-specific tracing metadata propagation (optional) `[T1]`
+- `Request-Id` header — server MUST include a unique request identifier (UUID v4) in every response; if the client sends `Request-Id`, the server SHOULD adopt it or generate a new one. In a distributed context, both W3C headers and legacy `Request-Id` MUST be propagated together (Dual Propagation) for backward compatibility `[T1]`
+- Propagate distributed tracing context across microservices: API Gateway (or first entrypoint service) MUST generate a new `traceparent` and `Request-Id` if they are missing in the incoming request `[T1]`
+- Invalid tracing context fallback: if the received `traceparent` is malformed/invalid, the server MUST ignore it and generate a new one (Restart Trace) without rejecting the request. Additionally, a warning log MUST be recorded for debugging correlation `[T1]`
+- Log both `traceparent` and `Request-Id` in all service logs for debugging correlation `[T1]`
 - `ETag` — opaque string representing the resource version; server includes in responses `[T1]`
 - `If-Match` — client sends etag value on Update/Delete requests for optimistic concurrency control `[T1]`
 

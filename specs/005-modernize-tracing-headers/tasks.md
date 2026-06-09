@@ -27,8 +27,8 @@
 
 **Purpose**: 프로젝트 초기화 및 규칙/가이드라인 파일 뼈대 생성
 
-- [ ] T001 Verify folders and verify target paths in specs/005-modernize-tracing-headers/spec.md
-- [ ] T002 Initialize empty api-rules file at .claude/rules/api-rules.md
+- [X] T001 Verify folders and verify target paths in specs/005-modernize-tracing-headers/spec.md
+- [X] T002 Initialize empty api-rules file at .claude/rules/api-rules.md
 
 ---
 
@@ -36,7 +36,7 @@
 
 **Purpose**: 본격적인 규칙 설계 및 작성 전에 수행해야 하는 헌법(Constitution) 정합성 점검 및 구조 준비
 
-- [ ] T003 Verify formatting tools and constitution constraints in .specify/memory/constitution.md
+- [X] T003 Verify formatting tools and constitution constraints in .specify/memory/constitution.md
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -52,13 +52,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T004 [P] [US1] Add evaluation test cases for W3C distributed tracing and Request-Id backward compatibility to docs/evaluation/test-cases.md
+- [X] T004 [P] [US1] Add evaluation test cases for W3C distributed tracing and Request-Id backward compatibility to docs/evaluation/test-cases.md
 
 ### Implementation for User Story 1
 
-- [ ] T005 [P] [US1] Implement distributed logging and tracing security rules in .claude/rules/api-rules.md
-- [ ] T006 [US1] Update Headers section and tracing guidelines in plugins/guideline/skills/restful-api/SKILL.md
-- [ ] T007 [US1] Run validation check on docs/evaluation/test-cases.md to pass TDD cycle
+- [X] T005 [P] [US1] Implement distributed logging and tracing security rules in .claude/rules/api-rules.md
+- [X] T006 [US1] Update Headers section and tracing guidelines in plugins/guideline/skills/restful-api/SKILL.md
+- [X] T007 [US1] Run validation check on docs/evaluation/test-cases.md to pass TDD cycle
 
 **Checkpoint**: User Story 1 should be fully functional and testable independently.
 
@@ -68,8 +68,8 @@
 
 **Purpose**: 여러 영역에 걸친 마무리 다듬기 및 가이드라인 정밀 최종 검증
 
-- [ ] T008 [P] Execute verification scenarios defined in specs/005-modernize-tracing-headers/quickstart.md
-- [ ] T009 Verify plugin version consistency and update readme at README.md
+- [X] T008 [P] Execute verification scenarios defined in specs/005-modernize-tracing-headers/quickstart.md
+- [X] T009 Verify plugin version consistency and update readme at README.md
 
 ---
 

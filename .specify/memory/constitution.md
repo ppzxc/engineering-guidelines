@@ -29,6 +29,7 @@ Sync Impact Report:
 PR 제목 및 본문은 기술 용어/코드를 제외하고 한국어로 작성한다. 
 PR 본문에 처리한 이슈를 `Closes #N`으로 연결하며, 이는 사용자 승인 후에만 삽입한다. [ADR-0038]
 플러그인 버전 변경 시 루트 `README.md`, `.claude-plugin/marketplace.json`, 그리고 플러그인의 `plugin.json` 세 곳의 버전을 동시에 업데이트하여 동기화한다.
+스킬 가이드라인(`SKILL.md`) 수정 시, 사람이 참조하는 설명 문서(`README.md`)도 동일하게 변경하여 동기화 상태를 유지한다.
 
 ## Glossary & Domain Terms
 

@@ -1,6 +1,6 @@
 ---
 name: restful-api
-description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /guideline:restful-api, \"REST API 설계\", \"REST API 리뷰\", \"API 가이드라인\""
+description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
 user-invocable: true
 ---
 
@@ -14,24 +14,24 @@ Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
 ## Profile Guide
 
-규칙마다 `[T1]`, `[T2]`, `[T3]` 태그가 붙어 있다. 사용자가 프로필을 지정하면 **해당 Tier 이하의 규칙만 적용**한다.
+Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a profile, **only the rules up to that Tier are applied**.
 
-| 프로필 | 포함 Tier | 대상 | 규칙 수 |
+| Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | 모든 API — 첫날부터 | ~87 |
-| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~121 |
-| **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~146 |
+| **Essential** | T1 only | All APIs — from day one | ~87 |
+| **Standard** | T1 + T2 | Production environments | ~121 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~146 |
 
-**사용 예시:** "Essential 프로필로 이 API를 리뷰해줘" → T1 규칙만 체크한다.
+**Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
-**No-arg 동작 (ADR-0045):**
-- **Interactive 세션**: 프로필이 지정되지 않은 경우, AskUserQuestion으로 "어떤 프로필로 검토할까요?" (Essential [T1] / Standard [T1+T2] / Full [T1+T2+T3, 권장]) 확인 후 진행.
-- **Non-interactive 세션**: Full 프로필(T1+T2+T3)로 진행.
+**No-arg Behavior (ADR-0045):**
+- **Interactive Session**: If no profile is specified, use AskUserQuestion to confirm: "Which profile should be used for review?" (Essential [T1] / Standard [T1+T2] / Full [T1+T2+T3, Recommended]).
+- **Non-interactive Session**: Fall back to the Full profile (T1+T2+T3).
 
-**Tier 분류 기준 [ADR-0010]:**
-- **T1 (Essential):** 후행 도입 시 하위 호환성 파괴 위험 / 보안 필수 / HTTP 표준 / API 계약 근간
-- **T2 (Standard):** 프로덕션 운영 편의, 후행 도입 가능
-- **T3 (Full):** 엔터프라이즈/고급 패턴, 특정 도메인 한정
+**Tier Classification Criteria [ADR-0010]:**
+- **T1 (Essential):** High risk of breaking backward compatibility if introduced later / Security essentials / HTTP standards / Core API contract.
+- **T2 (Standard):** Production convenience, can be introduced later.
+- **T3 (Full):** Enterprise/advanced patterns, limited to specific domains.
 
 ---
 
@@ -118,6 +118,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 - **camelCase** field names: `userId`, `createdAt`, `isActive` `[T1]`
 - Never snake_case or abbreviations `[T1]`
 - Omit null/missing fields entirely (do not send `"field": null`) `[T1]`
+  - *Exception*: In endpoints utilizing RFC 7396 (JSON Merge Patch) for explicit field deletion/nullification, clients MAY send `"field": null` to clear the field. In this case, the server MUST set the field to null or default. `[T2]`
 - Date/time values as RFC 3339 strings; server responses in UTC (`Z`) `[T1]`
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only) `[T1]`
 - Servers must ignore read-only fields in request bodies `[T1]`
@@ -208,6 +209,7 @@ OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly
   - `OUTPUT_ONLY` in mask → silently ignored (not an error)
   - `IMMUTABLE` in mask + value changed → `400 Bad Request`
   - `REQUIRED` in mask → field must be present in body
+- **Alternative (JSON Merge Patch)**: If the API service implements RFC 7396 (JSON Merge Patch) and supports explicit `null` fields for deletion, `updateMask` MAY be optional, allowing partial updates based purely on the fields present in the request body. `[T2]`
 
 **Optimistic Concurrency Control (AIP-154):** `[T1]` Include an `etag` field in the resource JSON schema (opaque string, OUTPUT_ONLY, updated on every change); the server also includes the same value in the `ETag` response header.
 
@@ -272,19 +274,20 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
   - `_embedded` (wrapping the array of resources under a resource-specific key, e.g., `"articles"`) `[T1]`
   - Top-level attributes are used for custom page/total count metadata (e.g., `totalCount`, `pageSize`). `[T1]`
 - **Legacy Array Support**: Backwards-compatible implementations may return a top-level JSON array `[]` alongside `Link` (RFC 8288) and `Total-Count` headers. `[T1]`
+- **Content Negotiation Fallback**: If the client explicitly requests `Accept: application/json` instead of `application/hal+json`, the server MAY return a simplified flat JSON envelope (e.g., `{"items": [...], "totalCount": N}`) to reduce client-side parsing overhead. `[T2]`
 - **Empty collections**: return `200 OK` with an empty collection representation (e.g., `_embedded: { "articles": [] }` and `totalCount: 0`) — never `404`. `[T1]`
 
-### API 표면 계약 — 페이지네이션 방식
+### API Surface Contract — Pagination Methods
 
-#### Token-based Pagination (AIP-158, 권장) `[T2]`
+#### Token-based Pagination (AIP-158, Recommended) `[T2]`
 
-불투명 토큰(`pageToken`)을 사용한다. 클라이언트는 토큰 내부 구조를 파싱하거나 직접 생성해서는 안 된다.
+Uses an opaque token (`pageToken`). Clients MUST NOT parse the internal structure of the token or generate it directly.
 
-**파라미터:**
-- `pageSize` — 페이지당 항목 수 (기본값 20, 최대 100)
-- `pageToken` — 이전 응답의 `nextPageToken` 값 (첫 페이지는 생략)
+**Parameters:**
+- `pageSize` — Number of items per page (default 20, max 100)
+- `pageToken` — The `nextPageToken` value from the previous response (omit for the first page)
 
-**요청/응답 흐름 (JSON HAL 표준):**
+**Request/Response Flow (JSON HAL Standard):**
 
 ```
 # 첫 페이지
@@ -370,47 +373,46 @@ Content-Type: application/hal+json
 }
 ```
 
-**규칙:**
-- `pageToken` 클라이언트 파싱/직접 생성 금지 — 반드시 서버가 반환한 값만 사용 `[T2]`
-- `pageSize < 1` → `400 Bad Request`; `pageSize > max` → max로 cap (에러 없음) `[T2]`
-- 다음 페이지가 없으면 `_links.next` 생략 `[T2]`
+**Rules:**
+- Clients MUST NOT parse or directly generate `pageToken` — only use the value returned by the server `[T2]`
+- `pageSize < 1` → `400 Bad Request`; `pageSize > max` → cap at max (no error) `[T2]`
+- Omit `_links.next` if there is no next page `[T2]`
 
-**서버 구현 참고 (클라이언트에 노출 금지):**
+**Server Implementation Notes (Do not expose to clients):**
 
-토큰 내부에 정렬 키(keyset)를 인코딩하는 방식을 권장한다. OFFSET 쿼리(`OFFSET N LIMIT 20`)는 깊은 페이지에서 O(N) 성능 저하가 발생하므로 사용하지 않는다.
+Encoding sorting keys (keyset) inside the token is recommended. Do not use OFFSET queries (`OFFSET N LIMIT 20`) due to O(N) performance degradation on deep pages.
 
 ```sql
--- pageToken 내부: { "createdAt": "2024-06-15T10:30:00Z", "id": 20 } → Base64 인코딩
+-- Inside pageToken: { "createdAt": "2024-06-15T10:30:00Z", "id": 20 } → Base64 Encoded
 SELECT * FROM articles
-WHERE (created_at, id) < ('2024-06-15T10:30:00Z', 20)  -- keyset 조건
+WHERE (created_at, id) < ('2024-06-15T10:30:00Z', 20)  -- keyset condition
 ORDER BY created_at DESC, id DESC
-LIMIT 21  -- pageSize + 1 (다음 페이지 존재 여부 판별)
--- 결과가 21건이면 마지막 항목을 제거하고 next pageToken 생성
--- 결과가 21건 미만이면 next pageToken 없음
+LIMIT 21  -- pageSize + 1 (to check for next page existence)
+-- If result count is 21, remove the last item and generate next pageToken.
+-- If result count is less than 21, next pageToken is not provided.
 ```
 
-#### Offset-based Pagination (소규모 데이터 한정) `[T2]`
+#### Offset-based Pagination (Small datasets only) `[T2]`
 
-관리자 UI 등 임의 페이지 접근이 필요하고 데이터가 10,000건 미만인 경우에 한해 사용한다.
+Use only when random page access is required (e.g., admin UI) and the dataset contains fewer than 10,000 items.
 
-- `page` + `pageSize` 파라미터
-- 대용량 데이터에서 성능 저하 및 데이터 삽입 시 중복/누락 발생 위험
+- `page` + `pageSize` parameters
+- Risk of performance degradation and duplicate/missing data during pagination when data is inserted/deleted
 
-### 페이지네이션 선택 기준
+### Pagination Selection Criteria
 
 ```
-임의 페이지 접근 필요 AND 데이터 < 10,000건?
+Random page access required AND data < 10,000 items?
   └─ Yes → Offset (page + pageSize)
-  └─ No  → Token-based (pageToken + pageSize, AIP-158) ← 기본 권장
+  └─ No  → Token-based (pageToken + pageSize, AIP-158) ← Default Recommended
 ```
 
-**같은 API 내 엔드포인트별로 다른 전략 사용 가능. 단, 같은 엔드포인트에서 두 전략 동시 제공 금지.**
+**Different endpoints in the same API can use different strategies. However, providing both strategies on the same endpoint is prohibited.**
 
 ## Filtering & Sorting
 
-❌ Do not use individual query parameters for filtering (e.g., `?status=PUBLISHED&createdAfter=...`). Use `filter` expression instead. `[T1]`
-
-**Filter expression (AIP-160):** Use the `filter` query parameter with a structured expression string. `[T1]`
+- **Filter expression (AIP-160):** Use the `filter` query parameter with a structured expression string for complex query criteria (AND/OR, inequality operators). `[T1]`
+- **Simple equality filters:** For simple 1:1 equality filtering (e.g., matching a single exact status), APIs MAY support direct query parameters (e.g., `?status=ACTIVE`) as a lightweight alternative to reduce parsing overhead on basic CRUD tasks. `[T1]`
 - Syntax: `?filter=status = "ACTIVE" AND price >= 1000`
 - Comparison operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
 - Logical operators: `AND`, `OR`, `NOT`; grouping with parentheses
@@ -548,7 +550,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 - **`Cache-Control` header:** Specify caching directives (`public`, `private`, `no-cache`, `max-age`). `[T2]`
 - **`ETag` usage:** All mutable resources MUST provide an `ETag` (see [Optimistic Concurrency Control](#optimistic-concurrency-control)). `[T2]`
 - **`Last-Modified`:** SHOULD be used alongside ETag for legacy client compatibility. `[T3]`
-- **Vary:** Use `Vary: Accept, Api-Version` if responses change based on content negotiation or versioning. `[T3]`
+- **Vary on Versioning:** All APIs implementing Header Versioning MUST include `Vary: Api-Version` (and `Accept` if content negotiation is used) in their responses to prevent CDN/proxy cache pollution. `[T1]`
 
 ## Long-Running Operations
 

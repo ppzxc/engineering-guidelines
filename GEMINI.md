@@ -1,5 +1,5 @@
-@AGENTS.md
+# GEMINI.md
 
-## Gemini CLI 전용
+## Gemini CLI 전용 지침
 
-설계, 아키텍처, 프로젝트 컨벤션에 대한 새로운 결정이 발생하면, 반드시 `docs/adr/0000-template.md` (또는 minimal)를 참고하여 ADR 문서를 작성할 것.
+작업 시작 전 반드시 프로젝트 헌법 파일인 `.specify/memory/constitution.md`를 읽고 규칙을 준수할 것.

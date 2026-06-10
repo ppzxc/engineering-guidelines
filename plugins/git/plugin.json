@@ -1,7 +1,7 @@
 {
   "name": "git",
-  "version": "0.7.2",
-  "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup",
+  "version": "0.7.3",
+  "description": "Git workflow skills — safe commit, Korean PR creation with speckit spec-link and issue detection, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup",
   "author": {
     "name": "ppzxc",
     "email": "cjh8487@naver.com",

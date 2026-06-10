@@ -46,7 +46,7 @@ Steps 4 and 5 always require explicit confirmation regardless of auto mode.
 Skills automatically adapt to project conventions:
 
 - **commit** — reads `git log` history to match the project's existing commit style
-- **pull-request** — detects the repository's default branch via `gh repo view` instead of hardcoding `main`; detects related issues from branch name, commit messages, and session context, then inserts `Closes #N` in the PR body after user confirmation (GitHub auto-closes issue on merge)
+- **pull-request** — detects the repository's default branch via `gh repo view` instead of hardcoding `main`; detects related issues from branch name, commit messages, and a full scan of the conversation for `#N` references, then inserts `Closes #N` in the PR body after user confirmation (GitHub auto-closes issue on merge); for speckit branches (matching `^[0-9]{3,}-` / timestamp prefix + `.specify/feature.json`), prefixes the PR title scope with `spec/<N>` and prepends a `## Spec` section to the PR body
 - **review** — detects languages in the PR diff, uses general best practices and peer cross-review to submit a code review
 - **merge** — detects the default branch dynamically; deletes remote and local branch after squash merge
 - **issue** — supports 4 issue types (bug, feature, chore, docs) with type-specific body templates

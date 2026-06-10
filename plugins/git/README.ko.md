@@ -46,7 +46,7 @@ Step 4, 5는 auto 모드에서도 반드시 사용자 확인이 필요합니다.
 스킬들은 프로젝트 컨벤션을 자동으로 감지하여 적용합니다:
 
 - **commit** — `git log` 히스토리를 참조하여 프로젝트의 커밋 스타일에 맞춤
-- **pull-request** — `main` 하드코딩 대신 `gh repo view`로 기본 브랜치 동적 감지; 브랜치명·커밋 메시지·세션 컨텍스트에서 연관 이슈를 탐지하여 사용자 confirm 후 PR 본문에 `Closes #N` 삽입 (머지 시 GitHub 자동 이슈 close)
+- **pull-request** — `main` 하드코딩 대신 `gh repo view`로 기본 브랜치 동적 감지; 브랜치명·커밋 메시지·대화 전체 `#N` 스캔으로 연관 이슈를 탐지하여 사용자 confirm 후 PR 본문에 `Closes #N` 삽입 (머지 시 GitHub 자동 이슈 close); speckit 브랜치(`^[0-9]{3,}-` / 타임스탬프 패턴 + `.specify/feature.json`)인 경우 PR 제목 scope에 `spec/<N>` 접두어 삽입 및 PR 본문 맨 위에 `## Spec` 섹션 추가
 - **review** — PR diff에서 언어를 감지하고, 일반 모범 사례 기준 및 peer 크로스 체크를 통해 코드 리뷰를 제출
 - **merge** — 기본 브랜치 동적 감지; squash merge 후 원격·로컬 브랜치 삭제
 - **issue** — 4가지 이슈 타입(bug, feature, chore, docs) 지원, 타입별 본문 템플릿 자동 적용

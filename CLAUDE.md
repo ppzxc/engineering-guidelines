@@ -12,5 +12,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at /home/ppzxc/projects/engineering-guidelines/specs/005-modernize-tracing-headers/plan.md
+at /home/ppzxc/projects/engineering-guidelines/specs/006-peer-orchestrator-integration/plan.md
 <!-- SPECKIT END -->

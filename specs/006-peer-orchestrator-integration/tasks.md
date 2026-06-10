@@ -25,8 +25,8 @@
 
 **Purpose**: Project initialization and basic structure checking
 
-- [ ] T001 Verify existing plugin directories and configuration in plugins/llm/plugin.json
-- [ ] T002 Configure local environment settings in .specify/feature.json
+- [x] T001 Verify existing plugin directories and configuration in plugins/llm/plugin.json
+- [x] T002 Configure local environment settings in .specify/feature.json
 
 ---
 
@@ -36,8 +36,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Initialize target evaluation file structure in docs/evaluation/test-cases.md
-- [ ] T004 Define empty placeholder orchestrator skill directory at plugins/llm/skills/peer-orchestrator/
+- [x] T003 Initialize target evaluation file structure in docs/evaluation/test-cases.md
+- [x] T004 Define empty placeholder orchestrator skill directory at plugins/llm/skills/peer-orchestrator/
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -53,13 +53,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US1] Create failing test case for sandbox warm-up and subagent execution in docs/evaluation/test-cases.md
+- [x] T005 [P] [US1] Create failing test case for sandbox warm-up and subagent execution in docs/evaluation/test-cases.md
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Create the core orchestrator skill skeleton in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T007 [US1] Implement sandbox warm-up version checks (`timeout 3 <cli> --version`) in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T008 [US1] Dispatch Self-Review and Peer-Review coordinator subagents concurrently in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T006 [US1] Create the core orchestrator skill skeleton in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T007 [US1] Implement sandbox warm-up version checks (`timeout 3 <cli> --version`) in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T008 [US1] Dispatch Self-Review and Peer-Review coordinator subagents concurrently in plugins/llm/skills/peer-orchestrator/SKILL.md
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -73,12 +73,12 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Create failing test case for sentinel fallback logic in docs/evaluation/test-cases.md
+- [x] T009 [P] [US2] Create failing test case for sentinel fallback logic in docs/evaluation/test-cases.md
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Implement sentinel parsing (`CLI_NOT_FOUND`, `CLI_TIMEOUT`, `CLI_ERROR`) in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T011 [US2] Implement fallback loop logic to transition to the next prioritized peer CLI in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T010 [US2] Implement sentinel parsing (`CLI_NOT_FOUND`, `CLI_TIMEOUT`, `CLI_ERROR`) in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T011 [US2] Implement fallback loop logic to transition to the next prioritized peer CLI in plugins/llm/skills/peer-orchestrator/SKILL.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -92,14 +92,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T012 [P] [US3] Create failing test case for severity-gated merging in docs/evaluation/test-cases.md
+- [x] T012 [P] [US3] Create failing test case for severity-gated merging in docs/evaluation/test-cases.md
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Implement findings parser and classification by severity in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T014 [US3] Implement Union logic for High/Critical findings in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T015 [US3] Implement Intersection logic for Medium/Low findings in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T016 [US3] Implement markdown report generator in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T013 [US3] Implement findings parser and classification by severity in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T014 [US3] Implement Union logic for High/Critical findings in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T015 [US3] Implement Intersection logic for Medium/Low findings in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T016 [US3] Implement markdown report generator in plugins/llm/skills/peer-orchestrator/SKILL.md
 
 **Checkpoint**: All user stories 1, 2, and 3 should now be independently functional
 
@@ -113,12 +113,12 @@
 
 ### Tests for User Story 4
 
-- [ ] T017 [P] [US4] Create failing test case for host exclusion and auto delegation in docs/evaluation/test-cases.md
+- [x] T017 [P] [US4] Create failing test case for host exclusion and auto delegation in docs/evaluation/test-cases.md
 
 ### Implementation for User Story 4
 
-- [ ] T018 [US4] Implement dynamic host CLI (LOCAL) detection and exclusion in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T019 [US4] Refactor plugins/llm/skills/auto/SKILL.md to remove local orchestration and delegate all work to llm:peer-orchestrator
+- [x] T018 [US4] Implement dynamic host CLI (LOCAL) detection and exclusion in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T019 [US4] Refactor plugins/llm/skills/auto/SKILL.md to remove local orchestration and delegate all work to llm:peer-orchestrator
 
 ---
 
@@ -126,9 +126,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T020 [P] Implement subagent polling timeout protection (maximum 5 minutes) in plugins/llm/skills/peer-orchestrator/SKILL.md
-- [ ] T021 [P] Update documentation in README.md and plugins/llm/README.md
-- [ ] T022 Run quickstart.md validation scenarios end-to-end to verify everything works
+- [x] T020 [P] Implement subagent polling timeout protection (maximum 5 minutes) in plugins/llm/skills/peer-orchestrator/SKILL.md
+- [x] T021 [P] Update documentation in README.md and plugins/llm/README.md
+- [x] T022 Run quickstart.md validation scenarios end-to-end to verify everything works
 
 ---
 

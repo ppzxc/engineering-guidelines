@@ -36,3 +36,40 @@
 *   **검증 조건**:
     *   시스템 최초 유입 요청에 헤더가 누락되었을 때, API Gateway 또는 최초 진입 컴포넌트가 `traceparent`의 생성자(Originator)가 되어 새 헤더를 발급하고 전파하는 책임 규칙이 정의되었는지 검증.
 *   **기대 상태**: **[PASSED]** (검증 완료)
+
+---
+
+## [TC-005] 다중 LLM 피어 오케스트레이션 및 샌드박스 웜업 검증
+*   **평가 대상**: `plugins/llm/skills/peer-orchestrator/SKILL.md`
+*   **검증 조건**:
+    - 샌드박스 락 방지를 위해 메인 프로세스에서 피어 CLI(claude, agy, openai)의 버전을 `timeout 3 <cli> --version`으로 조회하여 샌드박스 승인을 사전에 얻도록 규정하는지 검증.
+    - `invoke_subagent`를 통해 Self-Review와 Peer-Review 서브에이전트를 병렬 구동하는 절차가 명시되었는지 검증.
+    - 30초 스케줄 기반의 서브에이전트 감시 폴링 및 최대 5분(300초) 타임아웃 규칙이 정의되었는지 검증.
+*   **기대 상태**: **[PASSED]** (검증 완료)
+
+---
+
+## [TC-006] CLI 센티널 에러 감지 및 우선순위 폴백 검증
+*   **평가 대상**: `plugins/llm/skills/peer-orchestrator/SKILL.md`
+*   **검증 조건**:
+    - CLI 실행 오류 발생 시 센티널 신호(`CLI_NOT_FOUND`, `CLI_TIMEOUT`, `CLI_ERROR`)를 감지하고 파싱하는지 검증.
+    - 실패 시 우선순위 체인(`claude ➡️ agy ➡️ openai`)에 따라 다음 피어로 자동 스위칭하는 폴백 규칙이 정의되었는지 검증.
+*   **기대 상태**: **[PASSED]** (검증 완료)
+
+---
+
+## [TC-007] 중요도 기반 하이브리드 Findings 병합 검증
+*   **평가 대상**: `plugins/llm/skills/peer-orchestrator/SKILL.md`
+*   **검증 조건**:
+    - 수집된 findings 중 `Critical/High` 등급은 합집합(Union) 처리하고, `Medium/Low` 등증은 양쪽에서 중복 지적된 항목만 살리는 교집합(Intersection)으로 머지하는 규칙이 명문화되었는지 검증.
+*   **기대 상태**: **[PASSED]** (검증 완료)
+
+---
+
+## [TC-008] 로컬 호스트 LLM 제외 및 llm:auto 위임 검증
+*   **평가 대상**: `plugins/llm/skills/peer-orchestrator/SKILL.md` 및 `plugins/llm/skills/auto/SKILL.md`
+*   **검증 조건**:
+    - 현재 실행 중인 호스트 CLI(LOCAL)를 감지하여 폴백 목록에서 동적으로 중복 배제하는지 검증.
+    - `llm:auto` 스킬이 자체 로직을 제거하고 `llm:peer-orchestrator`에 오케스트레이션을 위임(Delegate)하도록 리팩토링되었는지 검증.
+*   **기대 상태**: **[PASSED]** (검증 완료)
+

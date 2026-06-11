@@ -4,20 +4,10 @@
 
 ## 제공되는 스킬
 
-### 1. `karpathy` (`/guideline:karpathy`)
-* **설명**: LLM 코딩 실수 및 누수를 줄이기 위해 Andrej Karpathy가 제시한 11가지 실무 코딩 행동 강령입니다.
-* **사용 목적**: 본격적인 코딩, 코드 리팩토링, 대규모 디버깅 작업을 시작하기 전에 세션 컨텍스트에 Andrej Karpathy의 원본 가이드라인을 로드할 때 사용합니다.
-* **단축어**: "Karpathy 가이드라인", "코딩 가이드라인"
-
-### 2. `restful-api` (`/guideline:restful-api`)
+### 1. `restful-api` (`/guideline:restful-api`)
 * **설명**: 글로벌 표준 수준의 RESTful API 설계 규칙들을 정리한 고품질 개발 규격입니다. URL 구조, HTTP 메서드, 응답 상태 코드, 표준 헤더 규격 및 BOLA/BOPA 등 보안 모범 사례를 포괄합니다.
 * **사용 목적**: 웹 API 인터페이스를 설계하거나, 새로운 컨트롤러 엔드포인트를 구현하거나, 기존 백엔드 설계에 대한 아키텍처 피어 리뷰를 수행할 때 사용합니다.
 * **단축어**: "REST API 설계", "REST API 리뷰", "API 가이드라인"
-
-### 3. `honest-judgment` (`/guideline:honest-judgment`)
-* **설명**: RLHF 예스맨(sycophancy) 성향을 무력화해 직설적·무보정 피드백을 끌어내되, 단순 "brutally honest" 류 문구의 알려진 실패모드(허위확신·calibration 저하·비판 날조)를 피하는 행동 규칙입니다.
-* **사용 목적**: 코드리뷰·아키텍처 검토·의사결정 지원 전에 규칙을 verbatim으로 컨텍스트에 로드할 때 사용합니다. 검증 태스크에 scoped 적용하며 always-on은 권장하지 않습니다.
-* **단축어**: "정직한 리뷰", "무보정 피드백", "가차없는 리뷰", "아첨 끄기"
 
 ---
 
@@ -27,7 +17,5 @@
 
 ```bash
 # 터미널 또는 CLI 환경에서 스킬 호출 예시
-/guideline:karpathy
 /guideline:restful-api
-/guideline:honest-judgment
 ```

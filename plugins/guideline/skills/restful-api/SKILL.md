@@ -1,6 +1,6 @@
 ---
 name: restful-api
-description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
+description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). — /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
 user-invocable: true
 ---
 

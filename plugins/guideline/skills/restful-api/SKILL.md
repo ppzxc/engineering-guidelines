@@ -16,9 +16,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~91 |
-| **Standard** | T1 + T2 | Production environments | ~129 |
-| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~156 |
+| **Essential** | T1 only | All APIs — from day one | ~90 |
+| **Standard** | T1 + T2 | Production environments | ~131 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~158 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
@@ -440,8 +440,9 @@ Random page access required AND data < 10,000 items?
 
 ## Filtering & Sorting
 
-- **Filter expression (AIP-160):** Use the `filter` query parameter with a structured expression string for complex query criteria (AND/OR, inequality operators). `[T1]`
-- **Simple equality filters:** For simple 1:1 equality filtering (e.g., matching a single exact status), APIs MAY support direct query parameters (e.g., `?status=ACTIVE`) as a lightweight alternative to reduce parsing overhead on basic CRUD tasks. `[T1]`
+- **Filter expression (AIP-160):** Offering complex filtering (AND/OR, inequality operators) via the `filter` query parameter is an optional feature. `[T2]`
+- **Filter syntax is a contract:** If filtering is offered, it MUST follow the AIP-160 expression grammar below; once shipped, the syntax cannot change without a breaking version bump. `[T1]`
+- **Simple equality filters:** For simple 1:1 equality filtering (e.g., matching a single exact status), APIs MAY support direct query parameters (e.g., `?status=ACTIVE`) as a lightweight alternative to reduce parsing overhead on basic CRUD tasks. `[T2]`
 - Syntax: `?filter=status = "ACTIVE" AND price >= 1000`
 - Comparison operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
 - Logical operators: `AND`, `OR`, `NOT`; grouping with parentheses
@@ -467,7 +468,7 @@ Random page access required AND data < 10,000 items?
 
 **Resource Expansion (Expand/Embed) (M-4):** Use the `expand` query parameter to include related resources in the response. `[T2]`
 - Syntax: `?expand=author,comments.author`
-- **Total Entity Limit REQUIRED:** Servers MUST enforce a hard limit on the *total number* of expanded entities returned per request (e.g., max 100) to prevent N+1/DoS attacks. Exceeding the limit → `400 Bad Request`.
+- **Total Entity Limit REQUIRED (security):** Servers MUST enforce a hard limit on the *total number* of expanded entities returned per request (e.g., max 100) to prevent N+1/DoS attacks. Exceeding the limit → `400 Bad Request`. `[T1]`
 - Depth limit: Servers SHOULD limit expansion depth (default max 3).
 - Selective expansion: Clients MUST only expand what is needed.
 - Expansion failure: If a requested resource cannot be expanded (e.g., permissions), the server SHOULD omit it or return a placeholder without failing the main request.
@@ -577,7 +578,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 ## Caching (M-2)
 
 - **`Cache-Control` header:** Specify caching directives (`public`, `private`, `no-cache`, `max-age`). `[T2]`
-- **`ETag` usage:** All mutable resources MUST provide an `ETag` (see [Optimistic Concurrency Control](#optimistic-concurrency-control)). `[T2]`
+- **`ETag` for cache revalidation:** Reuse the resource `ETag` — whose provision is mandated under [Optimistic Concurrency Control](#optimistic-concurrency-control) `[T1]` — to answer conditional `If-None-Match` requests with `304 Not Modified`. `[T2]`
 - **`Last-Modified`:** SHOULD be used alongside ETag for legacy client compatibility. `[T3]`
 - **Vary on Versioning:** All APIs implementing Header Versioning MUST include `Vary: Api-Version` (and `Accept` if content negotiation is used) in their responses to prevent CDN/proxy cache pollution. `[T1]`
 
@@ -610,7 +611,7 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 | Minimize `nullable` | `[T2]` | Follow field-omission principle; use `nullable` only when explicitly needed |
 | Shared error schema | `[T2]` | Define RFC 9457 Problem Details as a `$ref` shared component |
 | Internal-only marking | `[T3]` | Mark non-public endpoints with `x-internal: true` extension |
-| Automated validation | `[T1]` | MUST validate spec compliance in CI using linters (e.g., Spectral, Zally) |
+| Automated validation | `[T2]` | MUST validate spec compliance in CI using linters (e.g., Spectral, Zally) |
 
 ## Authentication & Security
 

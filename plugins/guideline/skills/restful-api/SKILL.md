@@ -1,12 +1,10 @@
 ---
 name: restful-api
-description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
+description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
 user-invocable: true
 ---
 
 # RESTful API Guidelines
-
-Source: https://github.com/ppzxc/restful-api-guidelines
 
 Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 

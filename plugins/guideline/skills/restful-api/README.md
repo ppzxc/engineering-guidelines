@@ -1,7 +1,5 @@
 # RESTful API 가이드라인
 
-출처: https://github.com/ppzxc/restful-api-guidelines
-
 본 문서의 필수(MUST), 권장(SHOULD), 선택(MAY) 키워드는 RFC 2119/8174 규격을 따릅니다.
 
 ---

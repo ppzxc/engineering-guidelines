@@ -16,9 +16,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~89 |
-| **Standard** | T1 + T2 | Production environments | ~127 |
-| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~152 |
+| **Essential** | T1 only | All APIs — from day one | ~90 |
+| **Standard** | T1 + T2 | Production environments | ~130 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~156 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
@@ -128,8 +128,12 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 **State Enum Pattern (AIP-216):** `[T1]` For representing resource lifecycle state:
 - State field name MUST be `state` (not `status` — avoid confusion with HTTP status codes)
 - First enum value MUST always be `STATE_UNSPECIFIED` (initial/unknown state)
-- `state` is OUTPUT_ONLY — direct PATCH updates are prohibited; state transitions via custom methods only
+- `state` is OUTPUT_ONLY — MUST NOT be set on Create or modified via PATCH; state transitions go through custom methods only
+- **State value naming:** available → `ACTIVE` (not `READY`/`AVAILABLE`); terminal → past participle `-ED` (`SUCCEEDED`, `FAILED`, `DELETED`); in-progress → present participle `-ING` (`RUNNING`, `CREATING`, `DELETING`)
 - Common patterns: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
+- A disallowed state transition (precondition not met) MUST return `409 Conflict` with the current `state` in the body `[T2]`
+- Expose only states with a real client use case — do not surface internal/implementation states `[T2]`
+- Prefer a timestamp over a state enum when the state is a single fact derivable from time (e.g., `deleteTime` for deletion — see Soft Delete) `[T3]`
 
 ## Error Response (RFC 7807/9457 + AIP-193 Hybrid)
 

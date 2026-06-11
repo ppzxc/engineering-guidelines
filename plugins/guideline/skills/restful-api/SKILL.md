@@ -16,8 +16,8 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~90 |
-| **Standard** | T1 + T2 | Production environments | ~130 |
+| **Essential** | T1 only | All APIs — from day one | ~91 |
+| **Standard** | T1 + T2 | Production environments | ~129 |
 | **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~156 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
@@ -132,7 +132,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 - **State value naming:** available → `ACTIVE` (not `READY`/`AVAILABLE`); terminal → past participle `-ED` (`SUCCEEDED`, `FAILED`, `DELETED`); in-progress → present participle `-ING` (`RUNNING`, `CREATING`, `DELETING`)
 - Common patterns: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
 - A disallowed state transition (precondition not met) MUST return `409 Conflict` with the current `state` in the body `[T2]`
-- Expose only states with a real client use case — do not surface internal/implementation states `[T2]`
+- Expose only states with a real client use case — do not surface internal/implementation states `[T3]`
 - Prefer a timestamp over a state enum when the state is a single fact derivable from time (e.g., `deleteTime` for deletion — see Soft Delete) `[T3]`
 
 ## Error Response (RFC 7807/9457 + AIP-193 Hybrid)
@@ -287,7 +287,7 @@ For async actions that create a pollable job resource, use `201 Created` + `Loca
 - `GET` for side-effect-free retrieval custom methods; these MUST NOT include a request body — pass inputs as query parameters. Reads are normally expressed as a standard collection `GET` with `filter`/`q`/`fields`; reserve a `GET` custom method for a distinct named operation that **cannot** be expressed as a filter or projection (e.g., `GET /documents/{id}:preview`, `GET /text:translate`).
 - Fall back to `POST` for a retrieval method only when its parameters would exceed URL length limits.
 
-**Custom verb naming (AIP-136):** `[T2]`
+**Custom verb naming (AIP-136):** `[T1]`
 - camelCase the verb after the colon: `:batchGet`, `:setIamPolicy` (not `:batch_get` / `:BatchGet`)
 - Use a verb or verb+noun; MUST NOT contain prepositions (`:moveToArchive`, not `:moveForArchive`)
 - MUST NOT reuse standard-method verbs (`get`, `list`, `create`, `update`, `delete`) as custom verbs

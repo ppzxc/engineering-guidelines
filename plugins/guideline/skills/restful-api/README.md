@@ -10,8 +10,8 @@
 
 | 프로필 | 포함 티어 | 대상 | 규칙 수 |
 |--------|-----------|------|---------|
-| **Essential** | T1 전용 | 모든 API — 첫날부터 적용 | ~90 |
-| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~130 |
+| **Essential** | T1 전용 | 모든 API — 첫날부터 적용 | ~91 |
+| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~129 |
 | **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~156 |
 
 **사용 예시:** "Essential 프로필로 이 API를 리뷰해줘" → T1 규칙만 검사합니다.
@@ -128,7 +128,7 @@
 - **상태값 명명 규칙:** 사용 가능 → `ACTIVE` (`READY`/`AVAILABLE` 대신); 종료(terminal) → 과거분사 `-ED` (`SUCCEEDED`, `FAILED`, `DELETED`); 진행 중 → 현재분사 `-ING` (`RUNNING`, `CREATING`, `DELETING`)
 - 공통 패턴: `ACTIVE/INACTIVE`, `PENDING/RUNNING/SUCCEEDED/FAILED`
 - 허용되지 않는 상태 전환(전제 조건 미충족)은 `409 Conflict`를 반환하며 응답 본문에 현재 `state`를 포함합니다. `[T2]`
-- 클라이언트에게 실제 유스케이스가 있는 상태만 노출하고, 내부 구현 상태를 그대로 드러내지 마십시오. `[T2]`
+- 클라이언트에게 실제 유스케이스가 있는 상태만 노출하고, 내부 구현 상태를 그대로 드러내지 마십시오. `[T3]`
 - 시간으로부터 도출되는 단일 사실인 상태는 에넘보다 타임스탬프를 우선합니다 (예: 삭제 여부 → `deleteTime`, 소프트 딜리트 섹션 참고). `[T3]`
 
 ---
@@ -278,7 +278,7 @@ OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly:
 - 부작용 없는 조회형 커스텀 메서드는 `GET`; 이때 요청 본문을 포함해서는 안 되며 입력은 쿼리 파라미터로 전달합니다. 읽기는 원칙적으로 표준 컬렉션 `GET` + `filter`/`q`/`fields`로 표현하며, 콜론 `GET` 커스텀 메서드는 필터·투영으로 표현할 수 **없는** 고유 연산(예: `GET /documents/{id}:preview`, `GET /text:translate`)에만 한정합니다.
 - 조회 메서드라도 파라미터가 URL 길이 한계를 초과할 때만 `POST`로 폴백합니다.
 
-**커스텀 동사 네이밍 (AIP-136):** `[T2]`
+**커스텀 동사 네이밍 (AIP-136):** `[T1]`
 - 콜론 뒤 동사는 camelCase: `:batchGet`, `:setIamPolicy` (`:batch_get` / `:BatchGet` 불가)
 - 동사 또는 동사+명사 사용; 전치사 포함 금지 (`:moveForArchive` 불가 → `:moveToArchive`)
 - 표준 메서드 동사(`get`, `list`, `create`, `update`, `delete`) 재사용 금지

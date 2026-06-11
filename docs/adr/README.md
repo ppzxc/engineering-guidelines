@@ -52,6 +52,8 @@
 | [ADR-0047](0047-severity-taxonomy.md) | accepted | Severity taxonomy 통합 — `_shared/references/severity-taxonomy.md` 단일 SOT, 4-level(critical/high/medium/low) + H/M/L alias 매핑 |
 | [ADR-0048](0048-workflow-session-state.md) | accepted | workflow:feature 스킬 로딩 감지 — STEP1-LOADED: string match → `.workflow-session.md` frontmatter YAML structured read |
 | [ADR-0049](0049-subagent-wait-schedule-loop.md) | accepted | subagent 완료 대기 시 schedule + manage_subagents 폴링 루프 도입 |
+| [ADR-0050](0050-deprecate-workflow-plugin.md) | accepted | workflow 플러그인 폐기 및 관련 메타데이터 정리 |
+| [ADR-0051](0051-restful-api-tier-classification-heuristic.md) | accepted | restful-api 티어 분류 휴리스틱 정립 및 규칙 재분류 (T1/T2/T3 일관성) |
 
 ## 새 ADR 추가
 

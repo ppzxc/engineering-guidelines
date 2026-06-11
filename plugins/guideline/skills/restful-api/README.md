@@ -10,9 +10,9 @@
 
 | 프로필 | 포함 티어 | 대상 | 규칙 수 |
 |--------|-----------|------|---------|
-| **Essential** | T1 전용 | 모든 API — 첫날부터 적용 | ~88 |
-| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~124 |
-| **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~149 |
+| **Essential** | T1 전용 | 모든 API — 첫날부터 적용 | ~89 |
+| **Standard** | T1 + T2 | 프로덕션 운영 단계 | ~127 |
+| **Full** | T1 + T2 + T3 | 대규모/엔터프라이즈 API | ~152 |
 
 **사용 예시:** "Essential 프로필로 이 API를 리뷰해줘" → T1 규칙만 검사합니다.
 
@@ -37,7 +37,7 @@
 
 - 경로 세그먼트에는 **kebab-case**를 사용합니다: `/user-profiles`, `/product-categories/123` `[T1]`
 - 컬렉션에는 **복수 명사**를 사용합니다: `/articles` ( `/article` 불가) `[T1]`
-- **리소스 경로에 동사를 사용하지 마십시오** — CRUD 작업에는 HTTP 메서드를 사용하고, 비-CRUD 동작에는 콜론(`:`) 구문을 동반한 `POST` 메서드를 사용합니다. (리소스 수준: `/{resource}/{id}:{action}`, 컬렉션 수준: `/{resource}:{action}`) `[T1]`
+- **리소스 경로에 동사를 사용하지 마십시오** — CRUD 작업에는 HTTP 메서드를 사용하고, 부작용이 있는 비-CRUD 동작에는 콜론(`:`) 구문을 동반한 `POST` 메서드를 사용합니다 (리소스 수준: `/{resource}/{id}:{action}`, 컬렉션 수준: `/{resource}:{action}`). 부작용 없는 조회형 커스텀 메서드는 `GET`을 사용합니다(액션 섹션 참고). `[T1]`
 - **파일 확장자**를 경로에 포함하지 마십시오 (`.json`, `.xml` 등) `[T1]`
 - **끝에 슬래시(trailing slash)를 붙이지 마십시오** — `/articles/` 대신 `/articles` 사용 `[T1]`
 - 쿼리 파라미터에는 **camelCase**를 사용합니다: `pageSize=20&sortOrder=desc` `[T1]`
@@ -268,6 +268,19 @@ OpenAPI 매핑: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly:
 | 비동기식 동작 — 수락 완료 및 지연 처리 | `202 Accepted` | 없거나 수락 관련 정보 제공 |
 
 비동기 동작 중 새로운 폴링 작업 리소스가 생성되는 경우는 `201 Created`와 `Location` 헤더를 대신 사용하십시오 ([LRO 장시간 실행 작업](#장시간-실행-작업) 참고).
+
+**커스텀 메서드의 HTTP 메서드 선택 (AIP-136):** `[T1]`
+- 부작용이 있거나 상태를 변경하는 경우 `POST` — 액션의 기본값이며 입력은 본문에 담습니다.
+- 부작용 없는 조회형 커스텀 메서드는 `GET`; 이때 요청 본문을 포함해서는 안 되며 입력은 쿼리 파라미터로 전달합니다. 읽기는 원칙적으로 표준 컬렉션 `GET` + `filter`/`q`/`fields`로 표현하며, 콜론 `GET` 커스텀 메서드는 필터·투영으로 표현할 수 **없는** 고유 연산(예: `GET /documents/{id}:preview`, `GET /text:translate`)에만 한정합니다.
+- 조회 메서드라도 파라미터가 URL 길이 한계를 초과할 때만 `POST`로 폴백합니다.
+
+**커스텀 동사 네이밍 (AIP-136):** `[T2]`
+- 콜론 뒤 동사는 camelCase: `:batchGet`, `:setIamPolicy` (`:batch_get` / `:BatchGet` 불가)
+- 동사 또는 동사+명사 사용; 전치사 포함 금지 (`:moveForArchive` 불가 → `:moveToArchive`)
+- 표준 메서드 동사(`get`, `list`, `create`, `update`, `delete`) 재사용 금지
+- 장시간 실행 변형은 `Async`가 아니라 `LongRunning` 접미사 사용 (예: `:exportLongRunning`)
+
+**커스텀 메서드 스코프 (AIP-136):** `[T2]` 커스텀 메서드는 리소스(`/articles/{id}:publish`), 컬렉션(`/articles:purge`)에 바인딩하거나, 관련 리소스가 없는 경우 stateless/서비스 스코프(동사+명사 권장, 예: `/text:translate`)로 정의할 수 있습니다.
 
 ---
 
@@ -657,7 +670,7 @@ Link: <https://api.example.com/new-resource>; rel="successor-version"
 |------|------|-----------|
 | AIP-121 | 리소스 지향 설계 (Resource-oriented design) | URL 설계, CRUD 동작, 리소스 스키마 |
 | AIP-134 | 표준 메서드: 수정(Update) | CRUD 동작 (PATCH / `updateMask`) |
-| AIP-136 | 커스텀 메서드 | 액션 |
+| AIP-136 | 커스텀 메서드 | URL 설계, 액션 |
 | AIP-154 | 리소스 신선도 검증(etag) | 낙관적 동시성 제어 |
 | AIP-155 | 요청 멱등성 | Idempotency-Key |
 | AIP-157 | 부분 응답 | 부분 응답 |

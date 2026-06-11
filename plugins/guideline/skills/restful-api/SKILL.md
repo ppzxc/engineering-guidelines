@@ -16,9 +16,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~88 |
-| **Standard** | T1 + T2 | Production environments | ~124 |
-| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~149 |
+| **Essential** | T1 only | All APIs — from day one | ~89 |
+| **Standard** | T1 + T2 | Production environments | ~127 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~152 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
@@ -43,7 +43,7 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 - **kebab-case** for path segments: `/user-profiles`, `/product-categories/123` `[T1]`
 - **Plural nouns** for collections: `/articles` not `/article` `[T1]`
-- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`) `[T1]`
+- **No verbs in resource paths** — use HTTP methods for CRUD; side-effecting non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`); safe read-only custom methods use `GET` (see Actions) `[T1]`
 - **No file extensions** (`.json`, `.xml`) `[T1]`
 - **No trailing slash** — `/articles` not `/articles/` `[T1]`
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc` `[T1]`
@@ -277,6 +277,19 @@ Adopted pattern: Google AIP-136 (`/orders/{id}:cancel`), Google Cloud API (`/pro
 | Async action — fire-and-forget | `202 Accepted` | None or minimal acknowledgement |
 
 For async actions that create a pollable job resource, use `201 Created` + `Location` header instead (see [Long-Running Operations](#long-running-operations)).
+
+**HTTP method for custom methods (AIP-136):** `[T1]`
+- `POST` when the method has side effects or mutates state — the default for actions; inputs go in the body.
+- `GET` for side-effect-free retrieval custom methods; these MUST NOT include a request body — pass inputs as query parameters. Reads are normally expressed as a standard collection `GET` with `filter`/`q`/`fields`; reserve a `GET` custom method for a distinct named operation that **cannot** be expressed as a filter or projection (e.g., `GET /documents/{id}:preview`, `GET /text:translate`).
+- Fall back to `POST` for a retrieval method only when its parameters would exceed URL length limits.
+
+**Custom verb naming (AIP-136):** `[T2]`
+- camelCase the verb after the colon: `:batchGet`, `:setIamPolicy` (not `:batch_get` / `:BatchGet`)
+- Use a verb or verb+noun; MUST NOT contain prepositions (`:moveToArchive`, not `:moveForArchive`)
+- MUST NOT reuse standard-method verbs (`get`, `list`, `create`, `update`, `delete`) as custom verbs
+- For a long-running variant, suffix `LongRunning`, never `Async` (e.g., `:exportLongRunning`)
+
+**Custom method scope (AIP-136):** `[T2]` Custom methods may bind to a resource (`/articles/{id}:publish`), a collection (`/articles:purge`), or be stateless/service-scoped when no resource is involved (prefer verb+noun, e.g., `/text:translate`).
 
 ## Collections & Pagination
 
@@ -643,7 +656,7 @@ Standards this guideline draws from. Inline `(AIP-xxx)` / RFC tags mark each rul
 |----------|-------|-----------|
 | AIP-121 | Resource-oriented design | URL Design, CRUD Behavior, Resource Schema |
 | AIP-134 | Standard methods: Update | CRUD Behavior (PATCH / `updateMask`) |
-| AIP-136 | Custom methods | Actions |
+| AIP-136 | Custom methods | URL Design, Actions |
 | AIP-154 | Resource freshness validation (etag) | Optimistic Concurrency Control |
 | AIP-155 | Request idempotency | Idempotency-Key |
 | AIP-157 | Partial responses | Partial Response |

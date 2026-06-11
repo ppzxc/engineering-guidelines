@@ -1,12 +1,10 @@
 ---
 name: restful-api
-description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). Source: github.com/ppzxc/restful-api-guidelines — /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
+description: "Use when designing, implementing, or reviewing REST APIs (URL structure, HTTP methods, status codes, JSON format, error responses, and headers). — /guideline:restful-api, \"REST API Design\", \"REST API Review\", \"API Guidelines\""
 user-invocable: true
 ---
 
 # RESTful API Guidelines
-
-Source: https://github.com/ppzxc/restful-api-guidelines
 
 Keywords MUST, SHOULD, MAY follow RFC 2119/8174.
 
@@ -18,9 +16,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~87 |
-| **Standard** | T1 + T2 | Production environments | ~121 |
-| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~146 |
+| **Essential** | T1 only | All APIs — from day one | ~89 |
+| **Standard** | T1 + T2 | Production environments | ~127 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~152 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
@@ -37,14 +35,15 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 ## URL Design
 
-**Resource-oriented design** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
+**Resource-oriented design (AIP-121)** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
 - Every resource MUST support at least GET (retrieval) `[T1]`
+- Collection resources MUST support List, except singleton resources where only one instance can exist (e.g., `/users/{id}/settings`) `[T1]` (AIP-121)
 - Prefer **standard methods** (GET, POST, PATCH, DELETE); use custom methods only when standard methods cannot express the operation `[T1]`
 - Do not mirror database structure in API schema `[T1]`
 
 - **kebab-case** for path segments: `/user-profiles`, `/product-categories/123` `[T1]`
 - **Plural nouns** for collections: `/articles` not `/article` `[T1]`
-- **No verbs in resource paths** — use HTTP methods for CRUD; non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`) `[T1]`
+- **No verbs in resource paths** — use HTTP methods for CRUD; side-effecting non-CRUD actions use `POST` with colon syntax (resource-level: `/{resource}/{id}:{action}`, collection-level: `/{resource}:{action}`); safe read-only custom methods use `GET` (see Actions) `[T1]`
 - **No file extensions** (`.json`, `.xml`) `[T1]`
 - **No trailing slash** — `/articles` not `/articles/` `[T1]`
 - **camelCase** for query parameters: `pageSize=20&sortOrder=desc` `[T1]`
@@ -173,6 +172,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 
 ## Resource Schema & Field Rules
 
+- **Schema consistency (AIP-121):** The full resource representation MUST be identical across Get, List, Create, and Update responses. Partial Response via `fields` and batch result wrappers are explicit exceptions. `[T2]`
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only) `[T1]`
 - Resource identifiers are opaque strings — clients must not parse structure `[T1]`
 - Omit null/missing fields entirely (do not send `"field": null`) `[T1]`
@@ -192,6 +192,8 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly: true`, other annotations → `x-field-behavior` extension. `[T1]`
 
 ## CRUD Behavior
+
+**Read-after-write consistency (AIP-121):** `[T2]` After a standard method succeeds, a subsequent GET MUST reflect the result — post-Create returns the resource, post-Update returns the final values, post-Delete returns `404 Not Found`. Exception: soft-deleted resources (AIP-164) remain retrievable via GET with a `deleteTime`.
 
 **Standard method response rules:**
 - POST (Create): return `201` with full resource + `Location` header `[T1]`
@@ -275,6 +277,19 @@ Adopted pattern: Google AIP-136 (`/orders/{id}:cancel`), Google Cloud API (`/pro
 | Async action — fire-and-forget | `202 Accepted` | None or minimal acknowledgement |
 
 For async actions that create a pollable job resource, use `201 Created` + `Location` header instead (see [Long-Running Operations](#long-running-operations)).
+
+**HTTP method for custom methods (AIP-136):** `[T1]`
+- `POST` when the method has side effects or mutates state — the default for actions; inputs go in the body.
+- `GET` for side-effect-free retrieval custom methods; these MUST NOT include a request body — pass inputs as query parameters. Reads are normally expressed as a standard collection `GET` with `filter`/`q`/`fields`; reserve a `GET` custom method for a distinct named operation that **cannot** be expressed as a filter or projection (e.g., `GET /documents/{id}:preview`, `GET /text:translate`).
+- Fall back to `POST` for a retrieval method only when its parameters would exceed URL length limits.
+
+**Custom verb naming (AIP-136):** `[T2]`
+- camelCase the verb after the colon: `:batchGet`, `:setIamPolicy` (not `:batch_get` / `:BatchGet`)
+- Use a verb or verb+noun; MUST NOT contain prepositions (`:moveToArchive`, not `:moveForArchive`)
+- MUST NOT reuse standard-method verbs (`get`, `list`, `create`, `update`, `delete`) as custom verbs
+- For a long-running variant, suffix `LongRunning`, never `Async` (e.g., `:exportLongRunning`)
+
+**Custom method scope (AIP-136):** `[T2]` Custom methods may bind to a resource (`/articles/{id}:publish`), a collection (`/articles:purge`), or be stateless/service-scoped when no resource is involved (prefer verb+noun, e.g., `/text:translate`).
 
 ## Collections & Pagination
 
@@ -628,3 +643,41 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 - **Deep vs Shallow:**
   - Shallow: Just returns 200 (service is running).
   - Deep: Checks dependencies (DB, cache, downstream services) — use cautiously to avoid cascading failures in load balancer health checks.
+
+---
+
+## References
+
+Standards this guideline draws from. Inline `(AIP-xxx)` / RFC tags mark each rule's source; this table is the crosswalk to the full specifications.
+
+### Google AIP (API Improvement Proposals — https://google.aip.dev)
+
+| Standard | Title | Applied in |
+|----------|-------|-----------|
+| AIP-121 | Resource-oriented design | URL Design, CRUD Behavior, Resource Schema |
+| AIP-134 | Standard methods: Update | CRUD Behavior (PATCH / `updateMask`) |
+| AIP-136 | Custom methods | URL Design, Actions |
+| AIP-154 | Resource freshness validation (etag) | Optimistic Concurrency Control |
+| AIP-155 | Request idempotency | Idempotency-Key |
+| AIP-157 | Partial responses | Partial Response |
+| AIP-158 | Pagination | Collections & Pagination |
+| AIP-160 | Filtering | Filtering & Sorting |
+| AIP-163 | Change validation (dry run) | Change Validation / Dry Run |
+| AIP-164 | Soft delete | Soft Delete |
+| AIP-193 | Errors | Error Response |
+| AIP-203 | Field behavior | Resource Schema & Field Rules |
+| AIP-216 | Resource lifecycle states | State Enum Pattern |
+
+### RFC / Web standards
+
+| Standard | Title | Applied in |
+|----------|-------|-----------|
+| RFC 2119 / 8174 | Requirement keywords (MUST/SHOULD/MAY) | Document-wide |
+| RFC 3339 | Date and Time on the Internet | JSON Format |
+| RFC 6648 / BCP 178 | Deprecating the `X-` header prefix | Headers, API Versioning |
+| RFC 7396 | JSON Merge Patch | JSON Format, CRUD Behavior |
+| RFC 7807 / 9457 | Problem Details for HTTP APIs | Error Response |
+| RFC 8288 | Web Linking (`Link` header) | Headers, Pagination |
+| RFC 8594 | The Sunset HTTP header | Deprecation |
+| RFC 9745 | The Deprecation HTTP header | Deprecation |
+| W3C Trace Context | `traceparent` / `tracestate` propagation | Headers |

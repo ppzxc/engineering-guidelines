@@ -18,9 +18,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 | Profile | Included Tiers | Target | Rule Count |
 |--------|-----------|------|---------|
-| **Essential** | T1 only | All APIs — from day one | ~87 |
-| **Standard** | T1 + T2 | Production environments | ~121 |
-| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~146 |
+| **Essential** | T1 only | All APIs — from day one | ~88 |
+| **Standard** | T1 + T2 | Production environments | ~124 |
+| **Full** | T1 + T2 + T3 | Large-scale/Enterprise APIs | ~149 |
 
 **Example usage:** "Review this API using the Essential profile" → Check only T1 rules.
 
@@ -37,8 +37,9 @@ Each rule is tagged with `[T1]`, `[T2]`, or `[T3]`. If the user specifies a prof
 
 ## URL Design
 
-**Resource-oriented design** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
+**Resource-oriented design (AIP-121)** — APIs are designed around resources (nouns). URL paths express resource hierarchy; behavior is expressed via HTTP methods and custom methods.
 - Every resource MUST support at least GET (retrieval) `[T1]`
+- Collection resources MUST support List, except singleton resources where only one instance can exist (e.g., `/users/{id}/settings`) `[T1]` (AIP-121)
 - Prefer **standard methods** (GET, POST, PATCH, DELETE); use custom methods only when standard methods cannot express the operation `[T1]`
 - Do not mirror database structure in API schema `[T1]`
 
@@ -173,6 +174,7 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 
 ## Resource Schema & Field Rules
 
+- **Schema consistency (AIP-121):** The full resource representation MUST be identical across Get, List, Create, and Update responses. Partial Response via `fields` and batch result wrappers are explicit exceptions. `[T2]`
 - Standard resource fields: `id`, `createdAt` (create-only), `updatedAt` (read-only) `[T1]`
 - Resource identifiers are opaque strings — clients must not parse structure `[T1]`
 - Omit null/missing fields entirely (do not send `"field": null`) `[T1]`
@@ -192,6 +194,8 @@ Nest at most one sub-resource under a parent. For deeper relationships, promote 
 OpenAPI mapping: `OUTPUT_ONLY` → `readOnly: true`, `INPUT_ONLY` → `writeOnly: true`, other annotations → `x-field-behavior` extension. `[T1]`
 
 ## CRUD Behavior
+
+**Read-after-write consistency (AIP-121):** `[T2]` After a standard method succeeds, a subsequent GET MUST reflect the result — post-Create returns the resource, post-Update returns the final values, post-Delete returns `404 Not Found`. Exception: soft-deleted resources (AIP-164) remain retrievable via GET with a `deleteTime`.
 
 **Standard method response rules:**
 - POST (Create): return `201` with full resource + `Location` header `[T1]`
@@ -628,3 +632,41 @@ All APIs MUST maintain an OpenAPI 3.0+ spec as the single source of truth (API F
 - **Deep vs Shallow:**
   - Shallow: Just returns 200 (service is running).
   - Deep: Checks dependencies (DB, cache, downstream services) — use cautiously to avoid cascading failures in load balancer health checks.
+
+---
+
+## References
+
+Standards this guideline draws from. Inline `(AIP-xxx)` / RFC tags mark each rule's source; this table is the crosswalk to the full specifications.
+
+### Google AIP (API Improvement Proposals — https://google.aip.dev)
+
+| Standard | Title | Applied in |
+|----------|-------|-----------|
+| AIP-121 | Resource-oriented design | URL Design, CRUD Behavior, Resource Schema |
+| AIP-134 | Standard methods: Update | CRUD Behavior (PATCH / `updateMask`) |
+| AIP-136 | Custom methods | Actions |
+| AIP-154 | Resource freshness validation (etag) | Optimistic Concurrency Control |
+| AIP-155 | Request idempotency | Idempotency-Key |
+| AIP-157 | Partial responses | Partial Response |
+| AIP-158 | Pagination | Collections & Pagination |
+| AIP-160 | Filtering | Filtering & Sorting |
+| AIP-163 | Change validation (dry run) | Change Validation / Dry Run |
+| AIP-164 | Soft delete | Soft Delete |
+| AIP-193 | Errors | Error Response |
+| AIP-203 | Field behavior | Resource Schema & Field Rules |
+| AIP-216 | Resource lifecycle states | State Enum Pattern |
+
+### RFC / Web standards
+
+| Standard | Title | Applied in |
+|----------|-------|-----------|
+| RFC 2119 / 8174 | Requirement keywords (MUST/SHOULD/MAY) | Document-wide |
+| RFC 3339 | Date and Time on the Internet | JSON Format |
+| RFC 6648 / BCP 178 | Deprecating the `X-` header prefix | Headers, API Versioning |
+| RFC 7396 | JSON Merge Patch | JSON Format, CRUD Behavior |
+| RFC 7807 / 9457 | Problem Details for HTTP APIs | Error Response |
+| RFC 8288 | Web Linking (`Link` header) | Headers, Pagination |
+| RFC 8594 | The Sunset HTTP header | Deprecation |
+| RFC 9745 | The Deprecation HTTP header | Deprecation |
+| W3C Trace Context | `traceparent` / `tracestate` propagation | Headers |

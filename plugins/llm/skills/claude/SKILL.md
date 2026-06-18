@@ -2,6 +2,7 @@
 name: claude
 description: Use when code review or architectural verification needs to be performed using Claude Code, particularly when triggered from either Claude Code directly or from Gemini/Antigravity via non-interactive CLI.
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # llm:claude

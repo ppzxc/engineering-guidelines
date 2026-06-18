@@ -2,6 +2,7 @@
 name: pull-request
 description: Use when the user wants to push changes and open a GitHub pull request. — /git:pull-request, "PR 만들어", "PR 생성", "push하고 PR"
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # pull-request — Create Pull Request

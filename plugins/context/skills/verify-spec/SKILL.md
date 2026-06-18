@@ -2,6 +2,7 @@
 name: verify-spec
 description: Spec review retry loop + ExitPlanMode release gate for context:plan. Invokes grill-me hardening, AskUserQuestion approval loop, and ExitPlanMode as the final release gate. Can also be invoked standalone to re-run the spec review cycle — /context:verify-spec.
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Verify Spec — Spec 리뷰 루프 + ExitPlanMode 게이트

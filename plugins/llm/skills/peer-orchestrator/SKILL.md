@@ -1,6 +1,7 @@
 ---
 name: llm:peer-orchestrator
 description: Centralized multi-LLM review/cross-check orchestration
+disable-model-invocation: true
 ---
 
 # llm:peer-orchestrator

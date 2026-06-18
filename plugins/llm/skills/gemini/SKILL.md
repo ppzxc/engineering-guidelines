@@ -2,6 +2,7 @@
 name: gemini
 description: Delegate cross-check to Gemini CLI. Wrapper skill — pure delegation only, no routing logic. Called by llm:auto. — /llm:gemini, "gemini crosscheck", "gemini 교차검증"
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # llm:gemini

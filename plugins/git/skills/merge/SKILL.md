@@ -2,6 +2,7 @@
 name: merge
 description: Use when the user wants to squash-merge a GitHub PR into the main branch. — /git:merge, "PR 머지", "squash merge"
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # merge — PR Squash Merge

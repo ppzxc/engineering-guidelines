@@ -2,7 +2,7 @@
 name: clean
 description: Use when the user wants to complete the full PR workflow in sequence (commit, push, review, merge, and cleanup). — /git:clean, "PR 완료", "PR 전체 흐름", "worktree 정리"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # clean — Full PR Lifecycle + Cleanup

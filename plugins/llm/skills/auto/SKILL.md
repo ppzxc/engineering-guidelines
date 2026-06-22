@@ -2,7 +2,7 @@
 name: auto
 description: Use when performing automated cross-platform peer cross-check for plans, specs, and ideas. Delegated to the peer orchestrator. — /llm:auto, "교차검증", "cross-check", "peer check"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # llm:auto

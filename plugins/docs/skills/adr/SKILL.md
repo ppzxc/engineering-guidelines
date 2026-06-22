@@ -2,7 +2,7 @@
 name: adr
 description: "Use when creating an Architecture Decision Record in Nygard format. — /docs:adr, \"ADR 작성\", \"결정 사항 기록\""
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # docs:adr — Architecture Decision Record

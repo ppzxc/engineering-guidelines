@@ -2,7 +2,7 @@
 name: madr
 description: "Use when creating a Markdown Architectural Decision Record in MADR 4.0 format. — /docs:madr, \"MADR 작성\", \"결정 사항 기록\""
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # docs:madr — Markdown Architectural Decision Record

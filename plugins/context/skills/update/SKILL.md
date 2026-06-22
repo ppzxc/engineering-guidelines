@@ -2,7 +2,7 @@
 name: update
 description: Use right before context compaction to persist task state into the Dev Docs folder — /context:update, "컨텍스트 업데이트", "상태 저장", "진행상황 기록"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # Context Update — 작업 상태 영속화

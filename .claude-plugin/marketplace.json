@@ -14,37 +14,37 @@
     {
       "name": "guideline",
       "source": "./plugins/guideline",
-      "version": "0.8.3"
+      "version": "0.8.4"
     },
     {
       "name": "docs",
       "source": "./plugins/docs",
       "description": "Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions",
-      "version": "0.0.9"
+      "version": "0.0.10"
     },
     {
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup",
-      "version": "0.7.4"
+      "version": "0.7.5"
     },
     {
       "name": "llm",
       "source": "./plugins/llm",
       "description": "LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain",
-      "version": "0.5.3"
+      "version": "0.5.4"
     },
     {
       "name": "dev",
       "source": "./plugins/dev",
       "description": "Development methodology skills — Tidy First, TDD, and language-agnostic development practices",
-      "version": "0.1.1"
+      "version": "0.1.2"
     },
     {
       "name": "context",
       "source": "./plugins/context",
       "description": "Dev Docs System skills — self-contained 4-file task folders (spec/plan/tasks/context) for resumable development",
-      "version": "0.10.2"
+      "version": "0.10.3"
     }
   ]
 }

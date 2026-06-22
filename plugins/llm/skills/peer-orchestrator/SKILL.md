@@ -1,7 +1,7 @@
 ---
 name: llm:peer-orchestrator
 description: Centralized multi-LLM review/cross-check orchestration
-disable-model-invocation: true
+
 ---
 
 # llm:peer-orchestrator
@@ -60,5 +60,4 @@ Findings from the Self and Peer reviewers are merged based on severity:
 - **Medium & Low Severity Findings**: Apply **Intersection** logic (collect only findings that are flagged by BOTH reviewers to reduce noise).
 
 The merged findings are outputted as a clean markdown report.
-
 

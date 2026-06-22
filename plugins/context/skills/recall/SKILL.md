@@ -2,7 +2,7 @@
 name: recall
 description: Use after a session break to re-anchor on a task by reading its Dev Docs folder — /context:recall, "컨텍스트 재개", "어디까지 했지"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # Context Recall — 세션 재개

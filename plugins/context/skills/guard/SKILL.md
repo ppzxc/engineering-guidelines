@@ -2,7 +2,7 @@
 name: guard
 description: Install the context:update staleness-reminder Stop hook into the host project — /context:guard, "훅 설치", "진행상황 강제 설치", "컨텍스트 가드"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # Context Guard — Stop hook 설치

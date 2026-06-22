@@ -2,7 +2,7 @@
 name: agy
 description: Cross-check execution plans using Antigravity (agy) MCP or CLI. Analysis output only — no code execution. — /llm:agy, "agy crosscheck", "교차검증"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # agy Crosscheck

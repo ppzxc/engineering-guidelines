@@ -73,3 +73,12 @@
     - `llm:auto` 스킬이 자체 로직을 제거하고 `llm:peer-orchestrator`에 오케스트레이션을 위임(Delegate)하도록 리팩토링되었는지 검증.
 *   **기대 상태**: **[PASSED]** (검증 완료)
 
+---
+
+## [TC-009] 모든 스킬의 모델 호출 허용 검증
+*   **평가 대상**: 모든 `plugins/*/skills/*/SKILL.md`
+*   **검증 조건**:
+    *   모든 스킬 파일의 프론트매터(Frontmatter)에 `disable-model-invocation: true` 설정이 제거되어 모델 호출 및 슬래시 명령이 정상 동작하는지 확인.
+*   **기대 상태**: **[PASSED]** (검증 완료 - disable-model-invocation: true 제거됨)
+
+

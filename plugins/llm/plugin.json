@@ -1,6 +1,6 @@
 {
   "name": "llm",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain",
   "author": {
     "name": "ppzxc",

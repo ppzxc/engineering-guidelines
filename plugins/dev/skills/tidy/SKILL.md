@@ -2,7 +2,7 @@
 name: tidy
 description: Use when refactoring code or preparing structural changes following Kent Beck's Tidy First principles. — /dev:tidy, "tidy first", "구조 정리", "리팩토링"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # tidy-first

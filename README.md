@@ -8,12 +8,12 @@ A collection of engineering guidelines for software development, as a Claude Cod
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| [guideline](./plugins/guideline) | v0.8.3 | Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule |
-| [docs](./plugins/docs) | v0.0.9 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
-| [git](./plugins/git) | v0.7.4 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup |
-| [llm](./plugins/llm) | v0.5.3 | LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain |
-| [dev](./plugins/dev) | v0.1.1 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
-| [context](./plugins/context) | v0.10.2 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
+| [guideline](./plugins/guideline) | v0.8.4 | Software engineering guidelines and coding principles — including RESTful API guidelines, Andrej Karpathy's 11 coding principles, and the Honest Judgment anti-sycophancy review rule |
+| [docs](./plugins/docs) | v0.0.10 | Documentation decision records — ADR (Nygard format) and MADR (MADR 4.0) for architecture decisions |
+| [git](./plugins/git) | v0.7.5 | Git workflow skills — safe commit, Korean PR creation, PR review with host-aware peer cross-check and selectable review tier (fast/balanced/deep), union-merge with agreement-tagged auto-fix, squash merge, issue creation, issue-PR linkage via Closes #N, full PR lifecycle orchestration, and worktree cleanup |
+| [llm](./plugins/llm) | v0.5.4 | LLM delegation skills — 4-way peer cross-check (agy, claude, gemini, codex) with host-aware fallback chain |
+| [dev](./plugins/dev) | v0.1.2 | Development methodology skills — Tidy First, TDD, and language-agnostic development practices |
+| [context](./plugins/context) | v0.10.3 | Dev Docs System skills — self-contained 4-file task folders for resumable, context-preserving development |
 
 ## Marketplace Registration
 

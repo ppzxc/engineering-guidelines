@@ -2,7 +2,7 @@
 name: plan
 description: Use when starting a new task from a raw idea and you want a resumable 4-file Dev Docs folder — /context:plan, "컨텍스트 플랜", "작업 폴더 만들어", "재개 가능한 계획", "context plan". IMPORTANT: When the user types /context:plan, invoke this skill with the Skill tool BEFORE any other action, including entering plan mode.
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # Context Plan — 4파일 Dev Docs 폴더 생성

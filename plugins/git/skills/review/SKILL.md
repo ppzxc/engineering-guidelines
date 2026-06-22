@@ -2,7 +2,7 @@
 name: review
 description: Use when the user wants to review, automatically fix, and comment on a GitHub PR. — /git:review, "PR 리뷰", "코드 리뷰"
 user-invocable: true
-disable-model-invocation: true
+
 ---
 
 # review — PR Code Review & Auto-Fix
